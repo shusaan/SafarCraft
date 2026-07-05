@@ -193,6 +193,34 @@
 - [x] Accessibility landmarks and ARIA labels
 - [x] Reduced motion support
 
+### 5.14 Builder UI — 2026 Polish
+
+- [x] Gradient builder header bar — logo icon, name, autosave status pill
+- [x] Panel navigation tabs — active gradient underline indicator, hover scale micro-animation
+- [x] Section sidebar — completion status badges (green check when section has data)
+- [x] Animated panel transitions — fade-in when switching between panels
+- [x] Animated ATS score — SVG circular progress ring with gradient stroke and animated fill
+- [x] ATS deduction cards — severity left-border colour coding (red/amber/slate)
+- [x] Preview panel header — zoom in/out controls, page count indicator
+- [x] Onboarding checklist — gradient progress bar, numbered step circles, glassmorphism card
+- [x] Skeleton loaders — shimmer placeholders shown while preview renders
+- [x] Button base component — `active:scale-95` micro-press + `transition-transform`
+
+- [x] Custom web font — Geist Sans + Geist Mono (next/font/google)
+- [x] Vibrant brand accent — violet/indigo gradient palette injected into CSS theme
+- [x] Glassmorphism navigation bar with sticky backdrop-blur
+- [x] Animated hero section — staggered entrance animations (fade + slide-up)
+- [x] Gradient headline with violet accent on "AI" keyword
+- [x] Gradient CTA primary button with subtle glow hover effect
+- [x] Hero product mockup card — live visual of the resume builder UI
+- [x] Stats bar — GitHub stars, open source badge, no-signup claim
+- [x] Feature cards — icon gradient backgrounds, hover lift effect, staggered CSS animation
+- [x] How it works — 3-step numbered section with connecting line
+- [x] Social proof / open source trust section
+- [x] Footer with links, license badge, GitHub link
+- [x] Fully responsive — mobile-first layout
+- [x] Dark mode compatible throughout
+
 ---
 
 ## 6. Architecture
@@ -394,12 +422,41 @@ careerforge-ai/
 - [ ] 14.3 Playwright E2E tests
 - [ ] 14.4 Accessibility tests (axe-core)
 
-### Phase 15: Deployment
+### Phase 15: 2026 Landing Page Redesign
 
-- [x] 15.1 Vercel config
-- [x] 15.2 Docker multi-stage build
-- [ ] 15.3 Deploy visitor counter (Cloudflare Worker)
-- [ ] 15.4 Verify Lighthouse scores
+- [x] 15.1 Add Geist Sans + Geist Mono via next/font/google
+- [x] 15.2 Add violet/indigo brand gradient to CSS theme tokens
+- [x] 15.3 Glassmorphism sticky nav with backdrop-blur
+- [x] 15.4 Animated hero — fade/slide entrance with stagger
+- [x] 15.5 Gradient CTA button with glow hover
+- [x] 15.6 Hero product mockup card
+- [x] 15.7 Stats trust bar (stars, open source, no-signup)
+- [x] 15.8 Feature cards grid with gradient icons + hover lift
+- [x] 15.9 How it works — 3-step section
+- [x] 15.10 Open source trust section
+- [x] 15.11 Rich footer with links and badges
+- [x] 15.12 Full dark mode support across all new sections
+
+### Phase 17: 2026 Builder UI Polish
+
+- [x] 17.1 Gradient builder header with logo + brand identity
+- [x] 17.2 Autosave status animated pill (saving → saved → unsaved)
+- [x] 17.3 Panel nav tabs — active gradient underline + hover scale
+- [x] 17.4 Section sidebar — per-section completion status badges
+- [x] 17.5 Animated panel fade-in transitions on panel swap
+- [x] 17.6 ATS animated circular SVG progress ring
+- [x] 17.7 ATS deduction cards — severity left-border colour system
+- [x] 17.8 Preview header zoom controls (50%–150%)
+- [x] 17.9 Onboarding checklist — glassmorphism card, gradient bar, numbered circles
+- [x] 17.10 Skeleton loader shimmer for preview panel
+- [x] 17.11 Button active:scale-95 + transition-transform micro-press
+
+### Phase 16: Deployment
+
+- [x] 16.1 Vercel config
+- [x] 16.2 Docker multi-stage build
+- [ ] 16.3 Deploy visitor counter (Cloudflare Worker)
+- [ ] 16.4 Verify Lighthouse scores
 
 ---
 

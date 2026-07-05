@@ -1,7 +1,20 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { ToastProviderWrapper } from "@/components/ui/toast";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -46,11 +59,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-background antialiased">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
+      >
         <ThemeProvider>
-          <ToastProviderWrapper>
-            {children}
-          </ToastProviderWrapper>
+          <ToastProviderWrapper>{children}</ToastProviderWrapper>
         </ThemeProvider>
       </body>
     </html>
