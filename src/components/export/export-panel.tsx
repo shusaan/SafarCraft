@@ -50,12 +50,13 @@ export function ExportPanel() {
   const [exported, setExported] = useState<Set<string>>(new Set());
   const data = useResumeStore((s) => s.data);
   const layout = useResumeStore((s) => s.layout);
+  const template = useResumeStore((s) => s.template);
   const { toast } = useToast();
 
   const handleExport = async (format: ExportFormat) => {
     setExporting(format);
     try {
-      await exportResume(data, layout, format);
+      await exportResume(data, layout, format, template);
       setExported((prev) => new Set(prev).add(format));
       toast({ title: `Exported as ${format.toUpperCase()}`, variant: "success" });
     } catch {

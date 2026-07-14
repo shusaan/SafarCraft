@@ -93,6 +93,18 @@ export function ModernProfessional({ data, layout }: TemplateProps) {
     </div>
   ) : null;
 
+  if (layout.columns === "two") {
+    return (
+      <div className="flex gap-6" style={{ fontSize: fs }}>
+        <div className="w-1/3">
+          <div className="rounded-lg bg-gradient-to-r from-background to-muted p-4 mb-4">{Header}</div>
+          {Summary}{Skills}
+        </div>
+        <div className="w-2/3">{Experience}{Education}{Projects}</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ fontSize: fs }}>
       <div className="rounded-lg bg-gradient-to-r from-background to-muted p-4">{Header}</div>

@@ -2,14 +2,17 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "2mb",
-    },
+  serverActions: {
+    bodySizeLimit: "2mb",
   },
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  serverExternalPackages: [
+    "lightningcss",
+    "@tailwindcss/postcss",
+    "@tailwindcss/node",
+  ],
   headers: async () => [
     {
       source: "/(.*)",

@@ -1,8 +1,22 @@
 import type { ResumeData, ResumeLayout } from "@/types";
-import { exportPDF } from "./providers/pdf";
 import { exportDOCX } from "./providers/docx";
 import { exportJSONResume } from "./providers/json-resume";
 import { exportMarkdown } from "./providers/markdown";
+
+async function exportPDFFromApi(data: ResumeData, layout: ResumeLayout, template: string): Promise<Blob> {
+  const response = await fetch("/api/export/pdf", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data, layout, template }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || "PDF export failed");
+  }
+
+  return await response.blob();
+}
 
 export type ExportFormat = "pdf" | "docx" | "json" | "markdown";
 
@@ -24,12 +38,13 @@ export async function exportResume(
   data: ResumeData,
   layout: ResumeLayout,
   format: ExportFormat,
+  template = "classic-ats",
 ): Promise<void> {
   let blob: Blob;
 
   switch (format) {
     case "pdf":
-      blob = await exportPDF(data, layout);
+      blob = await exportPDFFromApi(data, layout, template);
       break;
     case "docx":
       blob = await exportDOCX(data);

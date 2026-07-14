@@ -100,17 +100,61 @@ export function Executive({ data, layout }: TemplateProps) {
     </div>
   ) : null;
 
+  const Projects = data.projects.length > 0 ? (
+    <div className="mb-5">
+      <SectionTitle color={color}>Projects</SectionTitle>
+      {data.projects.map((proj) => (
+        <div key={proj.id} className="mb-2">
+          <div className="flex items-baseline justify-between">
+            <span className="text-xs font-semibold">{proj.name}</span>
+            {proj.role && <span className="text-xs text-muted-foreground">{proj.role}</span>}
+          </div>
+          {proj.description && <p className="text-xs text-muted-foreground">{proj.description}</p>}
+          {proj.highlights.filter(Boolean).length > 0 && (
+            <ul className="mt-1 list-disc space-y-0.5 pl-4 text-xs text-muted-foreground">
+              {proj.highlights.filter(Boolean).map((h, i) => <li key={i}>{h}</li>)}
+            </ul>
+          )}
+        </div>
+      ))}
+    </div>
+  ) : null;
+
+  const Languages = data.languages.length > 0 ? (
+    <div className="mb-5">
+      <SectionTitle color={color}>Languages</SectionTitle>
+      <p className="text-xs text-muted-foreground">
+        {data.languages.map((l) => `${l.language} (${l.proficiency})`).join(", ")}
+      </p>
+    </div>
+  ) : null;
+
+  if (layout.columns === "two") {
+    return (
+      <div style={{ fontSize: fs }}>
+        {Header}
+        <div className="flex gap-6">
+          <div className="w-1/3">
+            {Summary}{Skills}{Certifications}{Languages}
+          </div>
+          <div className="w-2/3">
+            {Experience}{Education}{Projects}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ fontSize: fs }}>
       {Header}
-      <div className={layout.columns === "two" ? "flex gap-6" : ""}>
-        <div className={layout.columns === "two" ? "w-2/3" : ""}>
-          {Summary}{Experience}
-        </div>
-        <div className={layout.columns === "two" ? "w-1/3" : ""}>
-          {Skills}{Education}{Certifications}
-        </div>
-      </div>
+      {Summary}
+      {Experience}
+      {Education}
+      {Skills}
+      {Certifications}
+      {Projects}
+      {Languages}
     </div>
   );
 }

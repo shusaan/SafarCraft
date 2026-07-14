@@ -1,4 +1,4 @@
-FROM node:22-alpine AS base
+FROM node:26.4.0-alpine3.24 AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -20,6 +20,11 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN apk add --no-cache chromium nss freetype harfbuzz ca-certificates ttf-freefont
+
+ENV CHROMIUM_PATH=/usr/bin/chromium
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
