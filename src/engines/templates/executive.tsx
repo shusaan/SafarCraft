@@ -133,11 +133,11 @@ export function Executive({ data, layout }: TemplateProps) {
     return (
       <div style={{ fontSize: fs }}>
         {Header}
-        <div className="flex gap-6">
-          <div className="w-1/3">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "24px" }}>
+          <div>
             {Summary}{Skills}{Certifications}{Languages}
           </div>
-          <div className="w-2/3">
+          <div>
             {Experience}{Education}{Projects}
           </div>
         </div>

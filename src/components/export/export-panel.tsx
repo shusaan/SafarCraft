@@ -3,10 +3,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useResumeStore } from "@/stores/resume-store";
-import { exportResume, type ExportFormat } from "@/engines/export/export-engine";
+import { exportResume } from "@/engines/export/export-engine";
+import type { ExportFormat, PaperSize } from "@/types";
 import { useToast } from "@/components/ui/toast";
 import { Download, FileText, FileJson, FileCode, CheckCircle } from "lucide-react";
+
+const paperSizes: Record<PaperSize, { label: string; dimensions: string }> = {
+  letter: { label: "US Letter", dimensions: '8.5" × 11"' },
+  a4: { label: "A4", dimensions: "210 × 297 mm" },
+  legal: { label: "US Legal", dimensions: '8.5" × 14"' },
+};
 
 const formats: Array<{
   id: ExportFormat;
@@ -48,6 +56,7 @@ const formats: Array<{
 export function ExportPanel() {
   const [exporting, setExporting] = useState<string | null>(null);
   const [exported, setExported] = useState<Set<string>>(new Set());
+  const [paperSize, setPaperSize] = useState<PaperSize>("letter");
   const data = useResumeStore((s) => s.data);
   const layout = useResumeStore((s) => s.layout);
   const template = useResumeStore((s) => s.template);
@@ -56,7 +65,7 @@ export function ExportPanel() {
   const handleExport = async (format: ExportFormat) => {
     setExporting(format);
     try {
-      await exportResume(data, layout, format, template);
+      await exportResume(data, layout, format, template, paperSize);
       setExported((prev) => new Set(prev).add(format));
       toast({ title: `Exported as ${format.toUpperCase()}`, variant: "success" });
     } catch {
@@ -75,6 +84,22 @@ export function ExportPanel() {
       <div>
         <h2 className="text-lg font-semibold">Export</h2>
         <p className="text-sm text-muted-foreground">Download your resume in various formats</p>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Paper Size</label>
+        <Select value={paperSize} onValueChange={(v) => setPaperSize(v as PaperSize)}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(paperSizes).map(([key, { label, dimensions }]) => (
+              <SelectItem key={key} value={key}>
+                {label} — {dimensions}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="grid gap-3">

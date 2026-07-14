@@ -121,9 +121,9 @@ export function ClassicATS({ data, layout }: TemplateProps) {
 
   if (layout.columns === "two") {
     return (
-      <div className="flex gap-6" style={{ fontSize: fs }}>
-        <div className="w-1/3">{Header}{Summary}{Skills}{Certifications}{Languages}</div>
-        <div className="w-2/3">{Experience}{Education}{Projects}</div>
+      <div style={{ fontSize: fs, display: "grid", gridTemplateColumns: "1fr 2fr", gap: "24px" }}>
+        <div>{Header}{Summary}{Skills}{Certifications}{Languages}</div>
+        <div>{Experience}{Education}{Projects}</div>
       </div>
     );
   }

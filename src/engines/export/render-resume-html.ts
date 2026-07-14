@@ -5,6 +5,8 @@ export async function renderResumeHtml(
   template: string,
   data: ResumeData,
   layout: ResumeLayout,
+  width = 816,
+  height = 1056,
 ): Promise<string> {
   const { createElement } = await import("react");
   const { renderToStaticMarkup } = await import("react-dom/server");
@@ -12,12 +14,8 @@ export async function renderResumeHtml(
   const markup = renderToStaticMarkup(
     createElement(
       "div",
-      { className: "resume-page" },
-      createElement(
-        "div",
-        { className: "resume-document" },
-        renderTemplate(template, { data, layout }),
-      ),
+      { className: "resume-document" },
+      renderTemplate(template, { data, layout }),
     ),
   );
 
@@ -31,13 +29,15 @@ export async function renderResumeHtml(
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Resume</title>
 <style>
-.resume-page{width:816px;margin:0 auto;padding:32px;background:#fff;color:#111827;font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif}
-.resume-document{width:100%}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;width:${width}px;height:${height}px;overflow:hidden}
+body{background:#fff}
+.resume-page{width:${width}px;height:${height}px;padding:32px;background:#fff;color:#111827;font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;overflow:hidden}
+.resume-document{width:100%;overflow:hidden}
 ${css}
-@media print{body{background:#fff}.resume-page{box-shadow:none}}
 </style>
 </head>
-<body style="background:#f5f5f5;margin:0">
+<body>
 <div class="resume-page">${markup}</div>
 </body>
 </html>`;
