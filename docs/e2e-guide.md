@@ -338,7 +338,7 @@ e2e:
 
 ### Development (`Dockerfile.dev`)
 
-- Based on `node:22-alpine`
+- Based on `node:26.4.0-alpine3.24`
 - Installs dependencies with `--legacy-peer-deps`
 - Runs `npm run dev` with hot reload
 - Mounts source code as volume for live editing

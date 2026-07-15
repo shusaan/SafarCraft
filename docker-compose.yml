@@ -9,6 +9,8 @@ services:
     environment:
       - NODE_ENV=development
       - NEXT_TELEMETRY_DISABLED=1
+      - CHROMIUM_PATH=/usr/bin/chromium
+      - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
     volumes:
       - .:/app
       - /app/node_modules

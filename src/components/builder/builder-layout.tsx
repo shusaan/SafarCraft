@@ -25,10 +25,11 @@ import { useAutosave } from "@/hooks/use-autosave";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { getSampleResume } from "@/lib/sample-resume";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import {
   FileText, Undo2, Redo2, Eye, EyeOff, Palette, ScrollText,
-  Sparkles, Github, Download, Target, Globe, History, Sun, Moon, GitCompare,
-  Menu, X, HelpCircle,
+  Sparkles, Github, Download, Target, Globe, History, Sun, Moon,
+  GitCompare, Menu, X, HelpCircle, CheckCircle, Clock, Save,
 } from "lucide-react";
 
 type Panel = "editor" | "templates" | "ats" | "ai" | "github" | "export" | "jd" | "portfolio" | "compare";
@@ -37,25 +38,25 @@ const panelGroups = [
   {
     label: "Build",
     panels: [
-      { id: "editor" as Panel, label: "Editor", icon: FileText },
-      { id: "templates" as Panel, label: "Templates", icon: Palette },
+      { id: "editor"    as Panel, label: "Editor",    icon: FileText  },
+      { id: "templates" as Panel, label: "Templates", icon: Palette   },
     ],
   },
   {
     label: "Enhance",
     panels: [
-      { id: "ats" as Panel, label: "ATS", icon: ScrollText },
-      { id: "ai" as Panel, label: "AI", icon: Sparkles },
-      { id: "github" as Panel, label: "GitHub", icon: Github },
-      { id: "jd" as Panel, label: "JD", icon: Target },
+      { id: "ats"    as Panel, label: "ATS",    icon: ScrollText },
+      { id: "ai"     as Panel, label: "AI",     icon: Sparkles   },
+      { id: "github" as Panel, label: "GitHub", icon: Github     },
+      { id: "jd"     as Panel, label: "JD",     icon: Target     },
     ],
   },
   {
     label: "Output",
     panels: [
-      { id: "export" as Panel, label: "Export", icon: Download },
-      { id: "portfolio" as Panel, label: "Portfolio", icon: Globe },
-      { id: "compare" as Panel, label: "Compare", icon: GitCompare },
+      { id: "export"    as Panel, label: "Export",    icon: Download  },
+      { id: "portfolio" as Panel, label: "Portfolio", icon: Globe     },
+      { id: "compare"   as Panel, label: "Compare",   icon: GitCompare },
     ],
   },
 ];
@@ -67,30 +68,92 @@ const defaultOrder: SectionId[] = [
   "certifications", "projects", "languages",
 ];
 
+/* ── Autosave status indicator ── */
+type SaveStatus = "saved" | "saving" | "unsaved";
+
+function AutosavePill({ isDirty }: { isDirty: boolean }) {
+  const [status, setStatus] = useState<SaveStatus>("saved");
+
+  useEffect(() => {
+    if (isDirty) {
+      setStatus("unsaved");
+    } else {
+      setStatus("saving");
+      const t = setTimeout(() => setStatus("saved"), 800);
+      return () => clearTimeout(t);
+    }
+  }, [isDirty]);
+
+  if (status === "saved") return null;
+
+  return (
+    <div
+      className={cn(
+        "hidden sm:flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-300",
+        status === "saving"
+          ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400"
+          : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+      )}
+      aria-live="polite"
+      aria-label={status === "saving" ? "Saving…" : "Unsaved changes"}
+    >
+      {status === "saving" ? (
+        <Save className="h-3 w-3 animate-pulse" aria-hidden="true" />
+      ) : (
+        <Clock className="h-3 w-3" aria-hidden="true" />
+      )}
+      {status === "saving" ? "Saving…" : "Unsaved"}
+    </div>
+  );
+}
+
+/* ── Panel wrapper with fade-in animation ── */
+function PanelWrapper({ id, children }: { id: Panel; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.opacity = "0";
+    el.style.transform = "translateY(6px)";
+    void el.offsetHeight;
+    el.style.transition = "opacity 200ms ease, transform 200ms ease";
+    el.style.opacity = "1";
+    el.style.transform = "translateY(0)";
+    return () => { el.style.transition = ""; };
+  }, [id]);
+
+  return (
+    <div ref={ref} className="flex flex-1 flex-col overflow-hidden">
+      {children}
+    </div>
+  );
+}
+
 export function BuilderLayout() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const panelParam = searchParams.get("panel");
+  const router       = useRouter();
+  const panelParam   = searchParams.get("panel");
 
-  const [activeSection, setActiveSection] = useState<SectionId>("personal");
-  const [sectionOrder, setSectionOrder] = useState<SectionId[]>(defaultOrder);
-  const [showPreview, setShowPreview] = useState(true);
-  const [showResumeList, setShowResumeList] = useState(false);
-  const [showVersionHistory, setShowVersionHistory] = useState(false);
-  const [showShortcuts, setShowShortcuts] = useState(false);
-  const [activePanel, setActivePanel] = useState<Panel>("editor");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [previewWidth, setPreviewWidth] = useState(500);
-  const [isResizing, setIsResizing] = useState(false);
+  const [activeSection,     setActiveSection]     = useState<SectionId>("personal");
+  const [sectionOrder,      setSectionOrder]       = useState<SectionId[]>(defaultOrder);
+  const [showPreview,       setShowPreview]        = useState(true);
+  const [showResumeList,    setShowResumeList]     = useState(false);
+  const [showVersionHistory,setShowVersionHistory] = useState(false);
+  const [showShortcuts,     setShowShortcuts]      = useState(false);
+  const [activePanel,       setActivePanel]        = useState<Panel>("editor");
+  const [mobileMenuOpen,    setMobileMenuOpen]     = useState(false);
+  const [previewWidth,      setPreviewWidth]       = useState(500);
+  const [isResizing,        setIsResizing]         = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  const isDirty = useResumeStore((s) => s.isDirty);
-  const undo = useResumeStore((s) => s.undo);
-  const redo = useResumeStore((s) => s.redo);
-  const data = useResumeStore((s) => s.data);
+  const isDirty    = useResumeStore((s) => s.isDirty);
+  const undo       = useResumeStore((s) => s.undo);
+  const redo       = useResumeStore((s) => s.redo);
+  const data       = useResumeStore((s) => s.data);
   const updateData = useResumeStore((s) => s.updateData);
-  const theme = useUIStore((s) => s.theme);
-  const setTheme = useUIStore((s) => s.setTheme);
+  const theme      = useUIStore((s) => s.theme);
+  const setTheme   = useUIStore((s) => s.setTheme);
 
   useAutosave();
   useKeyboardShortcuts();
@@ -98,10 +161,8 @@ export function BuilderLayout() {
   // Load sample resume on first visit
   useEffect(() => {
     const hasData = data.personal.name || data.experience.length > 0;
-    if (!hasData) {
-      const sample = getSampleResume();
-      updateData(sample);
-    }
+    if (!hasData) updateData(getSampleResume());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -112,9 +173,7 @@ export function BuilderLayout() {
   }, [panelParam, router]);
 
   // Resize handler
-  const handleMouseDown = useCallback(() => {
-    setIsResizing(true);
-  }, []);
+  const handleMouseDown = useCallback(() => setIsResizing(true), []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -122,16 +181,12 @@ export function BuilderLayout() {
       const newWidth = window.innerWidth - e.clientX;
       setPreviewWidth(Math.max(300, Math.min(newWidth, window.innerWidth * 0.6)));
     };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
+    const handleMouseUp = () => setIsResizing(false);
 
     if (isResizing) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     }
-
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
@@ -143,7 +198,7 @@ export function BuilderLayout() {
       case "editor":
         return (
           <div className="flex flex-1 overflow-hidden">
-            <div className="w-56 shrink-0 border-r lg:block hidden">
+            <div className="w-52 shrink-0 border-r lg:block hidden relative">
               <SectionSidebar
                 activeSection={activeSection}
                 onSectionChange={setActiveSection}
@@ -156,171 +211,230 @@ export function BuilderLayout() {
             </div>
           </div>
         );
-      case "templates":
-        return <TemplateSelector />;
-      case "ats":
-        return <ATSPanel />;
-      case "ai":
-        return <AIAssistant />;
-      case "github":
-        return <GitHubImport />;
-      case "export":
-        return <ExportPanel />;
-      case "jd":
-        return <JDAnalyzer />;
-      case "portfolio":
-        return <PortfolioGenerator />;
-      case "compare":
-        return <VersionComparison />;
+      case "templates":  return <TemplateSelector />;
+      case "ats":        return <ATSPanel />;
+      case "ai":         return <AIAssistant />;
+      case "github":     return <GitHubImport />;
+      case "export":     return <ExportPanel />;
+      case "jd":         return <JDAnalyzer />;
+      case "portfolio":  return <PortfolioGenerator />;
+      case "compare":    return <VersionComparison />;
     }
   };
 
   return (
-    <div className="flex h-screen flex-col transition-colors duration-200">
-      {/* Top bar */}
-      <header className="flex items-center justify-between border-b px-4 py-1.5" role="banner">
+    <div className="flex h-screen flex-col">
+      {/* ── Top bar ── */}
+      <header
+        className="flex items-center justify-between border-b bg-background/95 px-3 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+        role="banner"
+      >
+        {/* Left — logo + nav */}
         <div className="flex items-center gap-2">
-          {/* Mobile menu button */}
+          {/* Mobile hamburger */}
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            className="lg:hidden h-8 w-8"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
+          {/* Logo */}
+          <button
+            className="flex items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-accent"
             onClick={() => setShowResumeList(true)}
             aria-label="Manage resumes"
           >
-            <FileText className="mr-1 h-4 w-4" />
-            <span className="hidden sm:inline">Resumes</span>
-          </Button>
-          <div className="mx-3 h-5 w-px bg-border hidden sm:block" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-indigo-500 shadow-sm" aria-hidden="true">
+              <Sparkles className="h-3.5 w-3.5 text-white" />
+            </div>
+            <span className="hidden text-sm font-semibold sm:inline">CareerForge</span>
+          </button>
 
-          {/* Desktop toolbar - grouped */}
-          <nav className="hidden lg:flex items-center gap-1" role="navigation" aria-label="Main toolbar">
+          <div className="mx-2 h-4 w-px bg-border hidden sm:block" aria-hidden="true" />
+
+          {/* Desktop panel navigation */}
+          <nav
+            className="hidden lg:flex items-center gap-0.5"
+            role="navigation"
+            aria-label="Builder panels"
+          >
             {panelGroups.map((group, gi) => (
               <div key={group.label} className="flex items-center">
-                {gi > 0 && <div className="mx-1 h-4 w-px bg-border" />}
+                {gi > 0 && (
+                  <div className="mx-1.5 h-4 w-px bg-border" aria-hidden="true" />
+                )}
                 <div className="flex items-center gap-0.5">
-                  {group.panels.map(({ id, label, icon: Icon }) => (
-                    <Button
-                      key={id}
-                      variant={activePanel === id ? "secondary" : "ghost"}
-                      size="sm"
-                      onClick={() => setActivePanel(id)}
-                      className="gap-1.5"
-                      aria-pressed={activePanel === id}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      <span className="hidden xl:inline">{label}</span>
-                    </Button>
-                  ))}
+                  {group.panels.map(({ id, label, icon: Icon }) => {
+                    const isActive = activePanel === id;
+                    return (
+                      <button
+                        key={id}
+                        onClick={() => setActivePanel(id)}
+                        aria-pressed={isActive}
+                        aria-label={label}
+                        className={cn(
+                          "relative flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-all duration-150",
+                          "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground hover:scale-105",
+                        )}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0" />
+                        <span className="hidden xl:inline">{label}</span>
+                        {/* Active underline */}
+                        {isActive && (
+                          <span
+                            className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
           </nav>
         </div>
 
+        {/* Right — actions */}
         <div className="flex items-center gap-1">
-          {isDirty && <span className="mr-2 text-xs text-amber-500 hidden sm:inline">Unsaved</span>}
+          <AutosavePill isDirty={isDirty} />
+
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={undo}
             title="Undo (Ctrl+Z)"
             aria-label="Undo"
           >
-            <Undo2 className="h-4 w-4" />
+            <Undo2 className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={redo}
             title="Redo (Ctrl+Y)"
             aria-label="Redo"
           >
-            <Redo2 className="h-4 w-4" />
+            <Redo2 className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => setShowVersionHistory(true)}
             title="Version History"
             aria-label="Version history"
           >
-            <History className="h-4 w-4" />
+            <History className="h-3.5 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => setShowShortcuts(true)}
-            title="Keyboard Shortcuts"
+            title="Keyboard Shortcuts (?)"
             aria-label="Keyboard shortcuts"
           >
-            <HelpCircle className="h-4 w-4" />
+            <HelpCircle className="h-3.5 w-3.5" />
           </Button>
+
+          {/* Divider */}
+          <div className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             aria-pressed={theme === "dark"}
           >
-            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {theme === "dark"
+              ? <Sun className="h-3.5 w-3.5" />
+              : <Moon className="h-3.5 w-3.5" />}
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8"
             onClick={() => setShowPreview(!showPreview)}
             title="Toggle Preview"
-            aria-label="Toggle preview"
+            aria-label={showPreview ? "Hide preview" : "Show preview"}
             aria-pressed={showPreview}
           >
-            {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPreview
+              ? <EyeOff className="h-3.5 w-3.5" />
+              : <Eye className="h-3.5 w-3.5" />}
           </Button>
         </div>
       </header>
 
-      {/* Mobile menu overlay */}
+      {/* ── Mobile menu overlay ── */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setMobileMenuOpen(false)}>
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/50"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        >
           <nav
-            className="fixed left-0 top-0 h-full w-64 bg-background p-4 shadow-lg"
+            className="fixed left-0 top-0 h-full w-64 bg-background p-4 shadow-xl"
             onClick={(e) => e.stopPropagation()}
             role="navigation"
-            aria-label="Mobile menu"
+            aria-label="Mobile navigation menu"
           >
-            <div className="mb-4 flex items-center justify-between">
-              <span className="font-semibold">Menu</span>
-              <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+            {/* Mobile nav header */}
+            <div className="mb-5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <span className="font-semibold">CareerForge</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>
+
             {panelGroups.map((group) => (
-              <div key={group.label} className="mb-4">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">{group.label}</p>
-                <div className="space-y-1">
+              <div key={group.label} className="mb-5">
+                <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {group.label}
+                </p>
+                <div className="space-y-0.5">
                   {group.panels.map(({ id, label, icon: Icon }) => (
-                    <Button
+                    <button
                       key={id}
-                      variant={activePanel === id ? "secondary" : "ghost"}
-                      size="sm"
-                      className="w-full justify-start gap-2"
+                      className={cn(
+                        "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all",
+                        activePanel === id
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground",
+                      )}
                       onClick={() => {
                         setActivePanel(id);
                         setMobileMenuOpen(false);
                       }}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-4 w-4 shrink-0" />
                       {label}
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -329,52 +443,55 @@ export function BuilderLayout() {
         </div>
       )}
 
-      {/* Main content */}
+      {/* ── Main content ── */}
       <main className="flex flex-1 overflow-hidden" role="main">
         <div className="flex flex-1 flex-col overflow-hidden">
-          {renderPanel()}
+          <PanelWrapper key={activePanel} id={activePanel}>
+            {renderPanel()}
+          </PanelWrapper>
         </div>
 
-        {/* Preview panel */}
+        {/* ── Preview pane ── */}
         {showPreview && (
           <aside
             ref={previewRef}
-            className="shrink-0 border-l relative"
+            className="shrink-0 border-l relative flex flex-col"
             style={{ width: `${previewWidth}px` }}
             role="complementary"
             aria-label="Resume preview"
           >
             {/* Resize handle */}
             <div
-              className="absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/50 transition-colors"
+              className={cn(
+                "absolute left-0 top-0 h-full w-1 cursor-col-resize transition-colors",
+                isResizing ? "bg-primary/60" : "hover:bg-primary/30",
+              )}
               onMouseDown={handleMouseDown}
               role="separator"
-              aria-label="Resize preview"
+              aria-orientation="vertical"
+              aria-label="Drag to resize preview"
               tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowLeft")  setPreviewWidth((w) => Math.max(300, w - 20));
+                if (e.key === "ArrowRight") setPreviewWidth((w) => Math.min(window.innerWidth * 0.6, w + 20));
+              }}
             />
-            <div className="flex items-center justify-between border-b px-4 py-2">
-              <span className="text-sm font-medium">Preview</span>
-            </div>
             <ResumePreview />
           </aside>
         )}
       </main>
 
-      {/* Onboarding checklist */}
+      {/* ── Overlays ── */}
       <OnboardingChecklist />
-
-      {/* Completion celebration */}
       <Celebration />
 
-      {/* Resume list dialog */}
       <Dialog open={showResumeList} onOpenChange={setShowResumeList}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Resumes</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>My Resumes</DialogTitle></DialogHeader>
           <ResumeList onClose={() => setShowResumeList(false)} />
         </DialogContent>
       </Dialog>
 
-      {/* Version history dialog */}
       <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
         <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Version History</DialogTitle></DialogHeader>
@@ -382,7 +499,6 @@ export function BuilderLayout() {
         </DialogContent>
       </Dialog>
 
-      {/* Shortcuts help dialog */}
       <ShortcutsHelp open={showShortcuts} onOpenChange={setShowShortcuts} />
     </div>
   );

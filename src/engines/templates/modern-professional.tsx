@@ -93,6 +93,18 @@ export function ModernProfessional({ data, layout }: TemplateProps) {
     </div>
   ) : null;
 
+  if (layout.columns === "two") {
+    return (
+      <div style={{ fontSize: fs, display: "grid", gridTemplateColumns: "1fr 2fr", gap: "24px" }}>
+        <div>
+          <div className="rounded-lg bg-gradient-to-r from-background to-muted p-4 mb-4">{Header}</div>
+          {Summary}{Skills}
+        </div>
+        <div>{Experience}{Education}{Projects}</div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ fontSize: fs }}>
       <div className="rounded-lg bg-gradient-to-r from-background to-muted p-4">{Header}</div>

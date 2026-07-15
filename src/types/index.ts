@@ -16,6 +16,8 @@ export type TemplateId = "classic-ats" | "modern-professional" | "executive";
 
 export type ExportFormat = "pdf" | "docx" | "json" | "markdown";
 
+export type PaperSize = "letter" | "a4" | "legal";
+
 export type ColumnLayout = "one" | "two";
 
 export type ATSResult = {
