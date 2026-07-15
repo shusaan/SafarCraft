@@ -4,7 +4,7 @@ import { exportMarkdown } from "@/engines/export/providers/markdown";
 import { defaultResumeData, type ResumeData } from "@/types";
 
 describe("Export Engine", () => {
-  it("generates valid JSON Resume", () => {
+  it("generates valid JSON Resume", async () => {
     const data: ResumeData = {
       ...defaultResumeData,
       personal: {
@@ -14,7 +14,7 @@ describe("Export Engine", () => {
       },
     };
     const blob = exportJSONResume(data);
-    const text = blob.text();
+    const text = await blob.text();
     expect(text).toBeTruthy();
   });
 
