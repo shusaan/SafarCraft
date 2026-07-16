@@ -14,8 +14,10 @@ describe("Export Engine", () => {
       },
     };
     const blob = exportJSONResume(data);
-    const text = await blob.text();
+    const text = await new Response(blob).text();
     expect(text).toBeTruthy();
+    const parsed = JSON.parse(text);
+    expect(parsed.basics.name).toBe("Jane Doe");
   });
 
   it("generates markdown", () => {
