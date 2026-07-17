@@ -26,7 +26,7 @@ export function LanguagesForm() {
 
   return (
     <div className="space-y-4">
-      {languages.map((entry, index) => (
+      {languages.map((entry, _index) => (
         <div key={entry.id} className="flex items-end gap-4 rounded-lg border p-4">
           <div className="flex-1 space-y-2">
             <Label>Language</Label>

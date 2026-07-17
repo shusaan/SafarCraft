@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { debounce } from "@/lib/utils";
 
@@ -10,7 +10,6 @@ export function useAutosave() {
   const template = useResumeStore((s) => s.template);
   const isDirty = useResumeStore((s) => s.isDirty);
   const markSaved = useResumeStore((s) => s.markSaved);
-  const savedRef = useRef(true);
 
   const save = debounce(async (resumeData: typeof data) => {
     try {

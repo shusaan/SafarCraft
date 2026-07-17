@@ -19,7 +19,6 @@ type Version = {
 export function VersionHistory() {
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);
-  const data = useResumeStore((s) => s.data);
   const updateData = useResumeStore((s) => s.updateData);
   const { toast } = useToast();
 

@@ -2,7 +2,6 @@
 
 import { useResumeStore } from "@/stores/resume-store";
 import { templateRegistry, getTemplateName } from "@/engines/templates/registry";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";

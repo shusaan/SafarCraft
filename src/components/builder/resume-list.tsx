@@ -15,7 +15,6 @@ export function ResumeList({ onClose }: { onClose: () => void }) {
   const setResumes = useResumeStore((s) => s.setResumes);
   const setActiveResume = useResumeStore((s) => s.setActiveResume);
   const activeResumeId = useResumeStore((s) => s.activeResumeId);
-  const reset = useResumeStore((s) => s.reset);
   const { toast } = useToast();
   const [showNew, setShowNew] = useState(false);
   const [newTitle, setNewTitle] = useState("");

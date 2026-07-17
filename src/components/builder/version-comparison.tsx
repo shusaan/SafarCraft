@@ -3,11 +3,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useResumeStore } from "@/stores/resume-store";
 import { compareResumes } from "@/engines/ats/comparison";
-import { defaultResumeData } from "@/types";
-import { GitCompare, ArrowUp, ArrowDown, Plus, Minus } from "lucide-react";
+import { GitCompare, Plus, Minus } from "lucide-react";
 
 export function VersionComparison() {
   const currentData = useResumeStore((s) => s.data);

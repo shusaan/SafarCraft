@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useResumeStore } from "@/stores/resume-store";
 import { analyzeJobDescription } from "@/engines/ats/jd-analyzer";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Target, CheckCircle, XCircle, Lightbulb, TrendingUp, Activity } from "lucide-react";
 import type { JDParseResult } from "@/types";
 

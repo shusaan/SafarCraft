@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useResumeStore } from "@/stores/resume-store";
 import { useToast } from "@/components/ui/toast";
-import { fetchGitHubProfile, generateContributionBullets, generateProjectsFromGitHub, generateSkillsFromGitHub } from "@/engines/github/github-engine";
+import { fetchGitHubProfile, generateProjectsFromGitHub, generateSkillsFromGitHub } from "@/engines/github/github-engine";
 import { generateId } from "@/lib/utils";
 import { Loader2, Github, Star, GitFork, Code2 } from "lucide-react";
 
@@ -55,7 +54,6 @@ export function GitHubImport() {
 
   const applyContributions = () => {
     if (!profile) return;
-    const bullets = generateContributionBullets(profile);
     const existing = skills;
     const newSkills = generateSkillsFromGitHub(profile);
     const categoryId = generateId();

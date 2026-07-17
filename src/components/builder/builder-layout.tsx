@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import {
   FileText, Undo2, Redo2, Eye, EyeOff, Palette, ScrollText,
   Sparkles, Github, Download, Target, Globe, History, Sun, Moon,
-  GitCompare, Menu, X, HelpCircle, CheckCircle, Clock, Save,
+  GitCompare, Menu, X, HelpCircle, Clock, Save,
 } from "lucide-react";
 
 type Panel = "editor" | "templates" | "ats" | "ai" | "github" | "export" | "jd" | "portfolio" | "compare";

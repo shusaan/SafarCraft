@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, X, Sparkles } from "lucide-react";
+import { CheckCircle2, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const steps = [

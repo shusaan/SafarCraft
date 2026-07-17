@@ -17,7 +17,7 @@ export function SectionTitle({ color, children }: { color: string; children: Rea
   );
 }
 
-export function ContactLine({ label, value }: { label: string; value: string }) {
+export function ContactLine({ label: _label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
     <span className="text-xs text-muted-foreground">

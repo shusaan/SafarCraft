@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { isDbAvailable, db } from "@/db";
 import { resumes } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 export async function GET() {
   if (!isDbAvailable()) {
