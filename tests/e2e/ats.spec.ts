@@ -11,7 +11,7 @@ test.describe("ATS Panel", () => {
   });
 
   test("should show score message", async ({ page }) => {
-    const scoreMessage = page.locator("text=/Excellent|Good foundation|Needs improvement|Significant issues/");
+    const scoreMessage = page.getByText(/Excellent — your|Good foundation|Needs improvement|Significant issues/);
     await expect(scoreMessage).toBeVisible();
   });
 

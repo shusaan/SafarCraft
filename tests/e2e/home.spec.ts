@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Home Page", () => {
   test("should display the title", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("CareerForge AI");
+    await expect(page.locator("h1")).toContainText("Build resumes that beat the ATS");
   });
 
   test("should show no signup required badge", async ({ page }) => {
@@ -13,7 +13,7 @@ test.describe("Home Page", () => {
 
   test("should navigate to builder", async ({ page }) => {
     await page.goto("/");
-    await page.click("text=Start Building");
+    await page.click("text=Start building free");
     await expect(page).toHaveURL(/\/builder/);
   });
 

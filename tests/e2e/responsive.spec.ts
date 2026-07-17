@@ -11,18 +11,18 @@ test.describe("Responsive Design", () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.goto("/builder");
     await page.click("[aria-label='Toggle menu']");
-    await expect(page.locator("nav[aria-label='Mobile menu']")).toBeVisible();
+    await expect(page.locator("nav[aria-label='Mobile navigation menu']")).toBeVisible();
   });
 
   test("desktop: should show full toolbar", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/builder");
-    await expect(page.locator("nav[aria-label='Main toolbar']")).toBeVisible();
+    await expect(page.locator("nav[aria-label='Builder panels']")).toBeVisible();
   });
 
   test("desktop: should have resizable preview", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/builder");
-    await expect(page.locator("[aria-label='Resize preview']")).toBeVisible();
+    await expect(page.locator("[aria-label='Drag to resize preview']")).toBeVisible();
   });
 });

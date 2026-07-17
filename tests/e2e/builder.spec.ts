@@ -14,14 +14,14 @@ test.describe("Builder", () => {
   });
 
   test("should have grouped toolbar", async ({ page }) => {
-    await expect(page.locator("text=Build")).toBeVisible();
-    await expect(page.locator("text=Enhance")).toBeVisible();
-    await expect(page.locator("text=Output")).toBeVisible();
+    await expect(page.locator("text=Editor")).toBeVisible();
+    await expect(page.locator("text=ATS")).toBeVisible();
+    await expect(page.locator("text=Export")).toBeVisible();
   });
 
   test("should switch panels", async ({ page }) => {
     await page.click("button:has-text('Templates')");
-    await expect(page.locator("text=Template Selector")).toBeVisible();
+    await expect(page.locator("text=Template")).toBeVisible();
   });
 
   test("should show keyboard shortcuts help", async ({ page }) => {
@@ -35,7 +35,7 @@ test.describe("Builder", () => {
   });
 
   test("should toggle preview", async ({ page }) => {
-    await page.click("[aria-label='Toggle preview']");
+    await page.click("[aria-label='Hide preview']");
     await expect(page.locator("text=Preview")).not.toBeVisible();
   });
 
@@ -46,6 +46,6 @@ test.describe("Builder", () => {
 
   test("should show resume list dialog", async ({ page }) => {
     await page.click("[aria-label='Manage resumes']");
-    await expect(page.locator("text=Resumes")).toBeVisible();
+    await expect(page.locator("text=My Resumes")).toBeVisible();
   });
 });
