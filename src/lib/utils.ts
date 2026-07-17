@@ -20,12 +20,12 @@ export function truncate(str: string, length: number): string {
   return str.slice(0, length) + "...";
 }
 
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  fn: T,
+export function debounce<T extends unknown[]>(
+  fn: (...args: T) => unknown,
   ms: number,
-): (...args: Parameters<T>) => void {
+): (...args: T) => void {
   let timer: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<T>) => {
+  return (...args: T) => {
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), ms);
   };
