@@ -14,14 +14,14 @@ test.describe("Builder", () => {
   });
 
   test("should have grouped toolbar", async ({ page }) => {
-    await expect(page.locator("text=Editor")).toBeVisible();
-    await expect(page.locator("text=ATS")).toBeVisible();
-    await expect(page.locator("text=Export")).toBeVisible();
+    await expect(page.locator("[aria-label='Editor']")).toBeVisible();
+    await expect(page.locator("[aria-label='ATS']")).toBeVisible();
+    await expect(page.locator("[aria-label='Export']")).toBeVisible();
   });
 
   test("should switch panels", async ({ page }) => {
     await page.click("button:has-text('Templates')");
-    await expect(page.locator("text=Template")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Template" })).toBeVisible();
   });
 
   test("should show keyboard shortcuts help", async ({ page }) => {
@@ -46,6 +46,6 @@ test.describe("Builder", () => {
 
   test("should show resume list dialog", async ({ page }) => {
     await page.click("[aria-label='Manage resumes']");
-    await expect(page.locator("text=My Resumes")).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "My Resumes" })).toBeVisible();
   });
 });
