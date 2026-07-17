@@ -28,7 +28,7 @@ export function ShortcutsHelp({ open, onOpenChange }: ShortcutsHelpProps) {
         </DialogHeader>
         <div className="space-y-2">
           {shortcuts.map((shortcut) => (
-            <div key={shortcut.action} className="flex items-center justify-between">
+            <div key={shortcut.keys.join("-")} className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">{shortcut.action}</span>
               <div className="flex gap-1">
                 {shortcut.keys.map((key) => (
