@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateATSScore, getATSScoreLabel } from "@/engines/ats/ats-engine";
+import { calculateATSScore } from "@/engines/ats/ats-engine";
 import { analyzeJobDescription } from "@/engines/ats/jd-analyzer";
 import { compareResumes } from "@/engines/ats/comparison";
 import { defaultResumeData, type ResumeData } from "@/types";

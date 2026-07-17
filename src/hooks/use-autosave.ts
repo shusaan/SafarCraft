@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { debounce } from "@/lib/utils";
+import type { ResumeData } from "@/types";
 
 export function useAutosave() {
   const data = useResumeStore((s) => s.data);
@@ -39,7 +40,7 @@ export function useAutosave() {
     } catch {
       // Silently fail — local persistence works without API
     }
-  }, 2000);
+  }, 2000) as unknown as (data: ResumeData) => void;
 
   useEffect(() => {
     if (isDirty) {

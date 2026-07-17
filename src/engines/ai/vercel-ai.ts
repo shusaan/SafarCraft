@@ -1,4 +1,5 @@
 import { generateText } from "ai";
+// @ts-expect-error — @ai-sdk/openai not installed; install via npm install @ai-sdk/openai
 import { openai } from "@ai-sdk/openai";
 import { buildAIPrompt } from "@/engines/ai/ai-engine";
 import { generateFallbackResponse } from "@/engines/ai/ai-engine";

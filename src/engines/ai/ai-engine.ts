@@ -31,7 +31,7 @@ const PROMPTS: Record<AIAction, string> = {
     Text:`,
 };
 
-export function validateAIResponse(action: AIAction, response: string): string {
+export function validateAIResponse(_action: AIAction, response: string): string {
   return response.trim();
 }
 

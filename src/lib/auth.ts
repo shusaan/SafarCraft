@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 
-let _auth: ReturnType<typeof betterAuth> | null = null;
+let _auth: any = null;
 
 function createAuth() {
   const secret = process.env.BETTER_AUTH_SECRET;

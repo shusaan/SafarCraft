@@ -43,7 +43,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   }
 }
 
-export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!isDbAvailable()) {
     return NextResponse.json({ error: "Database not configured" }, { status: 501 });
   }

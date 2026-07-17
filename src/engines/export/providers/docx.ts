@@ -1,4 +1,5 @@
 import type { ResumeData } from "@/types";
+import type { Paragraph as ParagraphType } from "docx";
 
 export async function exportDOCX(data: ResumeData): Promise<Blob> {
   const {
@@ -10,7 +11,7 @@ export async function exportDOCX(data: ResumeData): Promise<Blob> {
     AlignmentType,
   } = await import("docx");
 
-  const sections: Paragraph[] = [];
+  const sections: ParagraphType[] = [];
 
   sections.push(
     new Paragraph({
