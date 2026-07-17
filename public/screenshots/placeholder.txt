@@ -1,0 +1,15 @@
+README screenshots
+==================
+Add actual screenshots here for the README:
+
+- builder.png  — Main builder interface with form sidebar and preview
+- templates.png — Template selection dialog
+- ats.png — ATS score panel
+- ai.png — AI suggestions panel
+- github.png — GitHub import panel
+- export.png — Export dialog
+- analytics.png — Admin analytics dashboard
+- portfolio.png — Portfolio generator output
+- dark.png — Dark mode preview
+
+Recommended: 1200×800px PNG screenshots.
