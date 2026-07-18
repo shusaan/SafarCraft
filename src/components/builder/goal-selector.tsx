@@ -12,13 +12,6 @@ const goals: Array<{ id: ResumeGoal; label: string; hint: string }> = [
   { id: "academia",   label: "Academia",        hint: "Emphasize publications, grants, and teaching" },
 ];
 
-const goalLabels: Record<ResumeGoal, string> = {
-  startup:    "Tech Startup",
-  faang:      "FAANG / Big Tech",
-  government: "Government",
-  academia:   "Academia",
-};
-
 export function GoalSelector() {
   const resumeGoal = useResumeStore((s) => s.resumeGoal);
   const setResumeGoal = useResumeStore((s) => s.setResumeGoal);
