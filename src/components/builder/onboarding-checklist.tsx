@@ -85,7 +85,7 @@ export function OnboardingChecklist() {
       aria-live="polite"
     >
       {/* Glass card */}
-      <div className="glass overflow-hidden rounded-2xl border shadow-2xl">
+      <div className="bg-background/80 backdrop-blur-lg overflow-hidden rounded-2xl border shadow-2xl">
         {/* Gradient top strip */}
         <div className="h-1 w-full bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500" aria-hidden="true" />
 

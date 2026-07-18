@@ -8,7 +8,8 @@ import { useResumeStore } from "@/stores/resume-store";
 import { useToast } from "@/components/ui/toast";
 import { fetchGitHubProfile, generateProjectsFromGitHub, generateSkillsFromGitHub } from "@/engines/github/github-engine";
 import { generateId } from "@/lib/utils";
-import { Loader2, Github, Star, GitFork, Code2 } from "lucide-react";
+import { Github, Star, GitFork, Code2 } from "lucide-react";
+import { SkeletonCard } from "@/components/ui/skeleton";
 
 export function GitHubImport() {
   const [username, setUsername] = useState("");
@@ -102,9 +103,15 @@ export function GitHubImport() {
           onKeyDown={(e) => e.key === "Enter" && handleImport()}
         />
         <Button onClick={handleImport} disabled={loading}>
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Import"}
+          {loading ? "Importing..." : "Import"}
         </Button>
       </div>
+
+      {loading && (
+        <div aria-label="Loading GitHub profile" aria-live="polite">
+          <SkeletonCard />
+        </div>
+      )}
 
       {profile && (
         <Card>

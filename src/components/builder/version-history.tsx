@@ -6,6 +6,7 @@ import { useResumeStore } from "@/stores/resume-store";
 import { useToast } from "@/components/ui/toast";
 import type { ResumeData } from "@/types";
 import { Clock, RotateCcw, Save } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Version = {
   id: string;
@@ -67,7 +68,14 @@ export function VersionHistory() {
   };
 
   if (loading) {
-    return <p className="py-4 text-sm text-muted-foreground">Loading versions...</p>;
+    return (
+      <div className="space-y-2 py-4" aria-label="Loading versions">
+        <Skeleton className="h-9 w-full rounded-md" />
+        {[1, 2, 3].map((i) => (
+          <Skeleton key={i} className="h-12 w-full rounded-md" />
+        ))}
+      </div>
+    );
   }
 
   return (

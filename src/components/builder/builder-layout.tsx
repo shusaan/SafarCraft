@@ -21,6 +21,10 @@ import { VersionComparison } from "./version-comparison";
 import { OnboardingChecklist } from "./onboarding-checklist";
 import { ShortcutsHelp } from "./shortcuts-help";
 import { Celebration } from "./celebration";
+import { GoalSelector } from "./goal-selector";
+import { BuilderStepper, type StepperStep } from "./builder-stepper";
+import { WelcomeOverlay } from "./welcome-overlay";
+import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { useAutosave } from "@/hooks/use-autosave";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { getSampleResume } from "@/lib/sample-resume";
@@ -91,7 +95,7 @@ function AutosavePill({ isDirty }: { isDirty: boolean }) {
       className={cn(
         "hidden sm:flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-all duration-300",
         status === "saving"
-          ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400"
+          ? "bg-primary/10 text-primary"
           : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
       )}
       aria-live="polite"
@@ -124,7 +128,7 @@ function PanelWrapper({ id, children }: { id: Panel; children: React.ReactNode }
   }, [id]);
 
   return (
-    <div ref={ref} className="flex flex-1 flex-col overflow-hidden">
+    <div ref={ref} className="flex flex-1 flex-col overflow-hidden" aria-live="polite">
       {children}
     </div>
   );
@@ -192,6 +196,23 @@ export function BuilderLayout() {
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isResizing]);
+
+  const handleStepperNavigate = (step: StepperStep) => {
+    const stepToSection: Record<StepperStep, string> = {
+      personal:   "personal",
+      experience: "experience",
+      "edu-skills": "education",
+      extra:      "certifications",
+      "ats-export": "ats",
+    };
+    const target = stepToSection[step];
+    if (target === "ats" || target === "export") {
+      setActivePanel(target);
+    } else {
+      setActiveSection(target as SectionId);
+      setActivePanel("editor");
+    }
+  };
 
   const renderPanel = () => {
     switch (activePanel) {
@@ -287,7 +308,6 @@ export function BuilderLayout() {
                       >
                         <Icon className="h-3.5 w-3.5 shrink-0" />
                         <span className="hidden xl:inline">{label}</span>
-                        {/* Active underline */}
                         {isActive && (
                           <span
                             className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
@@ -348,7 +368,6 @@ export function BuilderLayout() {
             <HelpCircle className="h-3.5 w-3.5" />
           </Button>
 
-          {/* Divider */}
           <div className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
 
           <Button
@@ -380,6 +399,16 @@ export function BuilderLayout() {
         </div>
       </header>
 
+      {/* ── Goal Selector ── */}
+      <GoalSelector />
+
+      {/* ── Stepper ── */}
+      <BuilderStepper
+        activeSection={activeSection}
+        activePanel={activePanel}
+        onNavigate={handleStepperNavigate}
+      />
+
       {/* ── Mobile menu overlay ── */}
       {mobileMenuOpen && (
         <div
@@ -393,7 +422,6 @@ export function BuilderLayout() {
             role="navigation"
             aria-label="Mobile navigation menu"
           >
-            {/* Mobile nav header */}
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500">
@@ -446,9 +474,11 @@ export function BuilderLayout() {
       {/* ── Main content ── */}
       <main className="flex flex-1 overflow-hidden" role="main">
         <div className="flex flex-1 flex-col overflow-hidden">
-          <PanelWrapper key={activePanel} id={activePanel}>
-            {renderPanel()}
-          </PanelWrapper>
+          <ErrorBoundary>
+            <PanelWrapper key={activePanel} id={activePanel}>
+              {renderPanel()}
+            </PanelWrapper>
+          </ErrorBoundary>
         </div>
 
         {/* ── Preview pane ── */}
@@ -460,7 +490,6 @@ export function BuilderLayout() {
             role="complementary"
             aria-label="Resume preview"
           >
-            {/* Resize handle */}
             <div
               className={cn(
                 "absolute left-0 top-0 h-full w-1 cursor-col-resize transition-colors",
@@ -476,7 +505,9 @@ export function BuilderLayout() {
                 if (e.key === "ArrowRight") setPreviewWidth((w) => Math.min(window.innerWidth * 0.6, w + 20));
               }}
             />
-            <ResumePreview />
+            <ErrorBoundary>
+              <ResumePreview />
+            </ErrorBoundary>
           </aside>
         )}
       </main>
@@ -484,6 +515,7 @@ export function BuilderLayout() {
       {/* ── Overlays ── */}
       <OnboardingChecklist />
       <Celebration />
+      <WelcomeOverlay />
 
       <Dialog open={showResumeList} onOpenChange={setShowResumeList}>
         <DialogContent>
