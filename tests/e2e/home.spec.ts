@@ -19,6 +19,6 @@ test.describe("Home Page", () => {
 
   test("should show trust bar", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("text=MIT licensed")).toBeVisible();
+    await expect(page.locator("section[aria-label='Trust signals']")).toBeVisible();
   });
 });
