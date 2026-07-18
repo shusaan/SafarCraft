@@ -37,6 +37,7 @@ export function WelcomeOverlay() {
   if (!visible) return null;
 
   const current = tips[step];
+  if (!current) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/30" role="dialog" aria-modal="true" aria-label="Welcome guide">
