@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ResumeData, ResumeLayout } from "@/types";
+export type ResumeGoal = "startup" | "faang" | "government" | "academia";
 import { defaultResumeData, defaultResumeLayout } from "@/types";
 
 type HistoryEntry = {
@@ -27,9 +28,11 @@ type ResumeState = {
   history: HistoryEntry[];
   historyIndex: number;
   versions: VersionEntry[];
+  resumeGoal: ResumeGoal;
   hasCompletedOnboarding: boolean;
 
   setResumes: (resumes: Array<{ id: string; title: string; data: ResumeData }>) => void;
+  setResumeGoal: (goal: ResumeGoal) => void;
   setActiveResume: (id: string) => void;
   updateData: (data: Partial<ResumeData>) => void;
   updatePersonal: (personal: Partial<ResumeData["personal"]>) => void;
@@ -67,9 +70,11 @@ export const useResumeStore = create<ResumeState>()(
       history: [{ data: defaultResumeData, timestamp: Date.now() }],
       historyIndex: 0,
       versions: [],
+      resumeGoal: "startup" as ResumeGoal,
       hasCompletedOnboarding: false,
 
       setResumes: (resumes) => set({ resumes }),
+      setResumeGoal: (goal) => set({ resumeGoal: goal }),
 
       setActiveResume: (id) => {
         const resume = get().resumes.find((r) => r.id === id);
@@ -163,6 +168,7 @@ export const useResumeStore = create<ResumeState>()(
         layout: state.layout,
         template: state.template,
         versions: state.versions,
+        resumeGoal: state.resumeGoal,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
     },

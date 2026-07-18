@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
-import { Sparkles, Loader2, Copy, Check } from "lucide-react";
+import { useResumeStore } from "@/stores/resume-store";
+import { Sparkles, Copy, Check, Info } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { AIAction } from "@/types";
 
 const actions: Array<{ id: AIAction; label: string }> = [
@@ -18,6 +20,13 @@ const actions: Array<{ id: AIAction; label: string }> = [
   { id: "generate-verbs", label: "Generate Stronger Verbs" },
 ];
 
+const goalHints: Record<string, string> = {
+  startup:    "For startups, emphasise ownership, shipped products, and cross-functional impact.",
+  faang:      "For FAANG, emphasise algorithmic complexity, scale, and measurable results.",
+  government: "For government roles, emphasise compliance, process, and documentation.",
+  academia:   "For academia, emphasise publications, grants, and teaching experience.",
+};
+
 export function AIAssistant() {
   const [action, setAction] = useState<AIAction>("improve-bullet");
   const [input, setInput] = useState("");
@@ -25,6 +34,8 @@ export function AIAssistant() {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
+  const resumeGoal = useResumeStore((s) => s.resumeGoal);
 
   const handleSubmit = async () => {
     if (!input.trim()) return;
@@ -34,7 +45,7 @@ export function AIAssistant() {
       const res = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, content: input }),
+        body: JSON.stringify({ action, content: input, context: resumeGoal }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -85,6 +96,13 @@ export function AIAssistant() {
         <p className="text-sm text-muted-foreground">Improve your resume content with AI</p>
       </div>
 
+      <div className="rounded-lg border bg-primary/5 p-3 flex items-start gap-2" aria-live="polite">
+        <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" aria-hidden="true" />
+        <p id="goal-hint" className="text-xs text-muted-foreground leading-relaxed">
+          {goalHints[resumeGoal] ?? "Tailor your content to the role you are targeting."}
+        </p>
+      </div>
+
       <div className="space-y-2">
         <Label>Action</Label>
         <Select value={action} onValueChange={(v) => setAction(v as AIAction)}>
@@ -106,13 +124,14 @@ export function AIAssistant() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Paste the text you want to improve..."
+          aria-describedby="goal-hint"
         />
       </div>
 
       <Button onClick={handleSubmit} disabled={loading || !input.trim()} className="w-full">
         {loading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
             Processing...
           </>
         ) : (
@@ -123,12 +142,21 @@ export function AIAssistant() {
         )}
       </Button>
 
+      {loading && (
+        <div className="space-y-3 rounded-lg border p-4" aria-label="Generating response">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-5/6" />
+          <Skeleton className="h-3 w-4/5" />
+        </div>
+      )}
+
       {result && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm">Result</CardTitle>
             <div className="flex gap-1">
-              <Button variant="ghost" size="icon" onClick={copyResult}>
+              <Button variant="ghost" size="icon" onClick={copyResult} aria-label="Copy result">
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               </Button>
               <Button variant="ghost" size="sm" onClick={useResult}>
@@ -137,7 +165,7 @@ export function AIAssistant() {
             </div>
           </CardHeader>
           <CardContent>
-            <p className="whitespace-pre-wrap text-sm">{result}</p>
+            <p className="whitespace-pre-wrap text-sm" aria-live="polite">{result}</p>
           </CardContent>
         </Card>
       )}

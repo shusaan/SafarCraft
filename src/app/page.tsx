@@ -1,74 +1,60 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { VisitorCounter } from "@/components/analytics/visitor-counter";
+import { BuilderPreview } from "@/components/marketing/builder-preview";
 import {
   ArrowRight,
   Github,
-  Sparkles,
-  Shield,
-  Zap,
-  CheckCircle,
-  Star,
   FileText,
   Target,
   Bot,
   Download,
   GitBranch,
   Palette,
+  CheckCircle,
+  Star,
+  Zap,
 } from "lucide-react";
 
-/* ─────────────────────────────────────────────
-   Feature data
-───────────────────────────────────────────── */
 const features = [
   {
     icon: FileText,
-    color: "from-violet-500 to-indigo-500",
     title: "Smart Resume Builder",
     description:
       "Real-time editing, drag-and-drop sections, live preview, autosave, and full version history — all in one flow.",
   },
   {
     icon: Target,
-    color: "from-indigo-500 to-blue-500",
     title: "ATS Analysis",
     description:
       "Detailed ATS scoring with per-deduction explanations and actionable recommendations to push past 90.",
   },
   {
     icon: Bot,
-    color: "from-violet-500 to-purple-500",
     title: "AI Assistant",
     description:
       "Improve bullets, rewrite summaries, fix grammar, and generate stronger action verbs with a single click.",
   },
   {
     icon: GitBranch,
-    color: "from-blue-500 to-cyan-500",
     title: "GitHub Intelligence",
     description:
       "Import your GitHub profile and auto-generate contribution bullets, project sections, and skill lists.",
   },
   {
     icon: Download,
-    color: "from-cyan-500 to-teal-500",
     title: "Multiple Exports",
     description:
       "Export to PDF, DOCX, JSON Resume, and Markdown — all ATS compliant and ready to send.",
   },
   {
     icon: Palette,
-    color: "from-teal-500 to-violet-500",
     title: "Professional Templates",
     description:
       "Classic ATS, Modern Professional, Executive — with column layout and picture options per template.",
   },
 ];
 
-/* ─────────────────────────────────────────────
-   How it works
-───────────────────────────────────────────── */
 const steps = [
   {
     number: "01",
@@ -90,35 +76,16 @@ const steps = [
   },
 ];
 
-/* ─────────────────────────────────────────────
-   Stats
-───────────────────────────────────────────── */
-const stats = [
-  { value: "100%", label: "Free forever" },
-  { value: "MIT", label: "Open source" },
-  { value: "0", label: "Accounts needed" },
-  { value: "95+", label: "Lighthouse score" },
-];
-
-/* ─────────────────────────────────────────────
-   Page
-───────────────────────────────────────────── */
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden">
+    <div className="flex min-h-screen flex-col">
       {/* ── Navbar ── */}
-      <header className="glass sticky top-0 z-50 border-b">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo */}
+      <header className="sticky top-0 z-50 border-b bg-background">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500 shadow-sm">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-base font-bold tracking-tight">CareerForge AI</span>
-            <VisitorCounter />
+            <span className="text-sm font-semibold tracking-tight">CareerForge AI</span>
           </div>
 
-          {/* Nav links */}
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
             <Link href="/builder">
               <Button variant="ghost" size="sm">Builder</Button>
@@ -138,12 +105,8 @@ export default function HomePage() {
             </a>
           </nav>
 
-          {/* CTA */}
           <Link href="/builder">
-            <Button
-              size="sm"
-              className="btn-glow gap-1.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700"
-            >
+            <Button size="sm" className="gap-1.5">
               Start free
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
@@ -153,202 +116,109 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* ── Hero ── */}
-        <section
-          className="relative overflow-hidden px-4 pb-24 pt-20 sm:px-6 lg:px-8"
-          style={{ background: "var(--gradient-hero)" }}
-          aria-labelledby="hero-heading"
-        >
-          {/* Decorative blobs */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-violet-400/10 blur-3xl"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-40 top-20 h-[400px] w-[400px] rounded-full bg-indigo-400/10 blur-3xl"
-          />
-
-          <div className="relative mx-auto max-w-4xl text-center">
-            {/* Pill badge */}
-            <div className="animate-fade-up mb-6 inline-flex items-center gap-2 rounded-full border bg-background/80 px-4 py-1.5 text-xs font-medium shadow-sm backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-              No signup required — start building immediately
-            </div>
-
-            {/* Headline */}
-            <h1
-              id="hero-heading"
-              className="animate-fade-up delay-100 text-5xl font-bold tracking-tight sm:text-7xl"
-            >
-              Build resumes that{" "}
-              <span className="gradient-text">beat the ATS</span>
-            </h1>
-
-            {/* Sub */}
-            <p className="animate-fade-up delay-200 mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              Open-source resume platform for software engineers. Real-time editing, AI assistance,
-              GitHub intelligence, and ATS analysis — all free, all yours.
-            </p>
-
-            {/* CTAs */}
-            <div className="animate-fade-up delay-300 mt-10 flex flex-wrap items-center justify-center gap-4">
-              <Link href="/builder">
-                <Button
-                  size="lg"
-                  className="btn-glow gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg hover:from-violet-700 hover:to-indigo-700"
-                >
-                  <Zap className="h-4 w-4" />
-                  Start building free
-                </Button>
-              </Link>
-              <a
-                href="https://github.com/yourusername/careerforge-ai"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" size="lg" className="gap-2">
-                  <Github className="h-4 w-4" />
-                  View on GitHub
-                  <Badge variant="secondary" className="ml-1 text-xs">MIT</Badge>
-                </Button>
-              </a>
-            </div>
-
-            <p className="animate-fade-up delay-400 mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-              <Shield className="h-3.5 w-3.5" />
-              Your data stays on your device — no account, no cloud, no tracking
-            </p>
-
-            {/* Hero mockup card */}
-            <div className="animate-fade-up delay-500 animate-float mt-16">
-              <div className="glass mx-auto max-w-3xl overflow-hidden rounded-2xl border shadow-2xl">
-                {/* Mock browser chrome */}
-                <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3">
-                  <div className="flex gap-1.5">
-                    <div className="h-3 w-3 rounded-full bg-red-400" />
-                    <div className="h-3 w-3 rounded-full bg-yellow-400" />
-                    <div className="h-3 w-3 rounded-full bg-green-400" />
-                  </div>
-                  <div className="flex-1 rounded-md bg-background/60 px-3 py-1 text-center text-xs text-muted-foreground">
-                    careerforge.ai/builder
-                  </div>
-                </div>
-
-                {/* Mock builder UI */}
-                <div className="flex h-64 divide-x bg-background/60">
-                  {/* Sidebar */}
-                  <div className="w-36 shrink-0 space-y-1 p-3">
-                    {["Personal Info", "Experience", "Education", "Skills", "Projects"].map(
-                      (item, i) => (
-                        <div
-                          key={item}
-                          className={`rounded-md px-2 py-1.5 text-xs ${
-                            i === 1
-                              ? "bg-gradient-to-r from-violet-500 to-indigo-500 text-white"
-                              : "text-muted-foreground hover:bg-muted"
-                          }`}
-                        >
-                          {item}
-                        </div>
-                      ),
-                    )}
-                  </div>
-
-                  {/* Editor area */}
-                  <div className="flex-1 space-y-3 p-4">
-                    <div className="h-3 w-3/4 rounded bg-muted" />
-                    <div className="h-3 w-1/2 rounded bg-muted" />
-                    <div className="h-3 w-5/6 rounded bg-muted" />
-                    <div className="mt-4 h-3 w-2/3 rounded bg-muted" />
-                    <div className="h-3 w-4/5 rounded bg-muted" />
-                    <div className="h-3 w-3/5 rounded bg-muted" />
-                    <div className="mt-4 flex gap-2">
-                      <div className="h-6 w-20 rounded-md bg-gradient-to-r from-violet-500 to-indigo-500" />
-                      <div className="h-6 w-16 rounded-md bg-muted" />
-                    </div>
-                  </div>
-
-                  {/* Preview area */}
-                  <div className="w-44 shrink-0 space-y-2 p-4">
-                    <div className="h-4 w-24 rounded bg-foreground/10 mx-auto" />
-                    <div className="h-2 w-full rounded bg-muted" />
-                    <div className="h-2 w-5/6 rounded bg-muted" />
-                    <div className="mt-3 h-2 w-full rounded bg-muted" />
-                    <div className="h-2 w-4/5 rounded bg-muted" />
-                    <div className="h-2 w-full rounded bg-muted" />
-                    <div className="h-2 w-3/4 rounded bg-muted" />
-                    <div className="mt-3 h-2 w-full rounded bg-muted" />
-                    <div className="h-2 w-5/6 rounded bg-muted" />
-                  </div>
-                </div>
-
-                {/* ATS score bar at bottom */}
-                <div className="flex items-center justify-between border-t bg-muted/30 px-4 py-2.5">
-                  <span className="text-xs text-muted-foreground">ATS Score</span>
-                  <div className="flex items-center gap-2">
-                    <div className="h-1.5 w-32 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full w-[87%] rounded-full bg-gradient-to-r from-violet-500 to-indigo-500" />
-                    </div>
-                    <span className="text-xs font-semibold text-violet-600 dark:text-violet-400">87</span>
-                  </div>
-                </div>
+        <section className="px-4 pt-20 pb-16 sm:px-6 sm:pb-20 sm:pt-24" aria-labelledby="hero-heading">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <div className="animate-fade-up mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                MIT licensed &middot; No signup required
               </div>
+
+              <h1
+                id="hero-heading"
+                className="animate-fade-up delay-100 text-4xl font-extrabold tracking-tight sm:text-5xl"
+              >
+                Build resumes that{" "}
+                <span className="text-primary">beat the ATS</span>
+              </h1>
+
+              <p className="animate-fade-up delay-200 mx-auto mt-5 max-w-xl text-base text-muted-foreground leading-relaxed">
+                Open-source resume platform for software engineers. Real-time editing, AI assistance,
+                GitHub intelligence, and ATS analysis — all free, all yours.
+              </p>
+
+              <div className="animate-fade-up delay-300 mt-8 flex flex-wrap items-center justify-center gap-3">
+                <Link href="/builder">
+                  <Button size="lg" className="gap-2">
+                    <Zap className="h-4 w-4" />
+                    Start building free
+                  </Button>
+                </Link>
+                <a
+                  href="https://github.com/yourusername/careerforge-ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button variant="outline" size="lg" className="gap-2">
+                    <Github className="h-4 w-4" />
+                    View on GitHub
+                    <Badge variant="secondary" className="ml-0.5 text-xs">MIT</Badge>
+                  </Button>
+                </a>
+              </div>
+
+              <p className="animate-fade-up delay-400 mt-4 text-xs text-muted-foreground">
+                Your data stays on your device — no account, no cloud, no tracking
+              </p>
+            </div>
+
+            <div className="animate-fade-up delay-500 mt-12">
+              <BuilderPreview />
+              <p className="mt-2 text-center text-xs text-muted-foreground/60">
+                The resume builder — real-time editor with live ATS scoring
+              </p>
             </div>
           </div>
         </section>
 
-        {/* ── Stats bar ── */}
-        <section className="border-y bg-muted/30" aria-label="Product statistics">
-          <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-            <dl className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-              {stats.map((stat, i) => (
-                <div
-                  key={stat.label}
-                  className={`animate-fade-up text-center delay-${i * 100 + 100}`}
-                >
-                  <dt className="text-3xl font-bold gradient-text">{stat.value}</dt>
-                  <dd className="mt-1 text-sm text-muted-foreground">{stat.label}</dd>
-                </div>
-              ))}
-            </dl>
+        {/* ── Trust bar ── */}
+        <section className="border-y bg-muted/20" aria-label="Trust signals">
+          <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6">
+            <p className="text-center text-xs text-muted-foreground tracking-wide">
+              <span className="font-medium text-foreground">MIT licensed</span>
+              <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
+              No signup or account required
+              <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
+              Self-hostable with Docker
+              <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
+              95+ Lighthouse score
+              <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
+              Data stays on your device
+            </p>
           </div>
         </section>
 
         {/* ── Features ── */}
-        <section className="px-4 py-24 sm:px-6 lg:px-8" aria-labelledby="features-heading">
-          <div className="mx-auto max-w-7xl">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
-              <Badge variant="outline" className="mb-4 border-violet-300 text-violet-600 dark:text-violet-400">
-                Everything you need
-              </Badge>
+        <section className="px-4 py-20 sm:px-6 sm:py-24" aria-labelledby="features-heading">
+          <div className="mx-auto max-w-6xl">
+            <div className="mx-auto mb-14 max-w-2xl text-center">
               <h2
                 id="features-heading"
-                className="animate-fade-up text-3xl font-bold tracking-tight sm:text-4xl"
+                className="animate-fade-up text-3xl font-extrabold tracking-tight sm:text-4xl"
               >
-                Built for engineers,{" "}
-                <span className="gradient-text">by engineers</span>
+                Built for engineers
               </h2>
-              <p className="animate-fade-up delay-100 mt-4 text-muted-foreground">
+              <p className="animate-fade-up delay-100 mt-4 text-muted-foreground leading-relaxed">
                 Every feature is designed around the real workflow of a software engineer applying for jobs.
               </p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3 bg-border rounded-lg overflow-hidden border">
               {features.map((feature, i) => {
                 const Icon = feature.icon;
                 return (
                   <article
                     key={feature.title}
-                    className={`animate-fade-up delay-${i * 100 + 100} group rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-violet-500/10`}
+                    className={`animate-fade-up delay-${(i % 6) * 100 + 100} bg-background p-6 sm:p-7`}
                   >
                     <div
-                      className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${feature.color} shadow-sm`}
+                      className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary"
                       aria-hidden="true"
                     >
-                      <Icon className="h-5 w-5 text-white" />
+                      <Icon className="h-4 w-4" />
                     </div>
-                    <h3 className="font-semibold">{feature.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                    <h3 className="text-sm font-semibold">{feature.title}</h3>
+                    <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
                   </article>
@@ -359,40 +229,28 @@ export default function HomePage() {
         </section>
 
         {/* ── How it works ── */}
-        <section
-          className="border-y bg-muted/20 px-4 py-24 sm:px-6 lg:px-8"
-          aria-labelledby="how-heading"
-        >
+        <section className="border-y bg-muted/20 px-4 py-20 sm:px-6 sm:py-24" aria-labelledby="how-heading">
           <div className="mx-auto max-w-4xl">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
-              <Badge variant="outline" className="mb-4 border-violet-300 text-violet-600 dark:text-violet-400">
-                Simple workflow
-              </Badge>
+            <div className="mx-auto mb-14 max-w-2xl text-center">
               <h2
                 id="how-heading"
-                className="animate-fade-up text-3xl font-bold tracking-tight sm:text-4xl"
+                className="animate-fade-up text-3xl font-extrabold tracking-tight sm:text-4xl"
               >
-                From blank to hired in{" "}
-                <span className="gradient-text">three steps</span>
+                From blank to hired in three steps
               </h2>
             </div>
 
-            <ol className="relative grid gap-10 sm:grid-cols-3" aria-label="Steps">
-              {/* Connecting line on desktop */}
-              <div
-                aria-hidden="true"
-                className="absolute left-1/6 right-1/6 top-6 hidden h-px bg-gradient-to-r from-transparent via-violet-300 to-transparent sm:block dark:via-violet-700"
-              />
+            <ol className="grid gap-8 sm:grid-cols-3" aria-label="Steps">
               {steps.map((step, i) => (
                 <li
                   key={step.number}
-                  className={`animate-fade-up delay-${i * 200 + 100} relative flex flex-col items-center text-center`}
+                  className={`animate-fade-up delay-${i * 200 + 100} relative text-center`}
                 >
-                  <div className="animate-pulse-glow mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-sm font-bold text-white shadow-lg">
+                  <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary/30 bg-background text-sm font-bold text-primary">
                     {step.number}
                   </div>
-                  <h3 className="font-semibold">{step.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  <h3 className="text-sm font-semibold">{step.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
                     {step.description}
                   </p>
                 </li>
@@ -402,27 +260,26 @@ export default function HomePage() {
         </section>
 
         {/* ── Open source trust ── */}
-        <section className="px-4 py-24 sm:px-6 lg:px-8" aria-labelledby="oss-heading">
+        <section className="px-4 py-20 sm:px-6 sm:py-24" aria-labelledby="oss-heading">
           <div className="mx-auto max-w-3xl">
-            <div className="animate-fade-up glass rounded-3xl border p-10 text-center shadow-xl">
+            <div className="animate-fade-up rounded-lg border bg-card p-8 sm:p-10 text-center shadow-sm">
               <div
-                className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-500 shadow-lg"
+                className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-lg border bg-background"
                 aria-hidden="true"
               >
-                <Github className="h-7 w-7 text-white" />
+                <Github className="h-6 w-6 text-muted-foreground" />
               </div>
               <h2
                 id="oss-heading"
-                className="text-2xl font-bold tracking-tight sm:text-3xl"
+                className="text-2xl font-extrabold tracking-tight sm:text-3xl"
               >
-                Fully open source —{" "}
-                <span className="gradient-text">MIT Licensed</span>
+                Fully open source — MIT Licensed
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+              <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground leading-relaxed">
                 Read the code, self-host it, contribute to it, or fork it. CareerForge AI is built
                 in the open. No vendor lock-in, no paywalls, no data sold.
               </p>
-              <ul className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm">
+              <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
                 {[
                   "No account required",
                   "Data stays on your device",
@@ -430,17 +287,14 @@ export default function HomePage() {
                   "Self-hostable",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-1.5 text-muted-foreground">
-                    <CheckCircle className="h-4 w-4 shrink-0 text-green-500" />
+                    <CheckCircle className="h-4 w-4 shrink-0 text-primary" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
                 <Link href="/builder">
-                  <Button
-                    size="lg"
-                    className="btn-glow gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-700 hover:to-indigo-700"
-                  >
+                  <Button size="lg" className="gap-2">
                     <Zap className="h-4 w-4" />
                     Start for free
                   </Button>
@@ -462,20 +316,15 @@ export default function HomePage() {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="border-t bg-muted/20" role="contentinfo">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            {/* Brand */}
+      <footer className="border-t" role="contentinfo">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-indigo-500">
-                <Sparkles className="h-3.5 w-3.5 text-white" />
-              </div>
               <span className="text-sm font-semibold">CareerForge AI</span>
               <Badge variant="outline" className="text-xs">MIT</Badge>
             </div>
 
-            {/* Links */}
-            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground" aria-label="Footer navigation">
+            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted-foreground" aria-label="Footer navigation">
               <Link href="/builder" className="hover:text-foreground transition-colors">
                 Builder
               </Link>
@@ -500,9 +349,8 @@ export default function HomePage() {
               </a>
             </nav>
 
-            {/* Rights */}
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} CareerForge AI — Open source. Free forever.
+              &copy; {new Date().getFullYear()} CareerForge AI &mdash; Open source. Free forever.
             </p>
           </div>
         </div>
