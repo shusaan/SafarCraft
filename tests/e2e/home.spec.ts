@@ -17,8 +17,8 @@ test.describe("Home Page", () => {
     await expect(page).toHaveURL(/\/builder/);
   });
 
-  test("should show visitor counter", async ({ page }) => {
+  test("should show trust bar", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("text=visitors")).toBeVisible();
+    await expect(page.locator("text=MIT licensed")).toBeVisible();
   });
 });
