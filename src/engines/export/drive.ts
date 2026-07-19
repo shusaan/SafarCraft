@@ -1,20 +1,9 @@
 // Google Drive integration service
 // Uses Google Identity Services (GIS) for OAuth 2.0 with drive.file scope
 
-declare namespace google.accounts.oauth2 {
-  interface TokenClientConfig {
-    client_id: string;
-    scope: string;
-    callback: (response: { access_token?: string; error?: string }) => void;
-  }
-  interface TokenClient {
-    requestAccessToken(config?: { prompt?: string }): void;
-  }
-  function initTokenClient(config: TokenClientConfig): TokenClient;
-}
-
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 let accessToken: string | null = null;
+let pickerLoaded = false;
 
 function getClientId(): string | null {
   if (typeof window === "undefined") return null;
@@ -48,9 +37,54 @@ export async function authenticate(): Promise<string | null> {
   });
 }
 
+function loadPickerApi(): Promise<void> {
+  return new Promise((resolve) => {
+    if (pickerLoaded) { resolve(); return; }
+    const script = document.createElement("script");
+    script.src = "https://apis.google.com/js/api.js";
+    script.onload = () => {
+      gapi.load("picker", () => {
+        pickerLoaded = true;
+        resolve();
+      });
+    };
+    document.body.appendChild(script);
+  });
+}
+
+export async function pickFolder(): Promise<string | null> {
+  const token = await authenticate();
+  if (!token) return null;
+
+  await loadPickerApi();
+
+  return new Promise<string | null>((resolve) => {
+    const view = new gapi.picker.DocsView();
+    view.setIncludeFolders(true);
+    view.setMimeTypes("application/vnd.google-apps.folder");
+    view.setSelectFolderEnabled(true);
+
+    const builder = new gapi.picker.PickerBuilder();
+    builder.addView(view);
+    builder.setOAuthToken(token);
+    builder.setDeveloperKey(process.env.NEXT_PUBLIC_GOOGLE_API_KEY ?? "");
+    builder.setCallback((data: { action: string; docs?: Array<{ id: string }> }) => {
+      if (data.action === gapi.picker.Action.PICKED) {
+        const doc = data.docs?.[0];
+        resolve(doc ? doc.id : null);
+      } else {
+        resolve(null);
+      }
+    });
+    const picker = builder.build();
+    picker.setVisible(true);
+  });
+}
+
 export async function saveToDrive(
   content: string,
   fileName: string,
+  mimeType = "text/plain",
   folderId?: string,
 ): Promise<{ id: string; name: string } | null> {
   const token = accessToken;
@@ -60,7 +94,7 @@ export async function saveToDrive(
     const res = await fetch("/api/drive/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessToken: token, folderId, content, fileName }),
+      body: JSON.stringify({ accessToken: token, folderId, content, fileName, mimeType }),
     });
     if (!res.ok) return null;
     return await res.json();

@@ -2,31 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { accessToken, folderId, content, fileName } = await request.json();
+    const { accessToken, folderId, content, fileName, mimeType = "text/plain", isBase64 = false } = await request.json();
 
     if (!accessToken || !content || !fileName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Create a file in Google Drive using the Drive API v3
     const metadata = {
       name: fileName,
-      mimeType: "text/plain",
+      mimeType,
       parents: folderId ? [folderId] : [],
     };
+
+    const fileBlob = isBase64
+      ? new Blob([Uint8Array.from(atob(content as string), (c) => c.charCodeAt(0))])
+      : new Blob([content as string], { type: "text/plain" });
 
     const form = new FormData();
     const metadataBlob = new Blob([JSON.stringify(metadata)], { type: "application/json" });
     form.append("metadata", metadataBlob);
-    form.append("file", new Blob([content], { type: "text/plain" }));
+    form.append("file", fileBlob);
 
     const response = await fetch(
       "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: { Authorization: `Bearer ${accessToken}` },
         body: form,
       },
     );

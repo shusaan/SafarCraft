@@ -46,7 +46,7 @@ export function PersonalInfoForm() {
       const lines = text.split("\n").filter((l) => l.trim()).slice(0, 50);
       const summary = lines.join("\n").replace(/<[^>]*>/g, "").trim();
       if (summary.length > 20) {
-        updatePersonal({ summary });
+        updatePersonal({ summary: summary.slice(0, 2000) });
         toast({ title: "CV imported", description: "Text extracted. Review and adjust below.", variant: "success" });
       } else {
         toast({

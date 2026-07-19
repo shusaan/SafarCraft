@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { calculateATSScore, getATSScoreLabel } from "@/engines/ats/ats-engine";
 import { Badge } from "@/components/ui/badge";
@@ -159,6 +159,14 @@ export function ATSPanel() {
   const highDeductions = result.deductions.filter((d) => d.severity === "high");
   const mediumDeductions = result.deductions.filter((d) => d.severity === "medium");
   const lowDeductions = result.deductions.filter((d) => d.severity === "low");
+
+  const autoTriggered = useRef(false);
+  useEffect(() => {
+    if (result.score < 85 && !autoImproving && !improveDone && !autoTriggered.current && result.score > 0) {
+      autoTriggered.current = true;
+      handleAutoImprove();
+    }
+  }, [result.score, autoImproving, improveDone]);
 
   const handleAddKeyword = (keyword: string) => {
     const existing = data.skills.find((c) => c.category === "Suggested");

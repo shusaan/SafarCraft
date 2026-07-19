@@ -6,11 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useResumeStore } from "@/stores/resume-store";
 import { exportResume } from "@/engines/export/export-engine";
-import { authenticate, saveToDrive } from "@/engines/export/drive";
+import { authenticate, saveToDrive, pickFolder } from "@/engines/export/drive";
 import { trackEvent } from "@/engines/analytics";
 import type { ExportFormat, PaperSize } from "@/types";
 import { useToast } from "@/components/ui/toast";
-import { Download, FileText, FileCode, CheckCircle, Cloud } from "lucide-react";
+import { Download, FileText, FileCode, CheckCircle, Cloud, FolderOpen } from "lucide-react";
 
 const paperSizes: Record<PaperSize, { label: string; dimensions: string }> = {
   letter: { label: "US Letter", dimensions: '8.5" × 11"' },
@@ -58,6 +58,25 @@ export function ExportPanel() {
   const { toast } = useToast();
 
   const [driveSaving, setDriveSaving] = useState(false);
+  const [driveFolder, setDriveFolder] = useState<string | null>(null);
+  const [driveFolderName, setDriveFolderName] = useState<string | null>(null);
+  const [pickingFolder, setPickingFolder] = useState(false);
+
+  const handleSelectFolder = async () => {
+    setPickingFolder(true);
+    try {
+      const folderId = await pickFolder();
+      if (folderId) {
+        setDriveFolder(folderId);
+        setDriveFolderName("Selected folder");
+        toast({ title: "Folder selected", variant: "success" });
+      }
+    } catch {
+      toast({ title: "Folder selection failed", variant: "destructive" });
+    } finally {
+      setPickingFolder(false);
+    }
+  };
 
   const handleDriveSave = async () => {
     setDriveSaving(true);
@@ -67,17 +86,31 @@ export function ExportPanel() {
         toast({ title: "Google Drive sign-in required", description: "Please allow access to save to Drive.", variant: "default" });
         return;
       }
-      const content = [
-        `Job: ${data.personal.name}`,
-        `Summary: ${data.personal.summary}`,
-        "",
-        ...data.experience.flatMap((e) => [
-          `${e.position} at ${e.company}`,
-          ...e.bullets.map((b) => `  - ${b}`),
-          "",
-        ]),
-      ].join("\n");
-      const result = await saveToDrive(content, `Application_Package_${Date.now()}.txt`);
+
+      // Generate a .docx using the docx library
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel } = await import("docx");
+      const doc = new Document({
+        sections: [{
+          children: [
+            new Paragraph({ children: [new TextRun({ text: data.personal.name || "Resume", bold: true, size: 28 })], heading: HeadingLevel.HEADING_1 }),
+            ...(data.personal.summary ? [new Paragraph({ children: [new TextRun({ text: data.personal.summary, size: 20 })], spacing: { after: 200 } })] : []),
+            ...data.experience.flatMap((e) => [
+              new Paragraph({ children: [new TextRun({ text: `${e.position} at ${e.company}`, bold: true, size: 22 })] }),
+              new Paragraph({ children: [new TextRun({ text: `${e.startDate} - ${e.endDate || "Present"}`, size: 18, italics: true })] }),
+              ...e.bullets.filter(Boolean).map((b) =>
+                new Paragraph({ children: [new TextRun({ text: `  \u2022  ${b}`, size: 20 })], spacing: { after: 80 } })
+              ),
+              new Paragraph({ spacing: { after: 120 } }),
+            ]),
+          ],
+        }],
+      });
+      const blob = await Packer.toBlob(doc);
+      const arrayBuf = await blob.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
+
+      const companyName = data.experience[0]?.company?.replace(/[^a-zA-Z0-9]/g, "_") || "Resume";
+      const result = await saveToDrive(base64, `${companyName}_Application_Package.docx`, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", driveFolder ?? undefined);
       if (result) {
         toast({ title: "Saved to Google Drive", variant: "success" });
       } else {
@@ -181,21 +214,26 @@ export function ExportPanel() {
             </div>
             <div className="flex-1 min-w-0">
               <span className="font-medium">Google Drive</span>
-              <p className="text-xs text-muted-foreground">Save your application package for later editing</p>
+              <p className="text-xs text-muted-foreground">Save your application package as {driveFolderName ? `.docx → ${driveFolderName}` : ".docx"}</p>
             </div>
-            <Button variant="ghost" size="sm" disabled={driveSaving} onClick={handleDriveSave}>
-              {driveSaving ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                  Saving...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Cloud className="h-4 w-4" />
-                  Save to Drive
-                </span>
-              )}
-            </Button>
+            <div className="flex gap-1">
+              <Button variant="ghost" size="sm" disabled={pickingFolder} onClick={handleSelectFolder} title="Select Drive folder">
+                <FolderOpen className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" disabled={driveSaving} onClick={handleDriveSave}>
+                {driveSaving ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Saving...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Cloud className="h-4 w-4" />
+                    Save
+                  </span>
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

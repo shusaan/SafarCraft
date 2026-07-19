@@ -7,9 +7,9 @@ test.describe("Export Panel", () => {
   });
 
   test("should show export formats with descriptions", async ({ page }) => {
-    await expect(page.locator("text=PDF")).toBeVisible();
-    await expect(page.locator("text=DOCX")).toBeVisible();
-    await expect(page.locator("text=Markdown")).toBeVisible();
+    await expect(page.getByText("PDF", { exact: true })).toBeVisible();
+    await expect(page.getByText("DOCX", { exact: true })).toBeVisible();
+    await expect(page.getByText("Markdown", { exact: true })).toBeVisible();
   });
 
   test("should show use case descriptions", async ({ page }) => {
