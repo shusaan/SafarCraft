@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { useToast } from "@/components/ui/toast";
 
