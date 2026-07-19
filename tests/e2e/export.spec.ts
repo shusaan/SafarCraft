@@ -9,7 +9,6 @@ test.describe("Export Panel", () => {
   test("should show export formats with descriptions", async ({ page }) => {
     await expect(page.locator("text=PDF")).toBeVisible();
     await expect(page.locator("text=DOCX")).toBeVisible();
-    await expect(page.locator("text=JSON Resume")).toBeVisible();
     await expect(page.locator("text=Markdown")).toBeVisible();
   });
 

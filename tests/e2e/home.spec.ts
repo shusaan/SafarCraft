@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Home Page", () => {
   test("should display the title", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("Build resumes that beat the ATS");
+    await expect(page.locator("h1")).toContainText("Free AI CV Maker");
   });
 
   test("should show no signup required badge", async ({ page }) => {

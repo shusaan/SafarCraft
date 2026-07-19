@@ -82,7 +82,7 @@ export function ResumePreview() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Preview toolbar */}
-      <div className="flex items-center justify-between border-b bg-muted/30 px-3 py-1.5">
+      <div className="flex items-center justify-between border-b bg-muted/30 px-3 py-1.5" onMouseDown={(e) => e.preventDefault()}>
         <div className="flex items-center gap-1">
           <Button
             variant={viewMode === "preview" ? "secondary" : "ghost"}

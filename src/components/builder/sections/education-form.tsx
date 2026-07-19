@@ -36,7 +36,7 @@ export function EducationForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
               <Label>Institution</Label>
-              <Input value={entry.institution} onChange={(e) => update(entry.id, { institution: e.target.value })} />
+              <Input value={entry.institution} onChange={(e) => update(entry.id, { institution: e.target.value })} placeholder="e.g., University of California, Berkeley" />
             </div>
             <div className="space-y-2">
               <Label>Degree</Label>

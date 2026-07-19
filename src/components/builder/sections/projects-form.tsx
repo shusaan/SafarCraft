@@ -83,19 +83,19 @@ function ProjectCard({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>Project Name</Label>
-          <Input value={entry.name} onChange={(e) => onChange({ name: e.target.value })} />
+          <Input value={entry.name} onChange={(e) => onChange({ name: e.target.value })} placeholder="e.g., Open Source Resume Builder" />
         </div>
         <div className="space-y-2">
           <Label>Role</Label>
-          <Input value={entry.role} onChange={(e) => onChange({ role: e.target.value })} placeholder="e.g. Creator, Maintainer" />
+          <Input value={entry.role} onChange={(e) => onChange({ role: e.target.value })} placeholder="e.g., Creator, Maintainer" />
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label>Description</Label>
-          <Textarea rows={2} value={entry.description} onChange={(e) => onChange({ description: e.target.value })} />
+          <Textarea rows={2} value={entry.description} onChange={(e) => onChange({ description: e.target.value })} placeholder="e.g., AI-powered resume builder for software engineers with ATS optimization" />
         </div>
         <div className="space-y-2 sm:col-span-2">
           <Label>Project URL</Label>
-          <Input value={entry.url} onChange={(e) => onChange({ url: e.target.value })} />
+          <Input value={entry.url} onChange={(e) => onChange({ url: e.target.value })} placeholder="e.g., github.com/username/project" />
         </div>
       </div>
       <div className="mt-4 space-y-2">

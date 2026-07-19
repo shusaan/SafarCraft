@@ -128,15 +128,15 @@ function ExperienceEntryCard({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>Company</Label>
-          <Input value={entry.company} onChange={(e) => onChange({ company: e.target.value })} />
+          <Input value={entry.company} onChange={(e) => onChange({ company: e.target.value })} placeholder="e.g., Google" />
         </div>
         <div className="space-y-2">
           <Label>Position</Label>
-          <Input value={entry.position} onChange={(e) => onChange({ position: e.target.value })} />
+          <Input value={entry.position} onChange={(e) => onChange({ position: e.target.value })} placeholder="e.g., Senior Software Engineer" />
         </div>
         <div className="space-y-2">
           <Label>Location</Label>
-          <Input value={entry.location} onChange={(e) => onChange({ location: e.target.value })} />
+          <Input value={entry.location} onChange={(e) => onChange({ location: e.target.value })} placeholder="e.g., Mountain View, CA" />
         </div>
         <div className="space-y-2">
           <Label>Start Date</Label>
@@ -166,7 +166,7 @@ function ExperienceEntryCard({
               rows={2}
               value={bullet}
               onChange={(e) => updateBullet(bi, e.target.value)}
-              placeholder="Describe your responsibility or achievement..."
+              placeholder='e.g., "Increased team productivity by 30% by migrating to microservices..."'
             />
             <div className="flex flex-col gap-1 mt-1">
               {onConvertToImpact && bullet.trim() && (

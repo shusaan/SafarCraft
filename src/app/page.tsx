@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BuilderPreview } from "@/components/marketing/builder-preview";
+import { ContinueDraft } from "@/components/marketing/continue-draft";
 import {
   ArrowRight,
   GitBranch,
@@ -117,7 +118,7 @@ export default function HomePage() {
         {/* ── Hero ── */}
         <section className="px-4 pt-20 pb-16 sm:px-6 sm:pb-20 sm:pt-24" aria-labelledby="hero-heading">
           <div className="mx-auto max-w-6xl">
-            <div className="mx-auto max-w-2xl text-center">
+            <div className="mx-auto max-w-3xl text-center">
               <div className="animate-fade-up mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 MIT licensed &middot; No signup required
@@ -125,13 +126,18 @@ export default function HomePage() {
 
               <h1
                 id="hero-heading"
-                className="animate-fade-up delay-100 text-4xl font-extrabold tracking-tight sm:text-5xl"
+                className="animate-fade-up delay-100 font-extrabold tracking-tight leading-tight"
+                style={{ fontSize: "clamp(2.5rem, 8vw, 4.5rem)" }}
               >
-                Build resumes that{" "}
-                <span className="text-primary">beat the ATS</span>
+                Free AI CV Maker &ndash; Build, Optimize, and Export{" "}
+                <span className="text-primary">ATS-Friendly Resumes</span> Instantly
               </h1>
 
-              <p className="animate-fade-up delay-200 mx-auto mt-5 max-w-xl text-base text-muted-foreground leading-relaxed">
+              <h2 className="animate-fade-up delay-150 mt-4 text-lg sm:text-xl font-semibold text-muted-foreground">
+                Enter your details, analyse with AI, and export in 5 simple steps
+              </h2>
+
+              <p className="animate-fade-up delay-200 mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
                 Open-source resume platform for software engineers. Real-time editing, AI assistance,
                 GitHub intelligence, and ATS analysis — all free, all yours.
               </p>
@@ -154,6 +160,7 @@ export default function HomePage() {
                     <Badge variant="secondary" className="ml-0.5 text-xs">MIT</Badge>
                   </Button>
                 </a>
+                <ContinueDraft />
               </div>
 
               <p className="animate-fade-up delay-400 mt-4 text-xs text-muted-foreground">
@@ -346,6 +353,9 @@ export default function HomePage() {
               >
                 Contributing
               </a>
+              <Link href="/privacy" className="hover:text-foreground transition-colors">
+                Privacy Policy
+              </Link>
             </nav>
 
             <p className="text-xs text-muted-foreground">

@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { calculateATSScore, getATSScoreLabel } from "@/engines/ats/ats-engine";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Lightbulb, XCircle, Plus, Sparkles } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
+import { trackEvent } from "@/engines/analytics";
+import { CheckCircle, Lightbulb, XCircle, Plus, Sparkles, ArrowRight } from "lucide-react";
 import { cn, generateId } from "@/lib/utils";
 
 const RADIUS = 52;
@@ -74,9 +76,18 @@ function findMissingKeywords(skills: string[], techs: string[]): string[] {
 
 export function ATSPanel() {
   const data = useResumeStore((s) => s.data);
+  const updateData = useResumeStore((s) => s.updateData);
   const updateSkills = useResumeStore((s) => s.updateSkills);
+  const resumeGoal = useResumeStore((s) => s.resumeGoal);
   const result = useMemo(() => calculateATSScore(data), [data]);
   const { label, color } = getATSScoreLabel(result.score);
+  const [autoImproving, setAutoImproving] = useState(false);
+  const [improveDone, setImproveDone] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    trackEvent("analysis_complete", { score: result.score });
+  }, [result.score]);
 
   const allTechs = useMemo(() => {
     const set = new Set<string>();
@@ -102,6 +113,48 @@ export function ATSPanel() {
     if (data.experience.length > 2) items.push("Strong work history (3+ roles)");
     return items;
   }, [data]);
+
+  const handleAutoImprove = async () => {
+    setAutoImproving(true);
+    try {
+      const weakBullets: Array<{ expIndex: number; bulletIndex: number; text: string }> = [];
+      data.experience.forEach((exp, ei) => {
+        exp.bullets.forEach((b, bi) => {
+          const firstWord = b.split(/\s+/)[0]?.toLowerCase();
+          if (firstWord && ["was","were","been","had","has","have","did","made","got","worked","helped","responsible","handled","performed","provided","assisted","supported"].includes(firstWord)) {
+            weakBullets.push({ expIndex: ei, bulletIndex: bi, text: b });
+          }
+        });
+      });
+      if (weakBullets.length === 0) {
+        toast({ title: "No weak bullets to improve", variant: "default" });
+        setAutoImproving(false);
+        return;
+      }
+      const newExperience = [...data.experience];
+      for (const wb of weakBullets) {
+        const res = await fetch("/api/ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "improve-bullet", content: wb.text, context: resumeGoal }),
+        });
+        if (res.ok) {
+          const data_ = await res.json();
+          const improved = data_.result ?? wb.text;
+          const bullets = [...newExperience[wb.expIndex]!.bullets];
+          bullets[wb.bulletIndex] = improved;
+          newExperience[wb.expIndex] = { ...newExperience[wb.expIndex]!, bullets };
+        }
+      }
+      updateData({ experience: newExperience });
+      setImproveDone(true);
+      toast({ title: "Auto-improve complete", description: `Improved ${weakBullets.length} bullet(s)`, variant: "success" });
+    } catch {
+      toast({ title: "Auto-improve failed", description: "Try manually in the AI Assistant", variant: "destructive" });
+    } finally {
+      setAutoImproving(false);
+    }
+  };
 
   const highDeductions = result.deductions.filter((d) => d.severity === "high");
   const mediumDeductions = result.deductions.filter((d) => d.severity === "medium");
@@ -145,6 +198,51 @@ export function ATSPanel() {
         <p className="mt-1 text-xs text-muted-foreground">{getScoreMessage(result.score)}</p>
       </div>
 
+      {/* Auto-improve banner */}
+      {result.score >= 85 ? (
+        <div className="rounded-2xl border bg-green-50 p-5 text-center dark:bg-green-950/20 shadow-sm">
+          <CheckCircle className="mx-auto h-8 w-8 text-green-500" aria-hidden="true" />
+          <p className="mt-2 font-semibold text-green-700 dark:text-green-400">Your resume scores {result.score}/100 — already ATS-ready!</p>
+          <p className="mt-1 text-xs text-green-600/80 dark:text-green-500/80">No auto-rewrite needed. Review suggestions below if desired.</p>
+          {result.deductions.length > 0 && (
+            <Button variant="outline" size="sm" className="mt-3 gap-1.5" onClick={() => document.getElementById("ats-suggestions")?.scrollIntoView({ behavior: "smooth" })}>
+              <ArrowRight className="h-3.5 w-3.5" />
+              Review Suggestions Manually
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-2xl border bg-amber-50 p-5 text-center dark:bg-amber-950/20 shadow-sm">
+          <Sparkles className="mx-auto h-8 w-8 text-amber-500" aria-hidden="true" />
+          <p className="mt-2 font-semibold text-amber-700 dark:text-amber-400">Score: {result.score}/100 — needs improvement</p>
+          <p className="mt-1 text-xs text-amber-600/80 dark:text-amber-500/80">Let AI improve your weak bullet points automatically.</p>
+          <Button
+            variant="default"
+            size="sm"
+            className="mt-3 gap-1.5"
+            disabled={autoImproving || improveDone}
+            onClick={handleAutoImprove}
+          >
+            {autoImproving ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Improving...
+              </span>
+            ) : improveDone ? (
+              <span className="flex items-center gap-1.5">
+                <CheckCircle className="h-4 w-4" />
+                Done
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4" />
+                Auto-Improve with AI
+              </span>
+            )}
+          </Button>
+        </div>
+      )}
+
       {/* Missing Keywords */}
       {missingKeywords.length > 0 && (
         <div className="space-y-2">
@@ -179,7 +277,7 @@ export function ATSPanel() {
 
       {/* Deductions grouped by priority */}
       {result.deductions.length > 0 && (
-        <div className="space-y-3">
+        <div id="ats-suggestions" className="space-y-3">
           <h3 className="flex items-center gap-2 text-sm font-semibold">
             <Lightbulb className="h-4 w-4 text-amber-500" />
             Suggestions

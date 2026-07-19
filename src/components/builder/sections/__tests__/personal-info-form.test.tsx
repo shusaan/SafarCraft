@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { PersonalInfoForm } from "../personal-info-form";
+import { ToastProviderWrapper } from "@/components/ui/toast";
 
 vi.mock("@/stores/resume-store", () => ({
   useResumeStore: vi.fn((selector) => {
@@ -14,15 +15,19 @@ vi.mock("@/stores/resume-store", () => ({
   }),
 }));
 
+function renderWithProviders(ui: React.ReactElement) {
+  return render(<ToastProviderWrapper>{ui}</ToastProviderWrapper>);
+}
+
 describe("PersonalInfoForm", () => {
   it("renders form fields", () => {
-    render(<PersonalInfoForm />);
+    renderWithProviders(<PersonalInfoForm />);
     expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
   });
 
   it("renders photo upload area", () => {
-    render(<PersonalInfoForm />);
+    renderWithProviders(<PersonalInfoForm />);
     expect(screen.getByText(/profile photo/i)).toBeInTheDocument();
   });
 });

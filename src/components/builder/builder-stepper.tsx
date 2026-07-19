@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 
+
 export type StepperStep = "personal" | "experience" | "edu-skills" | "extra" | "ats-export";
 
 const steps: Array<{ id: StepperStep; label: string }> = [
