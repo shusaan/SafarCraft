@@ -57,9 +57,14 @@ export function BuilderStepper({
     ([, sections]) => sections.includes(currentSection ?? ""),
   )?.[0] as StepperStep ?? "personal";
 
+  const totalSteps = steps.length;
+  const completedCount = completed.size;
+  const pct = Math.round((completedCount / totalSteps) * 100);
+
   return (
     <nav aria-label="Resume builder progress" className="border-b bg-background">
-      <ol className="flex items-center justify-center gap-0 px-4 py-2 max-w-4xl mx-auto">
+      <div className="flex items-center justify-center gap-2 px-4 py-2 max-w-4xl mx-auto">
+        <ol className="flex items-center justify-center gap-0 flex-1">
         {steps.map((step, i) => {
           const isCompleted = completed.has(step.id);
           const isCurrent = current === step.id;
@@ -105,7 +110,18 @@ export function BuilderStepper({
             </li>
           );
         })}
-      </ol>
+        </ol>
+        <div
+          className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground"
+          role="progressbar"
+          aria-valuenow={completedCount}
+          aria-valuemin={0}
+          aria-valuemax={totalSteps}
+          aria-label={`${pct}% complete`}
+        >
+          {pct}%
+        </div>
+      </div>
     </nav>
   );
 }
