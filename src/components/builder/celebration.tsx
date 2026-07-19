@@ -26,7 +26,7 @@ export function Celebration() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-      <div className="animate-bounce text-4xl">
+      <div className="animate-bounce text-4xl" role="img" aria-label="Celebration">
         🎉
       </div>
       <div className="absolute bottom-8 rounded-lg bg-primary px-4 py-2 text-primary-foreground shadow-lg animate-pulse">

@@ -54,7 +54,10 @@ export function PersonalInfoForm() {
         </div>
         <div className="flex-1 space-y-1">
           <p className="text-sm font-medium">Profile Photo</p>
-          <p className="text-xs text-muted-foreground">Click to upload (PNG, JPG, WEBP, max 5MB)</p>
+          <p className="text-xs text-muted-foreground">Click to upload or drag and drop (PNG, JPG, WEBP, max 5MB)</p>
+          <Button type="button" variant="outline" size="sm" className="mt-1 sm:hidden" onClick={() => document.querySelector<HTMLElement>('input[type="file"]')?.click()}>
+            Browse Files
+          </Button>
         </div>
       </div>
 
