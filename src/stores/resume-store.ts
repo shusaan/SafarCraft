@@ -36,6 +36,7 @@ type ResumeState = {
   setActiveResume: (id: string) => void;
   updateData: (data: Partial<ResumeData>) => void;
   updatePersonal: (personal: Partial<ResumeData["personal"]>) => void;
+  updateSkills: (skills: ResumeData["skills"]) => void;
   setLayout: (layout: Partial<ResumeLayout>) => void;
   setTemplate: (template: string) => void;
   undo: () => void;
@@ -93,6 +94,13 @@ export const useResumeStore = create<ResumeState>()(
       updatePersonal: (personal) => {
         set((state) => {
           const newData = { ...state.data, personal: { ...state.data.personal, ...personal } };
+          return { data: newData, ...pushHistory({ ...state, data: newData }) };
+        });
+      },
+
+      updateSkills: (skills) => {
+        set((state) => {
+          const newData = { ...state.data, skills };
           return { data: newData, ...pushHistory({ ...state, data: newData }) };
         });
       },

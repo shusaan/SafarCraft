@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useResumeStore } from "@/stores/resume-store";
@@ -150,6 +150,13 @@ export function BuilderLayout() {
   const [previewWidth,      setPreviewWidth]       = useState(500);
   const [isResizing,        setIsResizing]         = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setShowPreview(!mq.matches);
+  }, []);
 
   const isDirty    = useResumeStore((s) => s.isDirty);
   const undo       = useResumeStore((s) => s.undo);
@@ -170,13 +177,29 @@ export function BuilderLayout() {
   }, []);
 
   useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setMobileMenuOpen(false); menuButtonRef.current?.focus(); }
+      if (e.key !== "Tab" || !mobileMenuRef.current) return;
+      const focusable = mobileMenuRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      );
+      const first = focusable[0];
+      const last  = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
     if (panelParam && allPanels.some((p) => p.id === panelParam)) {
       setActivePanel(panelParam as Panel);
       router.replace("/builder", { scroll: false });
     }
   }, [panelParam, router]);
 
-  // Resize handler
   const handleMouseDown = useCallback(() => setIsResizing(true), []);
 
   useEffect(() => {
@@ -196,6 +219,8 @@ export function BuilderLayout() {
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isResizing]);
+
+
 
   const handleStepperNavigate = (step: StepperStep) => {
     const stepToSection: Record<StepperStep, string> = {
@@ -219,7 +244,7 @@ export function BuilderLayout() {
       case "editor":
         return (
           <div className="flex flex-1 overflow-hidden">
-            <div className="w-52 shrink-0 border-r lg:block hidden relative">
+            <div className="w-52 shrink-0 border-r max-md:hidden relative">
               <SectionSidebar
                 activeSection={activeSection}
                 onSectionChange={setActiveSection}
@@ -260,6 +285,7 @@ export function BuilderLayout() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={mobileMenuOpen}
+            ref={menuButtonRef}
           >
             {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </Button>
@@ -417,7 +443,8 @@ export function BuilderLayout() {
           aria-hidden="true"
         >
           <nav
-            className="fixed left-0 top-0 h-full w-64 bg-background p-4 shadow-xl"
+            ref={mobileMenuRef}
+            className="fixed left-0 top-0 h-full w-72 max-w-[85vw] bg-background p-4 shadow-xl overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
             role="navigation"
             aria-label="Mobile navigation menu"
@@ -472,7 +499,7 @@ export function BuilderLayout() {
       )}
 
       {/* ── Main content ── */}
-      <main className="flex flex-1 overflow-hidden" role="main">
+      <main className="flex flex-1 overflow-hidden" role="main" id="main-content">
         <div className="flex flex-1 flex-col overflow-hidden">
           <ErrorBoundary>
             <PanelWrapper key={activePanel} id={activePanel}>
@@ -485,14 +512,14 @@ export function BuilderLayout() {
         {showPreview && (
           <aside
             ref={previewRef}
-            className="shrink-0 border-l relative flex flex-col"
+            className="shrink-0 border-l relative flex flex-col max-md:fixed max-md:inset-0 max-md:z-30 max-md:bg-background"
             style={{ width: `${previewWidth}px` }}
             role="complementary"
             aria-label="Resume preview"
           >
             <div
               className={cn(
-                "absolute left-0 top-0 h-full w-1 cursor-col-resize transition-colors",
+                "absolute left-0 top-0 h-full w-1 cursor-col-resize transition-colors max-md:hidden",
                 isResizing ? "bg-primary/60" : "hover:bg-primary/30",
               )}
               onMouseDown={handleMouseDown}
