@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useResumeStore } from "@/stores/resume-store";
@@ -147,8 +147,6 @@ export function BuilderLayout() {
   const [showShortcuts,     setShowShortcuts]      = useState(false);
   const [activePanel,       setActivePanel]        = useState<Panel>("editor");
   const [mobileMenuOpen,    setMobileMenuOpen]     = useState(false);
-  const [previewWidth,      setPreviewWidth]       = useState(500);
-  const [isResizing,        setIsResizing]         = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -200,26 +198,7 @@ export function BuilderLayout() {
     }
   }, [panelParam, router]);
 
-  // Resize handler
-  const handleMouseDown = useCallback(() => setIsResizing(true), []);
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isResizing) return;
-      const newWidth = window.innerWidth - e.clientX;
-      setPreviewWidth(Math.max(300, Math.min(newWidth, window.innerWidth * 0.6)));
-    };
-    const handleMouseUp = () => setIsResizing(false);
-
-    if (isResizing) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isResizing]);
 
   const handleStepperNavigate = (step: StepperStep) => {
     const stepToSection: Record<StepperStep, string> = {
@@ -516,21 +495,6 @@ export function BuilderLayout() {
             role="complementary"
             aria-label="Resume preview"
           >
-            <div
-              className={cn(
-                "absolute left-0 top-0 h-full w-1 cursor-col-resize transition-colors",
-                isResizing ? "bg-primary/60" : "hover:bg-primary/30",
-              )}
-              onMouseDown={handleMouseDown}
-              role="separator"
-              aria-orientation="vertical"
-              aria-label="Drag to resize preview"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowLeft")  setPreviewWidth((w) => Math.max(300, w - 20));
-                if (e.key === "ArrowRight") setPreviewWidth((w) => Math.min(window.innerWidth * 0.6, w + 20));
-              }}
-            />
             <ErrorBoundary>
               <ResumePreview />
             </ErrorBoundary>
