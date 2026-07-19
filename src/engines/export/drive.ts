@@ -1,12 +1,6 @@
 // Google Drive integration service
 // Uses Google Identity Services (GIS) for OAuth 2.0 with drive.file scope
 
-type DriveTokenResponse = {
-  access_token: string;
-  expires_in: number;
-  scope: string;
-};
-
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 let accessToken: string | null = null;
 

@@ -4,7 +4,7 @@ import { useResumeStore } from "@/stores/resume-store";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
-import { trackEvent } from "@/engines/analytics";
+
 
 export type StepperStep = "personal" | "experience" | "edu-skills" | "extra" | "ats-export";
 
