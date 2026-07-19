@@ -1,6 +1,18 @@
 // Google Drive integration service
 // Uses Google Identity Services (GIS) for OAuth 2.0 with drive.file scope
 
+declare namespace google.accounts.oauth2 {
+  interface TokenClientConfig {
+    client_id: string;
+    scope: string;
+    callback: (response: { access_token?: string; error?: string }) => void;
+  }
+  interface TokenClient {
+    requestAccessToken(config?: { prompt?: string }): void;
+  }
+  function initTokenClient(config: TokenClientConfig): TokenClient;
+}
+
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 let accessToken: string | null = null;
 
