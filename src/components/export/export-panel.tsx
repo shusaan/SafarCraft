@@ -110,7 +110,7 @@ export function ExportPanel() {
       const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
 
       const companyName = data.experience[0]?.company?.replace(/[^a-zA-Z0-9]/g, "_") || "Resume";
-      const result = await saveToDrive(base64, `${companyName}_Application_Package.docx`, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", driveFolder ?? undefined);
+      const result = await saveToDrive(base64, `${companyName}_Application_Package.docx`, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", driveFolder ?? undefined, true);
       if (result) {
         toast({ title: "Saved to Google Drive", variant: "success" });
       } else {

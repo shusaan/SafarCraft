@@ -86,6 +86,7 @@ export async function saveToDrive(
   fileName: string,
   mimeType = "text/plain",
   folderId?: string,
+  isBase64?: boolean,
 ): Promise<{ id: string; name: string } | null> {
   const token = accessToken;
   if (!token) return null;
@@ -94,13 +95,40 @@ export async function saveToDrive(
     const res = await fetch("/api/drive/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ accessToken: token, folderId, content, fileName, mimeType }),
+      body: JSON.stringify({ accessToken: token, folderId, content, fileName, mimeType, isBase64 }),
     });
     if (!res.ok) return null;
     return await res.json();
   } catch {
     return null;
   }
+}
+
+export async function silentAuthenticate(): Promise<string | null> {
+  const clientId = getClientId();
+  if (!clientId) return null;
+
+  return new Promise((resolve) => {
+    try {
+      if (!tokenClient) {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: "https://www.googleapis.com/auth/drive.file",
+          callback: (response) => {
+            if (response.access_token) {
+              accessToken = response.access_token;
+              resolve(response.access_token);
+            } else {
+              resolve(null);
+            }
+          },
+        });
+      }
+      tokenClient.requestAccessToken({ prompt: "none" });
+    } catch {
+      resolve(null);
+    }
+  });
 }
 
 export async function listDriveFiles(): Promise<
