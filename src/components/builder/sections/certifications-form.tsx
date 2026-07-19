@@ -48,7 +48,7 @@ export function CertificationsForm() {
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>Credential URL</Label>
-              <Input value={entry.url} onChange={(e) => update(entry.id, { url: e.target.value })} />
+              <Input value={entry.url} onChange={(e) => update(entry.id, { url: e.target.value })} placeholder="e.g., https://aws.amazon.com/certification" />
             </div>
           </div>
         </div>

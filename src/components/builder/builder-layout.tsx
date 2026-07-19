@@ -27,6 +27,7 @@ import { WelcomeOverlay } from "./welcome-overlay";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { useAutosave } from "@/hooks/use-autosave";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { trackEvent } from "@/engines/analytics";
 import { getSampleResume } from "@/lib/sample-resume";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -223,6 +224,7 @@ export function BuilderLayout() {
 
 
   const handleStepperNavigate = (step: StepperStep) => {
+    trackEvent("step_view", { step });
     const stepToSection: Record<StepperStep, string> = {
       personal:   "personal",
       experience: "experience",
@@ -506,6 +508,10 @@ export function BuilderLayout() {
               {renderPanel()}
             </PanelWrapper>
           </ErrorBoundary>
+          <p className="border-t px-6 py-2 text-[10px] text-muted-foreground/60 leading-relaxed">
+            We only collect anonymized IP addresses via Google Analytics to improve user experience.
+            We do not store or share your resume text or personal data on our servers.
+          </p>
         </div>
 
         {/* ── Preview pane ── */}

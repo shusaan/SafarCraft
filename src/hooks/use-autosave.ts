@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { debounce } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 
 export function useAutosave() {
   const data = useResumeStore((s) => s.data);
@@ -10,6 +11,8 @@ export function useAutosave() {
   const template = useResumeStore((s) => s.template);
   const isDirty = useResumeStore((s) => s.isDirty);
   const markSaved = useResumeStore((s) => s.markSaved);
+  const { toast } = useToast();
+  const notified = useRef(false);
 
   const save = debounce(async (resumeData: typeof data) => {
     try {
@@ -36,6 +39,11 @@ export function useAutosave() {
         }
       }
       markSaved();
+      if (!notified.current) {
+        notified.current = true;
+        toast({ title: "Draft auto-saved locally", variant: "success" });
+        setTimeout(() => { notified.current = false; }, 5000);
+      }
     } catch {
       // Silently fail — local persistence works without API
     }

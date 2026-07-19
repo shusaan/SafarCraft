@@ -108,3 +108,22 @@ export type VisitorCount = {
   total: number;
   today: number;
 };
+
+declare global {
+  interface Window {
+    gtag: (command: string, event: string, params?: Record<string, unknown>) => void;
+    google?: {
+      accounts: {
+        oauth2: {
+          initTokenClient: (config: {
+            client_id: string;
+            scope: string;
+            callback: (response: { access_token?: string; error?: string }) => void;
+          }) => {
+            requestAccessToken: (config?: { prompt?: string }) => void;
+          };
+        };
+      };
+    };
+  }
+}
