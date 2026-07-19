@@ -20,7 +20,6 @@ import { VersionHistory } from "./version-history";
 import { VersionComparison } from "./version-comparison";
 import { OnboardingChecklist } from "./onboarding-checklist";
 import { ShortcutsHelp } from "./shortcuts-help";
-import { Celebration } from "./celebration";
 import { GoalSelector } from "./goal-selector";
 import { BuilderStepper, type StepperStep } from "./builder-stepper";
 import { WelcomeOverlay } from "./welcome-overlay";
@@ -547,7 +546,6 @@ export function BuilderLayout() {
 
       {/* ── Overlays ── */}
       <OnboardingChecklist />
-      <Celebration />
       <WelcomeOverlay />
 
       <Dialog open={showResumeList} onOpenChange={setShowResumeList}>

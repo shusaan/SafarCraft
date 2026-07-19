@@ -40,29 +40,29 @@ export function WelcomeOverlay() {
   if (!current) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/30" role="dialog" aria-modal="true" aria-label="Welcome guide">
-      <div className="bg-background border rounded-lg shadow-xl p-5 max-w-sm w-full mx-4 mb-20 sm:mb-0">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-medium text-muted-foreground">
+    <div className="fixed bottom-4 right-4 z-50 max-w-xs animate-in slide-in-from-bottom-4 fade-in" role="dialog" aria-label="Welcome guide">
+      <div className="bg-background border rounded-lg shadow-xl p-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-medium text-muted-foreground">
             Tip {step + 1} of {tips.length}
           </span>
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6"
+            className="h-5 w-5"
             onClick={() => {
               sessionStorage.setItem("careerforge-welcome-dismissed", "true");
               setVisible(false);
             }}
             aria-label="Dismiss welcome guide"
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-3 w-3" />
           </Button>
         </div>
-        <h3 className="text-sm font-semibold mb-1">{current.title}</h3>
+        <h3 className="text-sm font-semibold mb-0.5">{current.title}</h3>
         <p className="text-xs text-muted-foreground leading-relaxed">{current.body}</p>
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex gap-1.5">
+        <div className="flex items-center justify-between mt-3">
+          <div className="flex gap-1">
             {tips.map((_, i) => (
               <div
                 key={i}
@@ -70,13 +70,13 @@ export function WelcomeOverlay() {
               />
             ))}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1.5">
             {step < tips.length - 1 ? (
-              <Button size="sm" onClick={() => setStep(step + 1)}>
+              <Button size="sm" className="h-7 text-xs px-2" onClick={() => setStep(step + 1)}>
                 Next
               </Button>
             ) : (
-              <Button size="sm" onClick={() => {
+              <Button size="sm" className="h-7 text-xs px-2" onClick={() => {
                 completeOnboarding();
                 sessionStorage.setItem("careerforge-welcome-dismissed", "true");
                 setVisible(false);
