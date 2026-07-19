@@ -27,7 +27,6 @@ import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { useAutosave } from "@/hooks/use-autosave";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { trackEvent } from "@/engines/analytics";
-import { getSampleResume } from "@/lib/sample-resume";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
@@ -168,13 +167,6 @@ export function BuilderLayout() {
 
   useAutosave();
   useKeyboardShortcuts();
-
-  // Load sample resume on first visit
-  useEffect(() => {
-    const hasData = data.personal.name || data.experience.length > 0;
-    if (!hasData) updateData(getSampleResume());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
