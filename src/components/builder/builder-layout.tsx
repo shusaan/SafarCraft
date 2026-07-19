@@ -32,7 +32,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { cn } from "@/lib/utils";
 import {
   FileText, Undo2, Redo2, Eye, EyeOff, Palette, ScrollText,
-  Sparkles, Github, Download, Target, Globe, History, Sun, Moon,
+  Sparkles, GitBranch, Download, Target, Globe, History, Sun, Moon,
   GitCompare, Menu, X, HelpCircle, Clock, Save,
 } from "lucide-react";
 
@@ -51,7 +51,7 @@ const panelGroups = [
     panels: [
       { id: "ats"    as Panel, label: "ATS",    icon: ScrollText },
       { id: "ai"     as Panel, label: "AI",     icon: Sparkles   },
-      { id: "github" as Panel, label: "GitHub", icon: Github     },
+      { id: "github" as Panel, label: "GitHub", icon: GitBranch     },
       { id: "jd"     as Panel, label: "JD",     icon: Target     },
     ],
   },

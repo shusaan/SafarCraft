@@ -23,10 +23,6 @@ export function VersionHistory() {
   const updateData = useResumeStore((s) => s.updateData);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadVersions();
-  }, []);
-
   async function loadVersions() {
     try {
       const existing = localStorage.getItem("careerforge-autosave");
@@ -44,6 +40,10 @@ export function VersionHistory() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    loadVersions();
+  }, []);
 
   const saveVersion = async () => {
     const existing = localStorage.getItem("careerforge-autosave");
