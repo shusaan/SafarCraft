@@ -16,8 +16,17 @@ export async function POST(request: NextRequest) {
     let text = "";
 
     if (ext === "pdf") {
+      let pdfjs: typeof import("pdfjs-dist");
       try {
-        const pdfjs = await import("pdfjs-dist");
+        pdfjs = await import("pdfjs-dist");
+      } catch {
+        return NextResponse.json({
+          error: "PDF parsing library not available. Run: npm install pdfjs-dist",
+        }, { status: 501 });
+      }
+
+      try {
+        pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
         const buf = await file.arrayBuffer();
         const doc = await pdfjs.getDocument({ data: buf }).promise;
         const pages: string[] = [];
@@ -30,19 +39,27 @@ export async function POST(request: NextRequest) {
         text = pages.join("\n\n");
       } catch {
         return NextResponse.json({
-          error: "PDF parsing library not available. Run: npm install pdfjs-dist",
-        }, { status: 501 });
+          error: "Failed to extract text from PDF. The file may be corrupted or contain only scanned images.",
+        }, { status: 422 });
       }
     } else {
+      let mammoth: typeof import("mammoth");
       try {
-        const mammoth = await import("mammoth");
-        const buf = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer: buf });
-        text = result.value;
+        mammoth = await import("mammoth");
       } catch {
         return NextResponse.json({
           error: "DOCX parsing library not available. Run: npm install mammoth",
         }, { status: 501 });
+      }
+
+      try {
+        const buf = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ buffer: Buffer.from(buf) });
+        text = result.value;
+      } catch {
+        return NextResponse.json({
+          error: "Failed to extract text from DOCX. The file may be corrupted.",
+        }, { status: 422 });
       }
     }
 
