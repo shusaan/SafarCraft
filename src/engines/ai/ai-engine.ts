@@ -49,6 +49,14 @@ const PROMPTS: Record<AIAction, string> = {
     {{GOAL}}
     
     Text:`,
+
+  "star-convert": `Rewrite the following bullet point using the STAR method (Situation, Task, Action, Result).
+    Make it measurable and impactful. Use strong action verbs.
+    If the original lacks context, infer realistic but honest details.
+    {{GOAL}}
+    Return ONLY the rewritten bullet point.
+    
+    Original:`,
 };
 
 export function validateAIResponse(_action: AIAction, response: string): string {
@@ -82,6 +90,8 @@ export function generateFallbackResponse(action: AIAction, content: string): str
       return content;
     case "suggest-achievements":
       return `1. Improved system performance through optimisation\n2. Led cross-functional team initiatives\n3. Reduced operational overhead`;
+    case "star-convert":
+      return `STAR Rewrite: ${content.replace(/^(worked|was|were|had|made|got|did)\s+/i, "Led ")}`;
     case "generate-verbs":
       return content.replace(/\b(worked|was|were|had|made)\b/gi, "Engineered");
     default:

@@ -46,7 +46,8 @@ export type AIAction =
   | "rewrite-summary"
   | "check-grammar"
   | "suggest-achievements"
-  | "generate-verbs";
+  | "generate-verbs"
+  | "star-convert";
 
 export type AIRequest = {
   action: AIAction;

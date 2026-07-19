@@ -18,6 +18,7 @@ const actions: Array<{ id: AIAction; label: string }> = [
   { id: "check-grammar", label: "Check Grammar" },
   { id: "suggest-achievements", label: "Suggest Achievements" },
   { id: "generate-verbs", label: "Generate Stronger Verbs" },
+  { id: "star-convert", label: "Convert to Impact (STAR)" },
 ];
 
 const goalHints: Record<string, string> = {
