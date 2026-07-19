@@ -117,21 +117,25 @@ declare global {
   const gapi: {
     load: (api: string, callback: () => void) => void;
     picker: {
-      PickerBuilder: new () => {
-        addView: (view: unknown) => unknown;
-        setOAuthToken: (token: string) => unknown;
-        setDeveloperKey: (key: string) => unknown;
-        setCallback: (fn: (data: { action: unknown; docs?: Array<{ id: string }> }) => void) => unknown;
-        build: () => { setVisible: (visible: boolean) => void };
-      };
-      DocsView: new () => {
-        setIncludeFolders: (v: boolean) => unknown;
-        setMimeTypes: (m: string) => unknown;
-        setSelectFolderEnabled: (v: boolean) => unknown;
-      };
-      Action: { PICKED: unknown };
+      PickerBuilder: new () => PickerBuilder;
+      DocsView: new () => DocsView;
+      Action: { PICKED: string };
     };
   };
+
+  interface PickerBuilder {
+    addView(view: DocsView): this;
+    setOAuthToken(token: string): this;
+    setDeveloperKey(key: string): this;
+    setCallback(fn: (data: { action: string; docs?: Array<{ id: string }> }) => void): this;
+    build(): { setVisible(visible: boolean): void };
+  }
+
+  interface DocsView {
+    setIncludeFolders(v: boolean): this;
+    setMimeTypes(m: string): this;
+    setSelectFolderEnabled(v: boolean): this;
+  }
 
   namespace google.accounts.oauth2 {
     interface TokenClientConfig {

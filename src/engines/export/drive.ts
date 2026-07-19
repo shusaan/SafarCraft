@@ -58,20 +58,25 @@ export async function pickFolder(): Promise<string | null> {
 
   await loadPickerApi();
 
-  return new Promise((resolve) => {
-    const picker = new gapi.picker.PickerBuilder()
-      .addView(new gapi.picker.DocsView().setIncludeFolders(true).setMimeTypes("application/vnd.google-apps.folder").setSelectFolderEnabled(true))
-      .setOAuthToken(token)
-      .setDeveloperKey(process.env.NEXT_PUBLIC_GOOGLE_API_KEY ?? "")
-      .setCallback((data) => {
-        if (data.action === gapi.picker.Action.PICKED) {
-          const doc = data.docs[0];
-          resolve(doc ? doc.id : null);
-        } else {
-          resolve(null);
-        }
-      })
-      .build();
+  return new Promise<string | null>((resolve) => {
+    const view = new gapi.picker.DocsView();
+    view.setIncludeFolders(true);
+    view.setMimeTypes("application/vnd.google-apps.folder");
+    view.setSelectFolderEnabled(true);
+
+    const builder = new gapi.picker.PickerBuilder();
+    builder.addView(view);
+    builder.setOAuthToken(token);
+    builder.setDeveloperKey(process.env.NEXT_PUBLIC_GOOGLE_API_KEY ?? "");
+    builder.setCallback((data: { action: string; docs?: Array<{ id: string }> }) => {
+      if (data.action === gapi.picker.Action.PICKED) {
+        const doc = data.docs?.[0];
+        resolve(doc ? doc.id : null);
+      } else {
+        resolve(null);
+      }
+    });
+    const picker = builder.build();
     picker.setVisible(true);
   });
 }

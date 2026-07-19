@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
     };
 
     const fileBlob = isBase64
-      ? Buffer.from(content, "base64")
-      : new Blob([content], { type: "text/plain" });
+      ? new Blob([Uint8Array.from(atob(content as string), (c) => c.charCodeAt(0))])
+      : new Blob([content as string], { type: "text/plain" });
 
     const form = new FormData();
     const metadataBlob = new Blob([JSON.stringify(metadata)], { type: "application/json" });
