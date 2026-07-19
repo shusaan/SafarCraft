@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useResumeStore } from "@/stores/resume-store";
 import { exportResume } from "@/engines/export/export-engine";
+import { exportEvidencePack } from "@/engines/export/evidence-pack";
 import type { ExportFormat, PaperSize } from "@/types";
 import { useToast } from "@/components/ui/toast";
-import { Download, FileText, FileJson, FileCode, CheckCircle } from "lucide-react";
+import { Download, FileText, FileJson, FileCode, CheckCircle, Archive } from "lucide-react";
 
 const paperSizes: Record<PaperSize, { label: string; dimensions: string }> = {
   letter: { label: "US Letter", dimensions: '8.5" × 11"' },
@@ -61,6 +62,20 @@ export function ExportPanel() {
   const layout = useResumeStore((s) => s.layout);
   const template = useResumeStore((s) => s.template);
   const { toast } = useToast();
+
+  const handleEvidencePack = async () => {
+    setExporting("evidence");
+    try {
+      const atsScore = 0;
+      await exportEvidencePack(data, atsScore);
+      setExported((prev) => new Set(prev).add("evidence"));
+      toast({ title: "Evidence pack downloaded", variant: "success" });
+    } catch {
+      toast({ title: "Export failed", description: "Could not generate evidence pack.", variant: "destructive" });
+    } finally {
+      setExporting(null);
+    }
+  };
 
   const handleExport = async (format: ExportFormat) => {
     setExporting(format);
@@ -140,6 +155,44 @@ export function ExportPanel() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Evidence Pack */}
+      <div className="border-t pt-4">
+        <p className="mb-3 text-sm font-medium">Evidence Pack</p>
+        <Card className="cursor-pointer transition-colors hover:bg-muted/50">
+          <CardContent className="flex items-center gap-4 p-4">
+            <div className="rounded-lg bg-muted p-2">
+              <Archive className="h-5 w-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Full Evidence Pack</span>
+                {exported.has("evidence") && <CheckCircle className="h-4 w-4 text-green-500" />}
+              </div>
+              <p className="text-xs text-muted-foreground">ZIP containing resume, cover letter, and metadata</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Best for: Job applications, portfolio archives, career coaching</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={exporting === "evidence"}
+              onClick={handleEvidencePack}
+            >
+              {exporting === "evidence" ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Packing...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  Download
+                </span>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       <p className="text-xs text-muted-foreground text-center">

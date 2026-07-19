@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useResumeStore } from "@/stores/resume-store";
 import { useArrayField } from "@/hooks/use-array-field";
+import { useToast } from "@/components/ui/toast";
 import type { ExperienceEntry } from "@/types";
+import { Sparkles, Loader2 } from "lucide-react";
 
 const createExperience = (): Omit<ExperienceEntry, "id"> => ({
   company: "",
@@ -24,6 +26,38 @@ export function ExperienceForm() {
   const experience = useResumeStore((s) => s.data.experience);
   const updateData = useResumeStore((s) => s.updateData);
   const { add, remove, update } = useArrayField(experience, (items) => updateData({ experience: items }), createExperience);
+  const resumeGoal = useResumeStore((s) => s.resumeGoal);
+  const { toast } = useToast();
+  const [converting, setConverting] = useState<Record<string, number | null>>({});
+
+  const convertToImpact = useCallback(async (entryId: string, bulletIndex: number, text: string) => {
+    if (!text.trim()) return;
+    setConverting((prev) => ({ ...prev, [`${entryId}-${bulletIndex}`]: null }));
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "star-convert", content: text, context: resumeGoal }),
+      });
+      const data = await res.json();
+      const improved = data.result ?? text;
+      const entry = experience.find((e) => e.id === entryId);
+      if (entry) {
+        const bullets = [...entry.bullets];
+        bullets[bulletIndex] = improved;
+        update(entryId, { bullets });
+      }
+      toast({ title: "Bullet converted to impact", variant: "success" });
+    } catch {
+      toast({ title: "Conversion failed", description: "Try again later.", variant: "destructive" });
+    } finally {
+      setConverting((prev) => {
+        const next = { ...prev };
+        delete next[`${entryId}-${bulletIndex}`];
+        return next;
+      });
+    }
+  }, [experience, update, resumeGoal, toast]);
 
   return (
     <div className="space-y-6">
@@ -34,6 +68,9 @@ export function ExperienceForm() {
           index={index}
           onChange={(partial) => update(entry.id, partial)}
           onRemove={() => remove(entry.id)}
+          onConvertToImpact={(bulletIndex, text) => convertToImpact(entry.id, bulletIndex, text)}
+          isConverting={(key: string) => key in converting}
+          entryId={entry.id}
         />
       ))}
       <Button variant="outline" className="w-full" onClick={add}>
@@ -48,11 +85,17 @@ function ExperienceEntryCard({
   index,
   onChange,
   onRemove,
+  onConvertToImpact,
+  isConverting,
+  entryId,
 }: {
   entry: ExperienceEntry;
   index: number;
   onChange: (partial: Partial<ExperienceEntry>) => void;
   onRemove: () => void;
+  onConvertToImpact?: (bulletIndex: number, text: string) => void;
+  isConverting?: (key: string) => boolean;
+  entryId?: string;
 }) {
   const updateBullet = useCallback(
     (bulletIndex: number, value: string) => {
@@ -125,11 +168,26 @@ function ExperienceEntryCard({
               onChange={(e) => updateBullet(bi, e.target.value)}
               placeholder="Describe your responsibility or achievement..."
             />
-            {entry.bullets.length > 1 && (
-              <Button variant="ghost" size="icon" className="mt-1 shrink-0" onClick={() => removeBullet(bi)}>
-                X
-              </Button>
-            )}
+            <div className="flex flex-col gap-1 mt-1">
+              {onConvertToImpact && bullet.trim() && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0"
+                  onClick={() => onConvertToImpact(bi, bullet)}
+                  disabled={isConverting?.(`${entryId}-${bi}`)}
+                  aria-label="Convert to impact using STAR method"
+                  title="Convert to Impact (STAR)"
+                >
+                  {isConverting?.(`${entryId}-${bi}`) ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-amber-500" />}
+                </Button>
+              )}
+              {entry.bullets.length > 1 && (
+                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => removeBullet(bi)} aria-label="Remove bullet">
+                  X
+                </Button>
+              )}
+            </div>
           </div>
         ))}
         <Button variant="ghost" size="sm" onClick={addBullet}>
