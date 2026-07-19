@@ -99,8 +99,7 @@
     "typescript": "^5.8.0",
     "vitest": "^3.1.0",
     "@vitejs/plugin-react": "^4.4.0",
-    "@axe-core/playwright": "^4.10.0",
-    "@types/mammoth": "^0.2.9"
+    "@axe-core/playwright": "^4.10.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
