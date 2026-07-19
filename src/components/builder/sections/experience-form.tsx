@@ -9,7 +9,7 @@ import { useResumeStore } from "@/stores/resume-store";
 import { useArrayField } from "@/hooks/use-array-field";
 import { useToast } from "@/components/ui/toast";
 import type { ExperienceEntry } from "@/types";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const createExperience = (): Omit<ExperienceEntry, "id"> => ({
   company: "",
@@ -179,7 +179,7 @@ function ExperienceEntryCard({
                   aria-label="Convert to impact using STAR method"
                   title="Convert to Impact (STAR)"
                 >
-                  {isConverting?.(`${entryId}-${bi}`) ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 text-amber-500" />}
+                  {isConverting?.(`${entryId}-${bi}`) ? <span className="block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Sparkles className="h-3.5 w-3.5 text-amber-500" />}
                 </Button>
               )}
               {entry.bullets.length > 1 && (
