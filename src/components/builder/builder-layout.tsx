@@ -192,7 +192,11 @@ export function BuilderLayout() {
     }
   }, [panelParam, router]);
 
-  const handleMouseDown = useCallback(() => setIsResizing(true), []);
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    document.body.style.userSelect = "none";
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -200,7 +204,10 @@ export function BuilderLayout() {
       const newWidth = window.innerWidth - e.clientX;
       setPreviewWidth(Math.max(300, Math.min(newWidth, window.innerWidth * 0.6)));
     };
-    const handleMouseUp = () => setIsResizing(false);
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.userSelect = "";
+    };
 
     if (isResizing) {
       document.addEventListener("mousemove", handleMouseMove);
@@ -209,6 +216,7 @@ export function BuilderLayout() {
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.userSelect = "";
     };
   }, [isResizing]);
 
