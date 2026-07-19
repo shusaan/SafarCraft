@@ -89,14 +89,6 @@ export function ATSPanel() {
     trackEvent("analysis_complete", { score: result.score });
   }, [result.score]);
 
-  const autoTriggered = useRef(false);
-  useEffect(() => {
-    if (result.score < 85 && !autoImproving && !improveDone && !autoTriggered.current && result.score > 0) {
-      autoTriggered.current = true;
-      handleAutoImprove();
-    }
-  }, [result.score]);
-
   const allTechs = useMemo(() => {
     const set = new Set<string>();
     data.experience.forEach((e) => e.technologies.forEach((t) => set.add(t)));
@@ -167,6 +159,14 @@ export function ATSPanel() {
   const highDeductions = result.deductions.filter((d) => d.severity === "high");
   const mediumDeductions = result.deductions.filter((d) => d.severity === "medium");
   const lowDeductions = result.deductions.filter((d) => d.severity === "low");
+
+  const autoTriggered = useRef(false);
+  useEffect(() => {
+    if (result.score < 85 && !autoImproving && !improveDone && !autoTriggered.current && result.score > 0) {
+      autoTriggered.current = true;
+      handleAutoImprove();
+    }
+  }, [result.score, autoImproving, improveDone]);
 
   const handleAddKeyword = (keyword: string) => {
     const existing = data.skills.find((c) => c.category === "Suggested");

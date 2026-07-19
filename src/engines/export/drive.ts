@@ -4,7 +4,6 @@
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 let accessToken: string | null = null;
 let pickerLoaded = false;
-let pickerCallbacks: Array<(folderId: string | null) => void> = [];
 
 function getClientId(): string | null {
   if (typeof window === "undefined") return null;
