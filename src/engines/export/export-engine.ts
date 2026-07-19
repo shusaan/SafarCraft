@@ -1,6 +1,5 @@
 import type { ResumeData, ResumeLayout, PaperSize } from "@/types";
 import { exportDOCX } from "./providers/docx";
-import { exportJSONResume } from "./providers/json-resume";
 import { exportMarkdown } from "./providers/markdown";
 
 async function exportPDFFromApi(
@@ -23,19 +22,17 @@ async function exportPDFFromApi(
   return await response.blob();
 }
 
-export type ExportFormat = "pdf" | "docx" | "json" | "markdown";
+export type ExportFormat = "pdf" | "docx" | "markdown";
 
 const extensions: Record<ExportFormat, string> = {
   pdf: "pdf",
   docx: "docx",
-  json: "json",
   markdown: "md",
 };
 
 const mimeTypes: Record<ExportFormat, string> = {
   pdf: "application/pdf",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  json: "application/json",
   markdown: "text/markdown",
 };
 
@@ -54,9 +51,6 @@ export async function exportResume(
       break;
     case "docx":
       blob = await exportDOCX(data);
-      break;
-    case "json":
-      blob = exportJSONResume(data);
       break;
     case "markdown":
       blob = exportMarkdown(data);

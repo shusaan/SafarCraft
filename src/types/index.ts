@@ -14,7 +14,7 @@ export { defaultResumeData, defaultResumeLayout } from "./resume";
 
 export type TemplateId = "classic-ats" | "modern-professional" | "executive";
 
-export type ExportFormat = "pdf" | "docx" | "json" | "markdown";
+export type ExportFormat = "pdf" | "docx" | "markdown";
 
 export type PaperSize = "letter" | "a4" | "legal";
 
