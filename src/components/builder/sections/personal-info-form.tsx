@@ -71,7 +71,17 @@ export function PersonalInfoForm() {
         text = await file.text();
       }
 
-      const lines = text.split("\n").filter((l) => l.trim()).slice(0, 100);
+      const pdfGarbage = /^\s*(\/|%|end(obj|stream)|stream|obj\s*$|[a-zA-Z]*\.[a-z]{2,4}\s*$|[A-F0-9]{20,})/i;
+      const lines = text.split("\n")
+        .map((l) => l.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "").trim())
+        .filter((l) => {
+          if (l.length < 3) return false;
+          if (/\.(png|jpg|jpeg|gif|bmp|svg|tiff?)/i.test(l)) return false;
+          if (pdfGarbage.test(l)) return false;
+          if ((l.match(/[a-zA-Z]/g)?.length ?? 0) < l.length * 0.3) return false;
+          return true;
+        })
+        .slice(0, 100);
       const cleanText = lines.join("\n").replace(/<[^>]*>/g, "").trim();
 
       if (cleanText.length > 20) {
