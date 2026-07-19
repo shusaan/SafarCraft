@@ -113,4 +113,35 @@ declare global {
   interface Window {
     gtag: (command: string, event: string, params?: Record<string, unknown>) => void;
   }
+
+  const gapi: {
+    load: (api: string, callback: () => void) => void;
+    picker: {
+      PickerBuilder: new () => {
+        addView: (view: unknown) => unknown;
+        setOAuthToken: (token: string) => unknown;
+        setDeveloperKey: (key: string) => unknown;
+        setCallback: (fn: (data: { action: unknown; docs?: Array<{ id: string }> }) => void) => unknown;
+        build: () => { setVisible: (visible: boolean) => void };
+      };
+      DocsView: new () => {
+        setIncludeFolders: (v: boolean) => unknown;
+        setMimeTypes: (m: string) => unknown;
+        setSelectFolderEnabled: (v: boolean) => unknown;
+      };
+      Action: { PICKED: unknown };
+    };
+  };
+
+  namespace google.accounts.oauth2 {
+    interface TokenClientConfig {
+      client_id: string;
+      scope: string;
+      callback: (response: { access_token?: string; error?: string }) => void;
+    }
+    interface TokenClient {
+      requestAccessToken(config?: { prompt?: string }): void;
+    }
+    function initTokenClient(config: TokenClientConfig): TokenClient;
+  }
 }

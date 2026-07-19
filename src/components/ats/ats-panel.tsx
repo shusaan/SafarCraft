@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { calculateATSScore, getATSScoreLabel } from "@/engines/ats/ats-engine";
 import { Badge } from "@/components/ui/badge";
@@ -87,6 +87,14 @@ export function ATSPanel() {
 
   useEffect(() => {
     trackEvent("analysis_complete", { score: result.score });
+  }, [result.score]);
+
+  const autoTriggered = useRef(false);
+  useEffect(() => {
+    if (result.score < 85 && !autoImproving && !improveDone && !autoTriggered.current && result.score > 0) {
+      autoTriggered.current = true;
+      handleAutoImprove();
+    }
   }, [result.score]);
 
   const allTechs = useMemo(() => {
