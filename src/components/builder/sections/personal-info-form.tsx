@@ -42,31 +42,11 @@ export function PersonalInfoForm() {
   const handleImportCV = useCallback(async (file: File) => {
     setImporting(true);
     try {
-      let text = "";
-      if (file.name.endsWith(".docx")) {
-        const mammoth = await import("mammoth");
-        const arrayBuf = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer: arrayBuf });
-        text = result.value;
-      } else if (file.name.endsWith(".pdf")) {
-        const pdfjsLib = await import("pdfjs-dist");
-        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
-        const arrayBuf = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
-        const pages: string[] = [];
-        for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          pages.push(content.items.map((item: { str: string }) => item.str).join(" "));
-        }
-        text = pages.join("\n\n");
-      } else {
-        text = await file.text();
-      }
-
-      const cleaned = text.replace(/<[^>]*>/g, "").trim();
-      if (cleaned.length > 20) {
-        updatePersonal({ summary: cleaned.slice(0, 2000) });
+      const text = await file.text();
+      const lines = text.split("\n").filter((l) => l.trim()).slice(0, 50);
+      const summary = lines.join("\n").replace(/<[^>]*>/g, "").trim();
+      if (summary.length > 20) {
+        updatePersonal({ summary: summary.slice(0, 2000) });
         toast({ title: "CV imported", description: "Text extracted. Review and adjust below.", variant: "success" });
       } else {
         toast({
