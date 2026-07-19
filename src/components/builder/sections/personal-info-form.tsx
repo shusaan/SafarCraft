@@ -40,13 +40,42 @@ export function PersonalInfoForm() {
   const { toast } = useToast();
 
   const handleImportCV = useCallback(async (file: File) => {
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      toast({ title: "File too large", description: "Maximum file size is 5MB.", variant: "destructive" });
+      return;
+    }
+
+    const ext = file.name.split(".").pop()?.toLowerCase();
+    if (ext !== "docx" && ext !== "pdf") {
+      toast({ title: "Unsupported format", description: "Please upload a .docx or .pdf file.", variant: "destructive" });
+      return;
+    }
+
     setImporting(true);
     try {
-      const text = await file.text();
-      const lines = text.split("\n").filter((l) => l.trim()).slice(0, 50);
-      const summary = lines.join("\n").replace(/<[^>]*>/g, "").trim();
-      if (summary.length > 20) {
-        updatePersonal({ summary: summary.slice(0, 2000) });
+      let text = "";
+
+      if (ext === "docx") {
+        const buf = await file.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        const decoder = new TextDecoder("utf-8");
+        const raw = decoder.decode(bytes);
+        const xmlMatch = raw.match(/<w:t[^>]*>([^<]+)<\/w:t>/g);
+        if (xmlMatch) {
+          text = xmlMatch.map((m) => m.replace(/<[^>]*>/g, "")).join(" ").trim();
+        }
+      }
+
+      if (!text) {
+        text = await file.text();
+      }
+
+      const lines = text.split("\n").filter((l) => l.trim()).slice(0, 100);
+      const cleanText = lines.join("\n").replace(/<[^>]*>/g, "").trim();
+
+      if (cleanText.length > 20) {
+        updatePersonal({ summary: cleanText.slice(0, 3000) });
         toast({ title: "CV imported", description: "Text extracted. Review and adjust below.", variant: "success" });
       } else {
         toast({
