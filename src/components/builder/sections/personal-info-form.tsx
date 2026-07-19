@@ -84,6 +84,11 @@ export function PersonalInfoForm() {
         body: JSON.stringify({ action: "parse-cv", content: text }),
       });
       const aiData = await aiRes.json();
+      if (!aiRes.ok) {
+        toast({ title: "AI extraction failed", description: aiData?.error || "Try again later.", variant: "destructive" });
+        updatePersonal({ summary: text.slice(0, 3000) });
+        return;
+      }
       const jsonStr = aiData?.result ?? "{}";
       let parsed: Record<string, unknown> = {};
       try {

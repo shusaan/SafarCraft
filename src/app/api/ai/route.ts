@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { buildAIPrompt, generateFallbackResponse } from "@/engines/ai/ai-engine";
 import type { AIAction } from "@/types";
 
+const MAX_TOKENS: Partial<Record<AIAction, number>> = {
+  "parse-cv": 2000,
+};
+
 export async function POST(request: Request) {
   try {
     const { action, content, context, stream: wantStream } = await request.json();
@@ -18,6 +22,8 @@ export async function POST(request: Request) {
 
     const prompt = buildAIPrompt(action as AIAction, content, context);
 
+    const max_tokens = MAX_TOKENS[action as AIAction] ?? 300;
+
     if (wantStream) {
       const res = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -28,11 +34,16 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: prompt }],
-          max_tokens: 300,
+          max_tokens,
           temperature: 0.7,
           stream: true,
         }),
       });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: { message: "OpenAI API error" } }));
+        return NextResponse.json({ error: err.error?.message ?? "OpenAI API error" }, { status: res.status });
+      }
 
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
@@ -75,10 +86,16 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 300,
+        max_tokens,
         temperature: 0.7,
       }),
     });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: { message: "OpenAI API error" } }));
+      return NextResponse.json({ error: err.error?.message ?? "OpenAI API error" }, { status: res.status });
+    }
+
     const data = await res.json();
     const result = data.choices?.[0]?.message?.content ?? generateFallbackResponse(action as AIAction, content);
 

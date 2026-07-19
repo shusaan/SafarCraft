@@ -16,17 +16,20 @@ export async function POST(request: NextRequest) {
     let text = "";
 
     if (ext === "pdf") {
-      let pdfjs: typeof import("pdfjs-dist");
+      let pdfjs: any;
       try {
-        pdfjs = await import("pdfjs-dist");
+        pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
       } catch {
-        return NextResponse.json({
-          error: "PDF parsing library not available. Run: npm install pdfjs-dist",
-        }, { status: 501 });
+        try {
+          pdfjs = await import("pdfjs-dist");
+        } catch {
+          return NextResponse.json({
+            error: "PDF parsing library not available. Run: npm install pdfjs-dist",
+          }, { status: 501 });
+        }
       }
 
       try {
-        pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
         const buf = await file.arrayBuffer();
         const doc = await pdfjs.getDocument({ data: buf }).promise;
         const pages: string[] = [];
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
         }, { status: 422 });
       }
     } else {
-      let mammoth: typeof import("mammoth");
+      let mammoth: any;
       try {
         mammoth = await import("mammoth");
       } catch {
