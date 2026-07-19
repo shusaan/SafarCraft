@@ -17,7 +17,6 @@ export async function callVercelAI(action: AIAction, content: string, context?: 
       model: openai("gpt-4o-mini"),
       prompt,
       temperature: 0.7,
-      maxTokens: 300,
     });
     return text;
   } catch {
