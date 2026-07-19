@@ -21,7 +21,7 @@ export default function PrivacyPage() {
       <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Privacy Policy</h1>
       <p className="mt-2 text-sm text-muted-foreground">Last updated: {new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>
 
-      <div className="mt-8 space-y-6 text-sm leading-relaxed text-muted-foreground">
+      <div className="mt-8 space-y-6 text-base leading-relaxed text-muted-foreground">
         <section>
           <h2 className="text-lg font-semibold text-foreground">Data Collection</h2>
           <p className="mt-2">

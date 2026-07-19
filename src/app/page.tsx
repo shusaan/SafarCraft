@@ -163,14 +163,14 @@ export default function HomePage() {
                 <ContinueDraft />
               </div>
 
-              <p className="animate-fade-up delay-400 mt-4 text-xs text-muted-foreground">
+              <p className="animate-fade-up delay-400 mt-4 text-sm text-muted-foreground">
                 Your data stays on your device — no account, no cloud, no tracking
               </p>
             </div>
 
             <div className="animate-fade-up delay-500 mt-12">
               <BuilderPreview />
-              <p className="mt-2 text-center text-xs text-muted-foreground/60">
+              <p className="mt-2 text-center text-sm text-muted-foreground/60">
                 The resume builder — real-time editor with live ATS scoring
               </p>
             </div>
@@ -180,7 +180,7 @@ export default function HomePage() {
         {/* ── Trust bar ── */}
         <section className="border-y bg-muted/20" aria-label="Trust signals">
           <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6">
-            <p className="text-center text-xs text-muted-foreground tracking-wide">
+            <p className="text-center text-sm text-muted-foreground tracking-wide">
               <span className="font-medium text-foreground">MIT licensed</span>
               <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
               No signup or account required
@@ -224,7 +224,7 @@ export default function HomePage() {
                       <Icon className="h-4 w-4" />
                     </div>
                     <h3 className="text-sm font-semibold">{feature.title}</h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                    <p className="mt-1.5 text-base text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
                   </article>
@@ -256,7 +256,7 @@ export default function HomePage() {
                     {step.number}
                   </div>
                   <h3 className="text-sm font-semibold">{step.title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                  <p className="mt-1.5 text-base text-muted-foreground leading-relaxed">
                     {step.description}
                   </p>
                 </li>
@@ -281,7 +281,7 @@ export default function HomePage() {
               >
                 Fully open source — MIT Licensed
               </h2>
-              <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground leading-relaxed">
+              <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground leading-relaxed">
                 Read the code, self-host it, contribute to it, or fork it. CareerForge AI is built
                 in the open. No vendor lock-in, no paywalls, no data sold.
               </p>
@@ -330,7 +330,7 @@ export default function HomePage() {
               <Badge variant="outline" className="text-xs">MIT</Badge>
             </div>
 
-            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted-foreground" aria-label="Footer navigation">
+            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-sm text-muted-foreground" aria-label="Footer navigation">
               <Link href="/builder" className="hover:text-foreground transition-colors">
                 Builder
               </Link>
@@ -358,7 +358,7 @@ export default function HomePage() {
               </Link>
             </nav>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} CareerForge AI &mdash; Open source. Free forever.
             </p>
           </div>
