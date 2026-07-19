@@ -8,7 +8,7 @@ import { useResumeStore } from "@/stores/resume-store";
 import { useToast } from "@/components/ui/toast";
 import { fetchGitHubProfile, generateProjectsFromGitHub, generateSkillsFromGitHub } from "@/engines/github/github-engine";
 import { generateId } from "@/lib/utils";
-import { Github, Star, GitFork, Code2 } from "lucide-react";
+import { GitBranch, Star, GitFork, Code2 } from "lucide-react";
 import { SkeletonCard } from "@/components/ui/skeleton";
 
 export function GitHubImport() {
@@ -89,7 +89,7 @@ export function GitHubImport() {
     <div className="space-y-6 p-6">
       <div>
         <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <Github className="h-5 w-5" />
+          <GitBranch className="h-5 w-5" />
           GitHub Intelligence
         </h2>
         <p className="text-sm text-muted-foreground">Import your GitHub profile to auto-generate resume content</p>

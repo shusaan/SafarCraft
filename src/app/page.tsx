@@ -4,12 +4,11 @@ import { Badge } from "@/components/ui/badge";
 import { BuilderPreview } from "@/components/marketing/builder-preview";
 import {
   ArrowRight,
-  Github,
+  GitBranch,
   FileText,
   Target,
   Bot,
   Download,
-  GitBranch,
   Palette,
   CheckCircle,
   Star,
@@ -99,7 +98,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
             >
               <Button variant="ghost" size="sm" className="gap-1.5">
-                <Github className="h-3.5 w-3.5" />
+                <GitBranch className="h-3.5 w-3.5" />
                 GitHub
               </Button>
             </a>
@@ -150,7 +149,7 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                 >
                   <Button variant="outline" size="lg" className="gap-2">
-                    <Github className="h-4 w-4" />
+                    <GitBranch className="h-4 w-4" />
                     View on GitHub
                     <Badge variant="secondary" className="ml-0.5 text-xs">MIT</Badge>
                   </Button>
@@ -267,7 +266,7 @@ export default function HomePage() {
                 className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-lg border bg-background"
                 aria-hidden="true"
               >
-                <Github className="h-6 w-6 text-muted-foreground" />
+                <GitBranch className="h-6 w-6 text-muted-foreground" />
               </div>
               <h2
                 id="oss-heading"

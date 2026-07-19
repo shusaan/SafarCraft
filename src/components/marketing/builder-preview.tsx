@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Palette, ScrollText, Sparkles, Github, Download } from "lucide-react";
+import { FileText, Palette, ScrollText, Sparkles, GitBranch, Download } from "lucide-react";
 
 export function BuilderPreview() {
   return (
@@ -108,7 +108,7 @@ export function BuilderPreview() {
 
       {/* Toolbar */}
       <div className="flex items-center gap-1 border-t bg-muted/30 px-3 py-1.5">
-        {[FileText, Palette, ScrollText, Sparkles, Github, Download].map((Icon, i) => (
+        {[FileText, Palette, ScrollText, Sparkles, GitBranch, Download].map((Icon, i) => (
           <div
             key={i}
             className={`flex h-6 w-6 items-center justify-center rounded text-[10px] ${
