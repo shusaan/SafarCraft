@@ -47,7 +47,8 @@ export type AIAction =
   | "check-grammar"
   | "suggest-achievements"
   | "generate-verbs"
-  | "star-convert";
+  | "star-convert"
+  | "parse-cv";
 
 export type AIRequest = {
   action: AIAction;

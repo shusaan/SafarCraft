@@ -13,6 +13,7 @@ import { ImagePlus, X, Upload, FileText } from "lucide-react";
 export function PersonalInfoForm() {
   const personal = useResumeStore((s) => s.data.personal);
   const updatePersonal = useResumeStore((s) => s.updatePersonal);
+  const updateData = useResumeStore((s) => s.updateData);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -40,9 +41,9 @@ export function PersonalInfoForm() {
   const { toast } = useToast();
 
   const handleImportCV = useCallback(async (file: File) => {
-    const MAX_SIZE = 5 * 1024 * 1024;
+    const MAX_SIZE = 10 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      toast({ title: "File too large", description: "Maximum file size is 5MB.", variant: "destructive" });
+      toast({ title: "File too large", description: "Maximum file size is 10MB.", variant: "destructive" });
       return;
     }
 
@@ -54,56 +55,112 @@ export function PersonalInfoForm() {
 
     setImporting(true);
     try {
-      let text = "";
+      const formData = new FormData();
+      formData.append("file", file);
 
-      if (ext === "docx") {
-        const buf = await file.arrayBuffer();
-        const bytes = new Uint8Array(buf);
-        const decoder = new TextDecoder("utf-8");
-        const raw = decoder.decode(bytes);
-        const xmlMatch = raw.match(/<w:t[^>]*>([^<]+)<\/w:t>/g);
-        if (xmlMatch) {
-          text = xmlMatch.map((m) => m.replace(/<[^>]*>/g, "")).join(" ").trim();
-        }
-      }
-
-      if (!text) {
-        text = await file.text();
-      }
-
-      const pdfGarbage = /^\s*(\/|%|end(obj|stream)|stream|obj\s*$|[a-zA-Z]*\.[a-z]{2,4}\s*$|[A-F0-9]{20,})/i;
-      const lines = text.split("\n")
-        .map((l) => l.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "").trim())
-        .filter((l) => {
-          if (l.length < 3) return false;
-          if (/\.(png|jpg|jpeg|gif|bmp|svg|tiff?)/i.test(l)) return false;
-          if (pdfGarbage.test(l)) return false;
-          if ((l.match(/[a-zA-Z]/g)?.length ?? 0) < l.length * 0.3) return false;
-          return true;
-        })
-        .slice(0, 100);
-      const cleanText = lines.join("\n").replace(/<[^>]*>/g, "").trim();
-
-      if (cleanText.length > 20) {
-        updatePersonal({ summary: cleanText.slice(0, 3000) });
-        toast({ title: "CV imported", description: "Text extracted. Review and adjust below.", variant: "success" });
-      } else {
-        toast({
-          title: "We couldn't parse this file",
-          description: "Please paste the text manually using the 'Create from Scratch' tab.",
-          variant: "destructive",
-        });
-      }
-    } catch {
-      toast({
-        title: "We couldn't parse this file",
-        description: "Please paste the text manually using the 'Create from Scratch' tab.",
-        variant: "destructive",
+      const parseRes = await fetch("/api/parse-cv", {
+        method: "POST",
+        body: formData,
       });
+      if (!parseRes.ok) {
+        const err = await parseRes.json().catch(() => ({ error: "Parse failed" }));
+        if (parseRes.status === 501) {
+          toast({ title: err.error || "Missing parser library", variant: "destructive" });
+        } else {
+          toast({ title: err.error || "We couldn't parse this file", description: "Please paste the text manually using the 'Create from Scratch' tab.", variant: "destructive" });
+        }
+        return;
+      }
+
+      const { text } = await parseRes.json();
+      if (!text || text.length < 20) {
+        toast({ title: "We couldn't parse this file", description: "Please paste the text manually using the 'Create from Scratch' tab.", variant: "destructive" });
+        return;
+      }
+
+      const aiRes = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "parse-cv", content: text }),
+      });
+      const aiData = await aiRes.json();
+      const jsonStr = aiData?.result ?? "{}";
+      let parsed: Record<string, unknown> = {};
+      try {
+        parsed = JSON.parse(jsonStr);
+      } catch {
+        toast({ title: "CV imported", description: "Text extracted but could not auto-fill all fields. Review and adjust below.", variant: "default" });
+        updatePersonal({ summary: text.slice(0, 3000) });
+        return;
+      }
+
+      updateData({
+        personal: {
+          name: (parsed.name as string) ?? personal.name ?? "",
+          email: (parsed.email as string) ?? personal.email ?? "",
+          phone: (parsed.phone as string) ?? personal.phone ?? "",
+          location: (parsed.location as string) ?? personal.location ?? "",
+          linkedin: personal.linkedin ?? "",
+          github: personal.github ?? "",
+          website: personal.website ?? "",
+          photo: personal.photo ?? null,
+          summary: (parsed.summary as string) ?? text.slice(0, 3000),
+        },
+        skills: (parsed.skills as Array<string>)?.length
+          ? [{ id: crypto.randomUUID?.() ?? "", category: "Parsed", skills: parsed.skills as string[] }]
+          : [],
+        experience: (parsed.experience as Array<Record<string, unknown>>)?.map((e: Record<string, unknown>) => ({
+          id: crypto.randomUUID?.() ?? "",
+          company: (e.company as string) ?? "",
+          position: (e.position as string) ?? "",
+          location: (e.location as string) ?? "",
+          startDate: (e.startDate as string) ?? "",
+          endDate: (e.endDate as string) ?? "",
+          current: (e.endDate as string) === "Present",
+          bullets: (e.bullets as string[]) ?? [],
+          technologies: (e.technologies as string[]) ?? [],
+        })) ?? [],
+        education: (parsed.education as Array<Record<string, unknown>>)?.map((e: Record<string, unknown>) => ({
+          id: crypto.randomUUID?.() ?? "",
+          institution: (e.institution as string) ?? "",
+          degree: (e.degree as string) ?? "",
+          field: (e.field as string) ?? "",
+          location: (e.location as string) ?? "",
+          startDate: (e.startDate as string) ?? "",
+          endDate: (e.endDate as string) ?? "",
+          gpa: (e.gpa as string) ?? "",
+          honors: (e.honors as string[]) ?? [],
+        })) ?? [],
+        certifications: (parsed.certifications as Array<Record<string, unknown>>)?.map((c: Record<string, unknown>) => ({
+          id: crypto.randomUUID?.() ?? "",
+          name: (c.name as string) ?? "",
+          issuer: (c.issuer as string) ?? "",
+          date: (c.date as string) ?? "",
+          url: (c.url as string) ?? "",
+        })) ?? [],
+        projects: (parsed.projects as Array<Record<string, unknown>>)?.map((p: Record<string, unknown>) => ({
+          id: crypto.randomUUID?.() ?? "",
+          name: (p.name as string) ?? "",
+          role: (p.role as string) ?? "",
+          description: (p.description as string) ?? "",
+          technologies: (p.technologies as string[]) ?? [],
+          url: (p.url as string) ?? "",
+          highlights: (p.highlights as string[]) ?? [],
+        })) ?? [],
+        languages: (parsed.languages as Array<Record<string, unknown>>)?.map((l: Record<string, unknown>) => ({
+          id: crypto.randomUUID?.() ?? "",
+          language: (l.language as string) ?? "",
+          proficiency: (l.proficiency as string) ?? "",
+        })) ?? [],
+      });
+
+      toast({ title: "CV imported", description: "All fields auto-populated from your CV.", variant: "success" });
+    } catch {
+      toast({ title: "Import failed", description: "Please paste the text manually using the 'Create from Scratch' tab.", variant: "destructive" });
     } finally {
       setImporting(false);
     }
-  }, [updatePersonal, toast]);
+  }, [updatePersonal, updateData, toast, personal]);
 
   return (
     <div className="space-y-6">

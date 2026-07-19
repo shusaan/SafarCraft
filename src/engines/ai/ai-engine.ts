@@ -57,6 +57,34 @@ const PROMPTS: Record<AIAction, string> = {
     Return ONLY the rewritten bullet point.
     
     Original:`,
+
+  "parse-cv": `Extract resume data from the following text and return it as a JSON object with these fields:
+    {
+      "name": "Full Name",
+      "email": "email@example.com",
+      "phone": "phone number",
+      "location": "city, state",
+      "summary": "professional summary",
+      "skills": ["skill1", "skill2"],
+      "experience": [
+        { "company": "Company Name", "position": "Job Title", "startDate": "YYYY-MM", "endDate": "YYYY-MM or Present", "bullets": ["bullet1", "bullet2"], "technologies": ["tech1"] }
+      ],
+      "education": [
+        { "institution": "University", "degree": "Degree Type", "field": "Field of Study", "startDate": "YYYY-MM", "endDate": "YYYY-MM" }
+      ],
+      "certifications": [
+        { "name": "Cert Name", "issuer": "Issuer", "date": "YYYY" }
+      ],
+      "projects": [
+        { "name": "Project Name", "description": "Short description", "technologies": ["tech1"] }
+      ],
+      "languages": [
+        { "language": "Language", "proficiency": "Native/Fluent/Conversational" }
+      ]
+    }
+    Fill as many fields as you can from the text. Use null for missing fields. Return ONLY valid JSON, no other text.
+    
+    Text:`,
 };
 
 export function validateAIResponse(_action: AIAction, response: string): string {
@@ -94,6 +122,12 @@ export function generateFallbackResponse(action: AIAction, content: string): str
       return `STAR Rewrite: ${content.replace(/^(worked|was|were|had|made|got|did)\s+/i, "Led ")}`;
     case "generate-verbs":
       return content.replace(/\b(worked|was|were|had|made)\b/gi, "Engineered");
+    case "parse-cv":
+      return JSON.stringify({
+        name: content.split("\n")[0]?.trim() || "",
+        summary: content.slice(0, 500),
+        skills: content.match(/\b(React|Node|Python|JavaScript|TypeScript|AWS|Docker)\b/gi) || [],
+      });
     default:
       return content;
   }
