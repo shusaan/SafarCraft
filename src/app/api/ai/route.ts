@@ -3,7 +3,7 @@ import { buildAIPrompt, generateFallbackResponse } from "@/engines/ai/ai-engine"
 import type { AIAction } from "@/types";
 
 const MAX_TOKENS: Partial<Record<AIAction, number>> = {
-  "parse-cv": 2000,
+  "parse-cv": 4000,
 };
 
 export async function POST(request: Request) {

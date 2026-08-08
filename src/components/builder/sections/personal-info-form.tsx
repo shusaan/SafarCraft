@@ -62,104 +62,107 @@ export function PersonalInfoForm() {
         method: "POST",
         body: formData,
       });
+
+      const resData = await parseRes.json().catch(() => ({ error: "Parse failed" }));
+
       if (!parseRes.ok) {
-        const err = await parseRes.json().catch(() => ({ error: "Parse failed" }));
-        if (parseRes.status === 501) {
-          toast({ title: err.error || "Missing parser library", variant: "destructive" });
-        } else {
-          toast({ title: err.error || "We couldn't parse this file", description: "Please paste the text manually using the 'Create from Scratch' tab.", variant: "destructive" });
-        }
+        const msg = resData?.error ?? "We couldn't parse this file";
+        toast({
+          title: parseRes.status === 501 ? msg : "Could not parse file",
+          description: parseRes.status === 501 ? undefined : msg,
+          variant: "destructive",
+        });
         return;
       }
 
-      const { text } = await parseRes.json();
-      if (!text || text.length < 20) {
-        toast({ title: "We couldn't parse this file", description: "Please paste the text manually using the 'Create from Scratch' tab.", variant: "destructive" });
+      const { parsed } = resData;
+
+      if (!parsed) {
+        toast({ title: "We couldn't parse this file", description: "Please paste the text manually.", variant: "destructive" });
         return;
       }
 
-      const aiRes = await fetch("/api/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "parse-cv", content: text }),
-      });
-      const aiData = await aiRes.json();
-      if (!aiRes.ok) {
-        toast({ title: "AI extraction failed", description: aiData?.error || "Try again later.", variant: "destructive" });
-        updatePersonal({ summary: text.slice(0, 3000) });
-        return;
-      }
-      const jsonStr = aiData?.result ?? "{}";
-      let parsed: Record<string, unknown> = {};
-      try {
-        parsed = JSON.parse(jsonStr);
-      } catch {
-        toast({ title: "CV imported", description: "Text extracted but could not auto-fill all fields. Review and adjust below.", variant: "default" });
-        updatePersonal({ summary: text.slice(0, 3000) });
-        return;
-      }
+      const id = () => crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
 
       updateData({
         personal: {
-          name: (parsed.name as string) ?? personal.name ?? "",
-          email: (parsed.email as string) ?? personal.email ?? "",
-          phone: (parsed.phone as string) ?? personal.phone ?? "",
-          location: (parsed.location as string) ?? personal.location ?? "",
-          linkedin: personal.linkedin ?? "",
-          github: personal.github ?? "",
-          website: personal.website ?? "",
-          photo: personal.photo ?? null,
-          summary: (parsed.summary as string) ?? text.slice(0, 3000),
+          name:     parsed.name     || personal.name     || "",
+          email:    parsed.email    || personal.email    || "",
+          phone:    parsed.phone    || personal.phone    || "",
+          location: parsed.location || personal.location || "",
+          linkedin: parsed.linkedin || personal.linkedin || "",
+          github:   parsed.github   || personal.github   || "",
+          website:  parsed.website  || personal.website  || "",
+          photo:    personal.photo  ?? null,
+          summary:  parsed.summary  || "",
         },
-        skills: (parsed.skills as Array<string>)?.length
-          ? [{ id: crypto.randomUUID?.() ?? "", category: "Parsed", skills: parsed.skills as string[] }]
+        skills: Array.isArray(parsed.skillGroups) && parsed.skillGroups.length > 0
+          ? parsed.skillGroups.map((g: { category: string; skills: string[] }) => ({
+              id: id(),
+              category: g.category || "Skills",
+              skills: Array.isArray(g.skills) ? g.skills.filter(Boolean) : [],
+            }))
           : [],
-        experience: (parsed.experience as Array<Record<string, unknown>>)?.map((e: Record<string, unknown>) => ({
-          id: crypto.randomUUID?.() ?? "",
-          company: (e.company as string) ?? "",
-          position: (e.position as string) ?? "",
-          location: (e.location as string) ?? "",
-          startDate: (e.startDate as string) ?? "",
-          endDate: (e.endDate as string) ?? "",
-          current: (e.endDate as string) === "Present",
-          bullets: (e.bullets as string[]) ?? [],
-          technologies: (e.technologies as string[]) ?? [],
-        })) ?? [],
-        education: (parsed.education as Array<Record<string, unknown>>)?.map((e: Record<string, unknown>) => ({
-          id: crypto.randomUUID?.() ?? "",
-          institution: (e.institution as string) ?? "",
-          degree: (e.degree as string) ?? "",
-          field: (e.field as string) ?? "",
-          location: (e.location as string) ?? "",
-          startDate: (e.startDate as string) ?? "",
-          endDate: (e.endDate as string) ?? "",
-          gpa: (e.gpa as string) ?? "",
-          honors: (e.honors as string[]) ?? [],
-        })) ?? [],
-        certifications: (parsed.certifications as Array<Record<string, unknown>>)?.map((c: Record<string, unknown>) => ({
-          id: crypto.randomUUID?.() ?? "",
-          name: (c.name as string) ?? "",
-          issuer: (c.issuer as string) ?? "",
-          date: (c.date as string) ?? "",
-          url: (c.url as string) ?? "",
-        })) ?? [],
-        projects: (parsed.projects as Array<Record<string, unknown>>)?.map((p: Record<string, unknown>) => ({
-          id: crypto.randomUUID?.() ?? "",
-          name: (p.name as string) ?? "",
-          role: (p.role as string) ?? "",
-          description: (p.description as string) ?? "",
-          technologies: (p.technologies as string[]) ?? [],
-          url: (p.url as string) ?? "",
-          highlights: (p.highlights as string[]) ?? [],
-        })) ?? [],
-        languages: (parsed.languages as Array<Record<string, unknown>>)?.map((l: Record<string, unknown>) => ({
-          id: crypto.randomUUID?.() ?? "",
-          language: (l.language as string) ?? "",
-          proficiency: (l.proficiency as string) ?? "",
-        })) ?? [],
+        experience: Array.isArray(parsed.experience)
+          ? parsed.experience.map((e: Record<string, unknown>) => ({
+              id: id(),
+              company:    String(e.company    ?? ""),
+              position:   String(e.position   ?? ""),
+              location:   String(e.location   ?? ""),
+              startDate:  String(e.startDate  ?? ""),
+              endDate:    String(e.endDate    ?? ""),
+              current:    String(e.endDate ?? "").toLowerCase() === "present" || Boolean(e.current),
+              bullets:    Array.isArray(e.bullets)      ? (e.bullets      as string[]).filter(Boolean) : [],
+              technologies: Array.isArray(e.technologies) ? (e.technologies as string[]).filter(Boolean) : [],
+            }))
+          : [],
+        education: Array.isArray(parsed.education)
+          ? parsed.education.map((e: Record<string, unknown>) => ({
+              id: id(),
+              institution: String(e.institution ?? ""),
+              degree:      String(e.degree      ?? ""),
+              field:       String(e.field       ?? ""),
+              location:    String(e.location    ?? ""),
+              startDate:   String(e.startDate   ?? ""),
+              endDate:     String(e.endDate     ?? ""),
+              gpa:         String(e.gpa         ?? ""),
+              honors:      Array.isArray(e.honors) ? (e.honors as string[]).filter(Boolean) : [],
+            }))
+          : [],
+        certifications: Array.isArray(parsed.certifications)
+          ? parsed.certifications.map((c: Record<string, unknown>) => ({
+              id: id(),
+              name:   String(c.name   ?? ""),
+              issuer: String(c.issuer ?? ""),
+              date:   String(c.date   ?? ""),
+              url:    String(c.url    ?? ""),
+            }))
+          : [],
+        projects: Array.isArray(parsed.projects)
+          ? parsed.projects.map((p: Record<string, unknown>) => ({
+              id: id(),
+              name:         String(p.name        ?? ""),
+              role:         String(p.role        ?? ""),
+              description:  String(p.description ?? ""),
+              technologies: Array.isArray(p.technologies) ? (p.technologies as string[]).filter(Boolean) : [],
+              url:          String(p.url         ?? ""),
+              highlights:   Array.isArray(p.highlights) ? (p.highlights as string[]).filter(Boolean) : [],
+            }))
+          : [],
+        languages: Array.isArray(parsed.languages)
+          ? parsed.languages.map((l: Record<string, unknown>) => ({
+              id: id(),
+              language:    String(l.language    ?? ""),
+              proficiency: String(l.proficiency ?? ""),
+            }))
+          : [],
       });
 
-      toast({ title: "CV imported", description: "All fields auto-populated from your CV.", variant: "success" });
+      toast({
+        title: "CV imported",
+        description: "Fields auto-populated. Review and adjust anything that looks off.",
+        variant: "success",
+      });
     } catch {
       toast({ title: "Import failed", description: "Please paste the text manually using the 'Create from Scratch' tab.", variant: "destructive" });
     } finally {

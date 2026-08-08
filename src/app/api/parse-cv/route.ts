@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { extractPDFText } from "@/engines/cv/pdf-extractor";
+import { parseCV } from "@/engines/cv/cv-parser";
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
@@ -13,37 +16,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unsupported format" }, { status: 400 });
     }
 
-    let text = "";
+    const buffer = await file.arrayBuffer();
+    let rawText = "";
+    let layout: "single" | "two-column" = "single";
+    let numPages = 1;
 
+    // ── Step 1: Extract raw text ──────────────────────────────────────────
     if (ext === "pdf") {
-      let pdfjs: any;
       try {
-        pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
-      } catch {
-        try {
-          pdfjs = await import("pdfjs-dist");
-        } catch {
+        const extracted = await extractPDFText(buffer);
+        rawText  = extracted.text;
+        layout   = extracted.layout;
+        numPages = extracted.pages.length;
+      } catch (err: any) {
+        if (err?.message === "EMPTY_PDF") {
           return NextResponse.json({
-            error: "PDF parsing library not available. Run: npm install pdfjs-dist",
-          }, { status: 501 });
+            error: "Could not extract text from this PDF. It may be a scanned image. Please paste the text manually using the 'Create from Scratch' tab.",
+          }, { status: 422 });
         }
-      }
-
-      try {
-        const buf = await file.arrayBuffer();
-        const doc = await pdfjs.getDocument({ data: buf }).promise;
-        const pages: string[] = [];
-        for (let i = 1; i <= doc.numPages; i++) {
-          const page = await doc.getPage(i);
-          const content = await page.getTextContent();
-          const pageText = content.items.map((item: { str?: string }) => item.str ?? "").join(" ");
-          pages.push(pageText);
-        }
-        text = pages.join("\n\n");
-      } catch {
         return NextResponse.json({
-          error: "Failed to extract text from PDF. The file may be corrupted or contain only scanned images.",
-        }, { status: 422 });
+          error: "PDF parsing library not available. Run: npm install pdfjs-dist",
+        }, { status: 501 });
       }
     } else {
       let mammoth: any;
@@ -54,11 +47,9 @@ export async function POST(request: NextRequest) {
           error: "DOCX parsing library not available. Run: npm install mammoth",
         }, { status: 501 });
       }
-
       try {
-        const buf = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ buffer: Buffer.from(buf) });
-        text = result.value;
+        const result = await mammoth.extractRawText({ buffer: Buffer.from(buffer) });
+        rawText = result.value;
       } catch {
         return NextResponse.json({
           error: "Failed to extract text from DOCX. The file may be corrupted.",
@@ -66,12 +57,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (!text.trim()) {
-      return NextResponse.json({ error: "No text could be extracted from the file" }, { status: 422 });
+    if (!rawText.trim() || rawText.length < 20) {
+      return NextResponse.json({
+        error: "Could not extract text from this file. Please paste the text manually using the 'Create from Scratch' tab.",
+      }, { status: 422 });
     }
 
-    return NextResponse.json({ text: text.slice(0, 10000) });
-  } catch {
-    return NextResponse.json({ error: "Failed to parse file" }, { status: 500 });
+    // ── Step 2: Parse into structured data ───────────────────────────────
+    const quality = rawText.length > 500 ? "high" : "low";
+    const { parsed } = await parseCV(rawText, { layout, numPages, quality });
+
+    return NextResponse.json({ parsed });
+
+  } catch (error) {
+    console.error("[parse-cv] error:", error);
+    return NextResponse.json({
+      error: "Failed to parse file. Please paste the text manually using the 'Create from Scratch' tab.",
+    }, { status: 500 });
   }
 }
