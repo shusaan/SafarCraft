@@ -1,12 +1,12 @@
 /**
- * AI-first CV parser with regex fallback.
- * Uses OpenAI (or compatible) to semantically parse messy PDF-extracted text.
- * Falls back to regex-based extraction when no API key is configured.
+ * Regex-based CV parser.
+ * Uses pattern matching to extract structured data from PDF/DOCX text.
+ * AI parsing is disabled for reliability and speed.
  */
 
-import { generateText } from "ai";
-// @ts-expect-error — @ai-sdk/openai optional
-import { openai } from "@ai-sdk/openai";
+// AI parsing disabled - using regex-based extraction only
+// import { generateText } from "ai";
+// import { openai } from "@ai-sdk/openai";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -85,165 +85,24 @@ export interface ParseCVOptions {
   quality?: "high" | "low";
 }
 
-// ─── AI System Prompt ──────────────────────────────────────────────────────
-
-const AI_SYSTEM_PROMPT = `You are an expert Resume Parsing Engine. Your task is to convert raw, messy text extracted from a PDF resume into a strict, clean JSON structure.
-
-RULES:
-1. **NO HALLUCINATION**: Only extract information that is explicitly stated in the text. If a field is missing, set it to \`null\` or an empty array \`[]\`.
-2. **Handle Jumbled Layouts**: The input text may have columns rendered incorrectly (e.g., left column first, then right column). Use semantic reasoning to re-connect dates to job titles and descriptions.
-3. **Date Standardization**: Convert all dates to \`YYYY-MM\` format. If only a year is given (e.g., "2020"), use \`2020-01\`. If a range (e.g., "Jan 2020 - Present"), output \`{ start: "2020-01", end: null }\`.
-4. **Skill Extraction**: Extract hard skills (technologies, frameworks, languages) and soft skills separately. Do not include generic buzzwords like "Team Player" unless they are explicitly listed in a "Skills" section.
-5. **Education**: Include degree, institution, and graduation year.
-6. **Clean Text**: Remove excessive whitespace, random dashes (-----), and non-printable characters.
-7. **Output Format**: Respond ONLY with valid JSON. Do not wrap it in markdown code blocks. The JSON must match the schema exactly.`;
-
-// ─── AI-powered parsing ─────────────────────────────────────────────────────
-
-/** Schema returned by the AI */
-interface AIParseResult {
-  name: string | null;
-  email: string | null;
-  phone: string | null;
-  location: string | null;
-  linkedin: string | null;
-  summary: string | null;
-  skills: { hard: string[]; soft: string[] };
-  experience: Array<{
-    company: string;
-    title: string;
-    start_date: string | null;
-    end_date: string | null;
-    current: boolean;
-    description: string;
-  }>;
-  education: Array<{
-    institution: string;
-    degree: string;
-    field_of_study: string | null;
-    graduation_date: string | null;
-  }>;
-  certifications: string[] | null;
-}
-
-function mapAIResult(ai: AIParseResult): ParsedCV {
-  const skillGroups: ParsedSkillGroup[] = [];
-  if (ai.skills.hard?.length) skillGroups.push({ category: "Technical Skills", skills: ai.skills.hard });
-  if (ai.skills.soft?.length) skillGroups.push({ category: "Soft Skills", skills: ai.skills.soft });
-
-  return {
-    name:     ai.name ?? "",
-    email:    ai.email ?? "",
-    phone:    ai.phone ?? "",
-    location: ai.location ?? "",
-    linkedin: ai.linkedin ?? "",
-    github:   "",
-    website:  "",
-    summary:  ai.summary ?? "",
-    skillGroups,
-    experience: (ai.experience ?? []).map((e) => ({
-      company:      e.company ?? "",
-      position:     e.title ?? "",
-      location:     "",
-      startDate:    e.start_date ?? "",
-      endDate:      e.end_date ?? "",
-      current:      e.current ?? false,
-      bullets:      (e.description ?? "").split(/[.;]\s*/).filter(Boolean),
-      technologies: [],
-    })),
-    education: (ai.education ?? []).map((e) => ({
-      institution: e.institution ?? "",
-      degree:      e.degree ?? "",
-      field:       e.field_of_study ?? "",
-      location:    "",
-      startDate:   "",
-      endDate:     e.graduation_date ?? "",
-      gpa:         "",
-      honors:      [],
-    })),
-    projects: [],
-    certifications: (ai.certifications ?? []).map((c) => ({
-      name: typeof c === "string" ? c : "",
-      issuer: "", date: "", url: "",
-    })),
-    languages: [],
-  };
-}
+// ─── Main export function ──────────────────────────────────────────────────
 
 export async function parseCV(
   rawText: string,
   options?: ParseCVOptions,
 ): Promise<ParseResult> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) {
-    return parseCVFallback(rawText);
-  }
-
-  const layout  = options?.layout ?? "single";
-  const pages   = options?.numPages ?? 1;
-  const quality = options?.quality ?? (rawText.length > 500 ? "high" : "low");
-
-  try {
-    const userPrompt = `Parse the following raw resume text. Pay special attention to reconstructing lines that may have been split by PDF extraction errors.
-
-Debug context:
-- Layout detected: ${layout}
-- Number of pages: ${pages}
-- Extraction quality: ${quality}
-
-Raw text:
-"""${rawText}"""
-
-Output JSON schema:
-{
-  "name": "string | null",
-  "email": "string | null",
-  "phone": "string | null",
-  "location": "string | null",
-  "linkedin": "string | null",
-  "summary": "string | null",
-  "skills": { "hard": ["string"], "soft": ["string"] },
-  "experience": [
-    {
-      "company": "string",
-      "title": "string",
-      "start_date": "YYYY-MM | null",
-      "end_date": "YYYY-MM | null",
-      "current": "boolean",
-      "description": "string (concatenate all bullet points into a single paragraph)"
-    }
-  ],
-  "education": [
-    {
-      "institution": "string",
-      "degree": "string",
-      "field_of_study": "string | null",
-      "graduation_date": "YYYY-MM | null"
-    }
-  ],
-  "certifications": ["string"] | null
-}`;
-
-    const { text } = await generateText({
-      model: openai("gpt-4o-mini"),
-      system: AI_SYSTEM_PROMPT,
-      prompt: userPrompt,
-      temperature: 0.0,
-    });
-
-    const aiResult: AIParseResult = JSON.parse(text);
-    return { parsed: mapAIResult(aiResult) };
-  } catch {
-    return parseCVFallback(rawText);
-  }
+  // AI parsing disabled - using regex-based extraction for better reliability and speed
+  return parseCVFallback(rawText, options);
 }
 
-// ─── Fallback (regex) — helpers ─────────────────────────────────────────────
+// ─── Regex patterns and helpers ────────────────────────────────────────────
 
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[a-z]{2,}/i;
-const PHONE_RE = /(\+?[\d][\d\s\-().]{6,}[\d])/;
-const URL_RE   = /(?:https?:\/\/)?(?:www\.)?(linkedin\.com\/in\/[\w-]+|github\.com\/[\w-]+)/i;
-const BULLET_RE = /^[•·○●\-–—*]\s*/;
+const PHONE_RE = /(\+?[\d][\d\s\-().]{7,}[\d])/;
+const URL_RE   = /(?:https?:\/\/)?(?:www\.)?(linkedin\.com\/in\/[\w-]+|github\.com\/[\w-]+|[\w-]+\.[\w-]+\.[a-z]{2,})/i;
+const BULLET_RE = /^[•·○●\-–—*►▸]\s*/;
+const GITHUB_RE = /(?:https?:\/\/)?(?:www\.)?github\.com\/[\w-]+/i;
+const LINKEDIN_RE = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
 
 const MONTH_MAP: Record<string, string> = {
   jan:"01", feb:"02", mar:"03", apr:"04", may:"05", jun:"06",
@@ -269,14 +128,14 @@ function toYYYYMM(raw: string): string {
 }
 
 const SECTION_HEADERS = [
-  "SUMMARY", "PROFILE", "OBJECTIVE", "ABOUT",
-  "EXPERIENCE", "WORK EXPERIENCE", "PROFESSIONAL EXPERIENCE", "EMPLOYMENT HISTORY", "EMPLOYMENT",
-  "EDUCATION", "ACADEMIC",
-  "SKILLS", "TECHNICAL SKILLS", "SKILLS & TECHNOLOGIES", "CORE COMPETENCIES", "KEY SKILLS",
-  "PROJECTS", "PERSONAL PROJECTS", "SIDE PROJECTS",
-  "CERTIFICATIONS", "CERTIFICATES", "CREDENTIALS",
-  "LANGUAGES",
-  "AWARDS", "PUBLICATIONS", "VOLUNTEER", "INTERESTS", "REFERENCES",
+  "SUMMARY", "PROFILE", "OBJECTIVE", "ABOUT", "PROFESSIONAL SUMMARY",
+  "EXPERIENCE", "WORK EXPERIENCE", "PROFESSIONAL EXPERIENCE", "EMPLOYMENT HISTORY", "EMPLOYMENT", "WORK HISTORY",
+  "EDUCATION", "ACADEMIC", "ACADEMIC BACKGROUND", "EDUCATIONAL BACKGROUND",
+  "SKILLS", "TECHNICAL SKILLS", "SKILLS & TECHNOLOGIES", "CORE COMPETENCIES", "KEY SKILLS", "COMPETENCIES",
+  "PROJECTS", "PERSONAL PROJECTS", "SIDE PROJECTS", "KEY PROJECTS",
+  "CERTIFICATIONS", "CERTIFICATES", "CREDENTIALS", "LICENSES",
+  "LANGUAGES", "LANGUAGE SKILLS",
+  "AWARDS", "HONORS", "PUBLICATIONS", "VOLUNTEER", "VOLUNTEERING", "INTERESTS", "REFERENCES", "HOBBIES",
 ] as const;
 
 const SECTION_RE = new RegExp(
@@ -287,15 +146,22 @@ const SECTION_RE = new RegExp(
 function splitSections(lines: string[]): Record<string, string[]> {
   const sections: Record<string, string[]> = { HEADER: [] };
   let current = "HEADER";
+  
   for (const line of lines) {
-    if (SECTION_RE.test(line)) {
-      current = line.replace(/:$/, "").trim().toUpperCase();
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    
+    // Check if this line is a section header
+    if (SECTION_RE.test(trimmed)) {
+      current = trimmed.replace(/[:|\-–—]/g, "").trim().toUpperCase();
       if (!sections[current]) sections[current] = [];
     } else {
+      // Also check for underlined headers (header followed by ====== or ------)
       if (!sections[current]) sections[current] = [];
-      sections[current]!.push(line);
+      sections[current]!.push(trimmed);
     }
   }
+  
   return sections;
 }
 
@@ -309,8 +175,15 @@ function getSection(sections: Record<string, string[]>, ...keys: string[]): stri
 
 // ─── Main parser (regex fallback) ──────────────────────────────────────────
 
-function parseCVFallback(rawText: string): ParseResult {
-  const lines = rawText.split("\n").map((l) => l.trim()).filter(Boolean);
+export function parseCVFallback(rawText: string, options?: ParseCVOptions): ParseResult {
+  // Clean and normalize the text
+  const cleanedText = rawText
+    .replace(/\r\n/g, "\n")
+    .replace(/\t/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  
+  const lines = cleanedText.split("\n").map((l) => l.trim()).filter(Boolean);
   const sections = splitSections(lines);
 
   const name     = parseName(lines);
@@ -353,10 +226,21 @@ function parseCVFallback(rawText: string): ParseResult {
 
 function parseName(lines: string[]): string {
   // First non-empty line that doesn't look like contact info
-  for (const line of lines.slice(0, 5)) {
-    if (!EMAIL_RE.test(line) && !PHONE_RE.test(line) && line.length < 60) {
-      return line;
-    }
+  for (const line of lines.slice(0, 8)) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    
+    // Skip if looks like email, phone, or URL
+    if (EMAIL_RE.test(trimmed) || PHONE_RE.test(trimmed) || URL_RE.test(trimmed)) continue;
+    
+    // Skip if too long (likely not a name)
+    if (trimmed.length > 60) continue;
+    
+    // Skip if contains section headers
+    if (SECTION_RE.test(trimmed)) continue;
+    
+    // First line that passes all checks is likely the name
+    return trimmed;
   }
   return "";
 }
@@ -368,12 +252,25 @@ function parseLocation(headerText: string, fullText: string): string {
 
 function parseURLs(text: string): { linkedin: string; github: string; website: string } {
   let linkedin = "", github = "", website = "";
-  for (const m of text.matchAll(new RegExp(URL_RE.source, "gi"))) {
-    if (m[0].includes("linkedin")) linkedin = m[0];
-    else if (m[0].includes("github")) github = m[0];
+  
+  // Find LinkedIn
+  const linkedinMatch = text.match(LINKEDIN_RE);
+  if (linkedinMatch) {
+    linkedin = linkedinMatch[0];
+    if (!linkedin.startsWith("http")) linkedin = "https://" + linkedin;
   }
-  const web = text.match(/https?:\/\/(?!linkedin|github)[\w.-]+\.[a-z]{2,}[\w/.-]*/i);
-  if (web) website = web[0];
+  
+  // Find GitHub
+  const githubMatch = text.match(GITHUB_RE);
+  if (githubMatch) {
+    github = githubMatch[0];
+    if (!github.startsWith("http")) github = "https://" + github;
+  }
+  
+  // Find personal website (not LinkedIn or GitHub)
+  const webMatch = text.match(/https?:\/\/(?!linkedin|github)[\w.-]+\.[a-z]{2,}[\w/.-]*/i);
+  if (webMatch) website = webMatch[0];
+  
   return { linkedin, github, website };
 }
 
@@ -421,7 +318,11 @@ function parseExperience(lines: string[]): ParsedExperience[] {
   const entries: ParsedExperience[] = [];
   let current: ParsedExperience | null = null;
 
-  const flush = () => { if (current) entries.push(current); };
+  const flush = () => { 
+    if (current && (current.position || current.company)) {
+      entries.push(current); 
+    }
+  };
 
   for (let i = 0; i < lines.length; i++) {
     const line  = lines[i]!;
@@ -447,26 +348,38 @@ function parseExperience(lines: string[]): ParsedExperience[] {
       continue;
     }
 
-    // Company/location line  e.g.  "KM.ON by Karyl Mayer, Hong Kong"
-    // Heuristic: short line, no dates, follows a job title already set
-    if (current && !current.company && stripped.length < 80) {
-      current.company  = stripped.split(",")[0]?.trim() ?? stripped;
-      current.location = stripped.includes(",") ? stripped.split(",").slice(1).join(",").trim() : "";
+    // Check if this looks like a company/location line (contains comma or location keywords)
+    const hasLocationKeywords = /\b(USA|Canada|UK|US|Remote|Hybrid|On-site)\b/i.test(stripped);
+    const hasComma = stripped.includes(",");
+    
+    if (current && !current.company && stripped.length < 100 && (hasComma || hasLocationKeywords)) {
+      const parts = stripped.split(",");
+      current.company  = parts[0]?.trim() ?? stripped;
+      current.location = parts.length > 1 ? parts.slice(1).join(",").trim() : "";
       continue;
     }
 
     // New job title line — looks like capitalised words, not a bullet
-    if (/^[A-Z]/.test(stripped) && stripped.length < 80) {
+    // Better heuristic: check if it's reasonably short and looks like a title
+    if (/^[A-Z]/.test(stripped) && stripped.length < 100 && stripped.length > 2) {
       flush();
       current = {
-        company: "", position: stripped, location: "",
-        startDate: "", endDate: "", current: false,
-        bullets: [], technologies: [],
+        company: "", 
+        position: stripped, 
+        location: "",
+        startDate: "", 
+        endDate: "", 
+        current: false,
+        bullets: [], 
+        technologies: [],
       };
       continue;
     }
 
-    if (current) current.bullets.push(stripped);
+    // If we have a current entry but no bullets yet, treat as description/bullet
+    if (current && !current.bullets.length) {
+      current.bullets.push(stripped);
+    }
   }
 
   flush();
@@ -477,35 +390,65 @@ function parseEducation(lines: string[]): ParsedEducation[] {
   const entries: ParsedEducation[] = [];
   let current: ParsedEducation | null = null;
 
-  const flush = () => { if (current) entries.push(current); };
+  const flush = () => { 
+    if (current && (current.institution || current.degree)) {
+      entries.push(current); 
+    }
+  };
 
   for (const line of lines) {
     const stripped = line.replace(BULLET_RE, "").trim();
     if (!stripped) continue;
 
-    if (/gpa/i.test(stripped)) {
+    // Check for GPA
+    if (/gpa|grade/i.test(stripped)) {
       const gm = stripped.match(/[\d.]+/);
-      if (current && gm) { current.gpa = gm[0]; continue; }
+      if (current && gm) { 
+        current.gpa = gm[0]; 
+        continue; 
+      }
     }
 
-    if (!DATE_RANGE_RE.test(stripped) && /\b(20|19)\d{2}\b/.test(stripped)) {
-      const dm = stripped.match(/(\d{4}[-/]\d{2}|\w+ \d{4})\s*[-–—]\s*(\d{4}[-/]\d{2}|\w+ \d{4}|present)/i);
+    // Check for date ranges
+    if (/\b(20|19)\d{2}\b/.test(stripped)) {
+      const dm = stripped.match(/(\d{4}[-/]\d{2}|\w+\s+\d{4}|\d{4})\s*[-–—]?\s*(\d{4}[-/]\d{2}|\w+\s+\d{4}|\d{4}|present|current)?/i);
       if (dm && current) {
         current.startDate = toYYYYMM(dm[1]!);
-        current.endDate   = toYYYYMM(dm[2]!);
+        current.endDate   = dm[2] ? toYYYYMM(dm[2]) : "";
         continue;
       }
     }
 
-    if (/bachelor|master|phd|b\.sc|m\.sc|b\.s\b|m\.s\b|b\.a\b|m\.a\b|b\.e\b|m\.e\b|b\.tech|m\.tech|diploma|associate/i.test(stripped)) {
+    // Check for degree
+    if (/bachelor|master|phd|doctorate|b\.sc|m\.sc|b\.s\b|m\.s\b|b\.a\b|m\.a\b|b\.e\b|m\.e\b|b\.tech|m\.tech|diploma|associate|degree/i.test(stripped)) {
       flush();
-      const field = stripped.match(/(?:of|in)\s+([^,]+)/i)?.[1]?.trim() ?? "";
-      current = { institution: "", degree: stripped, field, location: "", startDate: "", endDate: "", gpa: "", honors: [] };
+      const field = stripped.match(/(?:of|in)\s+([^,\d]+)/i)?.[1]?.trim() ?? "";
+      current = { 
+        institution: "", 
+        degree: stripped, 
+        field, 
+        location: "", 
+        startDate: "", 
+        endDate: "", 
+        gpa: "", 
+        honors: [] 
+      };
     } else if (current && !current.institution) {
+      // This is likely the institution name
       current.institution = stripped;
-    } else {
+    } else if (!current) {
+      // Start with institution if no degree found yet
       flush();
-      current = { institution: stripped, degree: "", field: "", location: "", startDate: "", endDate: "", gpa: "", honors: [] };
+      current = { 
+        institution: stripped, 
+        degree: "", 
+        field: "", 
+        location: "", 
+        startDate: "", 
+        endDate: "", 
+        gpa: "", 
+        honors: [] 
+      };
     }
   }
 
