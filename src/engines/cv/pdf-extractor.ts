@@ -117,28 +117,39 @@ function findColumnSplit(items: PDFTextItem[]): number | null {
   const lineStarts = getLineStartX(items);
   if (lineStarts.length < 6) return null;
 
-  const xs    = lineStarts.sort((a, b) => a - b);
-  const xMin  = xs[0]!;
-  const xMax  = xs[xs.length - 1]!;
-  const span  = xMax - xMin;
-  if (span < 100) return null;
-
-  // Find largest gap between adjacent x-start values in the 25–75% zone
-  const lo = xMin + span * 0.25;
-  const hi = xMin + span * 0.75;
-  const mid = xs.filter((x) => x >= lo && x <= hi);
-  if (mid.length < 2) return null;
-
-  let bestGap = 0, bestSplit = -1;
-  for (let i = 1; i < mid.length; i++) {
-    const gap = mid[i]! - mid[i - 1]!;
-    if (gap > bestGap) { bestGap = gap; bestSplit = (mid[i]! + mid[i - 1]!) / 2; }
+  // Bucket line-starts to 5pt clusters (so we collapse sub-pixel jitter).
+  const buckets = new Map<number, number>();
+  for (const x of lineStarts) {
+    const k = Math.round(x / 5) * 5;
+    buckets.set(k, (buckets.get(k) ?? 0) + 1);
   }
 
-  // Gap must be meaningful — at least 8% of page span
-  if (bestGap < span * 0.08 || bestSplit < 0) return null;
+  const sorted = [...buckets.entries()].sort((a, b) => a[0] - b[0]);
+  if (sorted.length < 2) return null;
 
-  // Validate: right-side items must be ≥15% of total
+  const xMin = sorted[0]![0];
+  const xMax = sorted[sorted.length - 1]![0];
+  const span = xMax - xMin;
+  if (span < 100) return null;
+
+  // Find the largest gap between adjacent cluster centres. For a real
+  // two-column layout the left margin cluster and right column cluster will
+  // dominate this gap.
+  let bestGap = 0;
+  let bestSplit = -1;
+  for (let i = 1; i < sorted.length; i++) {
+    const gap = sorted[i]![0] - sorted[i - 1]![0];
+    if (gap > bestGap) {
+      bestGap = gap;
+      bestSplit = (sorted[i]![0] + sorted[i - 1]![0]) / 2;
+    }
+  }
+
+  // Gap must be at least 15% of the page span — narrow gaps are just
+  // indented lists, not columns.
+  if (bestGap < span * 0.15 || bestSplit < 0) return null;
+
+  // Validate: right-of-split items must be ≥15% of all items.
   const rightCount = items.filter((it) => it.x >= bestSplit).length;
   if (rightCount / items.length < 0.15) return null;
 
@@ -160,6 +171,31 @@ function getLineStartX(items: PDFTextItem[]): number[] {
 
 const LINE_Y_TOLERANCE = 3;  // pt — items within 3pt vertically = same line
 
+// Patterns that indicate Chrome (or common browsers / print drivers) page
+// headers/footers. We strip these from the first/last ~2 lines of each page
+// before they pollute parsing.
+const BROWSER_HEADER_RE = /^\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}\s*(?:AM|PM)?\s+/i;
+const BROWSER_FOOTER_RE = /^fi\s*le:\/\/\S+\s+\d+\/\d+\s*$/i;
+const PAGE_NUM_RE       = /^(?:page\s+)?\d+\s*(?:\/\s*\d+|of\s+\d+)?\s*$/i;
+
+function stripHeaderFooter(lines: string[]): string[] {
+  if (lines.length === 0) return lines;
+  const result = [...lines];
+  // Strip from top (header) — typically 1-2 lines
+  while (result.length > 0 && (BROWSER_HEADER_RE.test(result[0]!) || PAGE_NUM_RE.test(result[0]!))) {
+    result.shift();
+  }
+  // Strip from bottom (footer) — typically 1-2 lines
+  while (
+    result.length > 0 &&
+    (BROWSER_FOOTER_RE.test(result[result.length - 1]!) ||
+      PAGE_NUM_RE.test(result[result.length - 1]!))
+  ) {
+    result.pop();
+  }
+  return result;
+}
+
 function renderPage(items: PDFTextItem[], split: number | null): string {
   if (split === null) return renderColumn(items);
 
@@ -170,6 +206,9 @@ function renderPage(items: PDFTextItem[], split: number | null): string {
   const leftText  = renderColumn(left);
   const rightText = renderColumn(right);
 
+  // For two-column pages, only strip the very first line (page header) and
+  // very last line (page footer) of the WHOLE page, not of each column
+  // independently — they're usually page-wide.
   return leftText + (rightText.trim() ? "\n\n" + rightText : "");
 }
 
@@ -183,7 +222,7 @@ function renderColumn(items: PDFTextItem[]): string {
     lines.get(yk)!.push(it);
   }
 
-  return Array.from(lines.entries())
+  const rendered = Array.from(lines.entries())
     .sort(([ya], [yb]) => ya - yb)                         // top → bottom
     .map(([, its]) =>
       its
@@ -192,6 +231,7 @@ function renderColumn(items: PDFTextItem[]): string {
         .join(" ")
         .trim()
     )
-    .filter((l) => l.length > 0)
-    .join("\n");
+    .filter((l) => l.length > 0);
+
+  return stripHeaderFooter(rendered).join("\n");
 }
