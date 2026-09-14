@@ -12,7 +12,7 @@ const tips = [
   },
   {
     title: "Analyse and optimise",
-    body: "Use the ATS tool to score your resume against job descriptions. The AI assistant can improve your bullets.",
+    body: "Use the ATS tool to score your resume against job descriptions. Use Quick Actions to swap weak verbs, add metrics, and rewrite bullets.",
   },
   {
     title: "Export when ready",

@@ -8,7 +8,7 @@ import {
   GitBranch,
   FileText,
   Target,
-  Bot,
+  Zap as ZapIcon,
   Download,
   Palette,
   CheckCircle,
@@ -27,13 +27,13 @@ const features = [
     icon: Target,
     title: "ATS Analysis",
     description:
-      "Detailed ATS scoring with per-deduction explanations and actionable recommendations to push past 90.",
+      "Detailed ATS scoring across 5 axes with per-deduction explanations and actionable recommendations to push past 90.",
   },
   {
-    icon: Bot,
-    title: "AI Assistant",
+    icon: ZapIcon,
+    title: "Smart Local Helpers",
     description:
-      "Improve bullets, rewrite summaries, fix grammar, and generate stronger action verbs with a single click.",
+      "Action-verb swap, bullet rewriter, metric prompter, grammar checker — instant, offline, no API key.",
   },
   {
     icon: GitBranch,
@@ -45,7 +45,7 @@ const features = [
     icon: Download,
     title: "Multiple Exports",
     description:
-      "Export to PDF, DOCX, JSON Resume, and Markdown — all ATS compliant and ready to send.",
+      "Export to PDF, DOCX, JSON Resume, Markdown, plain TXT — all ATS compliant and ready to send.",
   },
   {
     icon: Palette,
@@ -66,7 +66,7 @@ const steps = [
     number: "02",
     title: "Analyse & optimise",
     description:
-      "Run ATS analysis, let AI improve your bullets, and match against job descriptions.",
+      "Run ATS analysis, use Quick Actions to swap weak verbs, add metrics, and match against job descriptions.",
   },
   {
     number: "03",
@@ -129,17 +129,17 @@ export default function HomePage() {
                 className="animate-fade-up delay-100 font-extrabold tracking-tight leading-tight"
                 style={{ fontSize: "clamp(2.5rem, 8vw, 4.5rem)" }}
               >
-                Free AI CV Maker &ndash; Build, Optimize, and Export{" "}
+                Free ATS Resume Builder &ndash; Build, Optimise, and Export{" "}
                 <span className="text-primary">ATS-Friendly Resumes</span> Instantly
               </h1>
 
               <h2 className="animate-fade-up delay-150 mt-4 text-lg sm:text-xl font-semibold text-muted-foreground">
-                Enter your details, analyse with AI, and export in 5 simple steps
+                Edit locally, analyse with 5-axis ATS scoring, and export in 5 simple steps
               </h2>
 
               <p className="animate-fade-up delay-200 mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-                Open-source resume platform for software engineers. Real-time editing, AI assistance,
-                GitHub intelligence, and ATS analysis — all free, all yours.
+                Open-source resume platform for software engineers. Real-time editing, smart local helpers,
+                GitHub intelligence, and ATS analysis — all free, all yours, 100% local.
               </p>
 
               <div className="animate-fade-up delay-300 mt-8 flex flex-wrap items-center justify-center gap-3">

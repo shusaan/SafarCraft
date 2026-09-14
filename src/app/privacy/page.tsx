@@ -49,20 +49,11 @@ export default function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-foreground">AI Processing</h2>
-          <p className="mt-2">
-            If you choose to use AI features, the text you submit is sent directly to OpenAI&apos;s API for
-            processing. No data is retained by CareerForge AI servers. You should not submit sensitive or
-            confidential information to AI features.
-          </p>
-        </section>
-
-        <section>
           <h2 className="text-lg font-semibold text-foreground">Third-Party Services</h2>
           <p className="mt-2">
             We do not sell, trade, or transfer your information to third parties. The only third-party
-            services used are Google Analytics (for anonymized usage statistics) and OpenAI (for AI
-            features, if enabled).
+            service used is Google Analytics (for anonymized usage statistics). Optional integrations
+            (Google Drive export) only connect when you explicitly enable them.
           </p>
         </section>
 

@@ -41,26 +41,6 @@ export type KeywordMatch = {
   importance: "critical" | "important" | "optional";
 };
 
-export type AIAction =
-  | "improve-bullet"
-  | "rewrite-summary"
-  | "check-grammar"
-  | "suggest-achievements"
-  | "generate-verbs"
-  | "star-convert"
-  | "parse-cv";
-
-export type AIRequest = {
-  action: AIAction;
-  content: string;
-  context?: string;
-};
-
-export type AIResponse = {
-  result: string;
-  suggestions?: string[];
-};
-
 export type JDParseResult = {
   skills: string[];
   technologies: string[];

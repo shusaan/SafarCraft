@@ -11,7 +11,7 @@ import { ResumePreview } from "./resume-preview";
 import { ResumeList } from "./resume-list";
 import { TemplateSelector } from "@/components/template-selector/template-selector";
 import { ATSPanel } from "@/components/ats/ats-panel";
-import { AIAssistant } from "@/components/ai/ai-assistant";
+import { QuickActions } from "@/components/builder/quick-actions";
 import { GitHubImport } from "@/components/github/github-import";
 import { ExportPanel } from "@/components/export/export-panel";
 import { JDAnalyzer } from "@/components/jd-analyzer/jd-analyzer";
@@ -32,10 +32,10 @@ import { cn } from "@/lib/utils";
 import {
   FileText, Undo2, Redo2, Eye, EyeOff, Palette, ScrollText,
   Sparkles, GitBranch, Download, Target, Globe, History, Sun, Moon,
-  GitCompare, Menu, X, HelpCircle, Clock, Save,
+  GitCompare, Menu, X, HelpCircle, Clock, Save, Zap,
 } from "lucide-react";
 
-type Panel = "editor" | "templates" | "ats" | "ai" | "github" | "export" | "jd" | "portfolio" | "compare";
+type Panel = "editor" | "templates" | "ats" | "quick" | "github" | "export" | "jd" | "portfolio" | "compare";
 
 const panelGroups = [
   {
@@ -48,10 +48,10 @@ const panelGroups = [
   {
     label: "Enhance",
     panels: [
-      { id: "ats"    as Panel, label: "ATS",    icon: ScrollText },
-      { id: "ai"     as Panel, label: "AI",     icon: Sparkles   },
-      { id: "github" as Panel, label: "GitHub", icon: GitBranch     },
-      { id: "jd"     as Panel, label: "JD",     icon: Target     },
+      { id: "ats"    as Panel, label: "ATS",       icon: ScrollText },
+      { id: "quick"  as Panel, label: "Quick Actions", icon: Zap    },
+      { id: "github" as Panel, label: "GitHub",    icon: GitBranch  },
+      { id: "jd"     as Panel, label: "JD",        icon: Target     },
     ],
   },
   {
@@ -160,8 +160,6 @@ export function BuilderLayout() {
   const isDirty    = useResumeStore((s) => s.isDirty);
   const undo       = useResumeStore((s) => s.undo);
   const redo       = useResumeStore((s) => s.redo);
-  const data       = useResumeStore((s) => s.data);
-  const updateData = useResumeStore((s) => s.updateData);
   const theme      = useUIStore((s) => s.theme);
   const setTheme   = useUIStore((s) => s.setTheme);
 
@@ -260,7 +258,7 @@ export function BuilderLayout() {
         );
       case "templates":  return <TemplateSelector />;
       case "ats":        return <ATSPanel />;
-      case "ai":         return <AIAssistant />;
+      case "quick":      return <QuickActions />;
       case "github":     return <GitHubImport />;
       case "export":     return <ExportPanel />;
       case "jd":         return <JDAnalyzer />;

@@ -1,12 +1,8 @@
 /**
  * Regex-based CV parser.
  * Uses pattern matching to extract structured data from PDF/DOCX text.
- * AI parsing is disabled for reliability and speed.
+ * 100% local, offline, zero-cost.
  */
-
-// AI parsing disabled - using regex-based extraction only
-// import { generateText } from "ai";
-// import { openai } from "@ai-sdk/openai";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 

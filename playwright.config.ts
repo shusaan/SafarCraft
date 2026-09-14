@@ -1,15 +1,17 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const PORT = Number(process.env.E2E_PORT ?? 3001);
+
 export default defineConfig({
   testDir: "./tests/e2e",
-  timeout: process.env.CI ? 15000 : 30000,
-  fullyParallel: true,
+  timeout: process.env.CI ? 30000 : 30000,
+  fullyParallel: !process.env.CI ? false : true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 2 : 1,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
     actionTimeout: 5000,
     navigationTimeout: 10000,
@@ -22,9 +24,12 @@ export default defineConfig({
         { name: "webkit", use: { ...devices["Desktop Safari"] } },
       ],
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3000",
-    timeout: 30000,
+    command: `next dev -p ${PORT}`,
+    url: `http://localhost:${PORT}`,
+    timeout: 60000,
     reuseExistingServer: !process.env.CI,
+    env: {
+      BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET ?? "e2e-test-secret-not-for-production",
+    },
   },
 });

@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type { ResumeData, ResumeLayout } from "@/types";
 export type ResumeGoal = "startup" | "faang" | "government" | "academia";
 import { defaultResumeData, defaultResumeLayout } from "@/types";
+import { sampleResumeData, sampleResumeLayout } from "@/data/sample-resume";
 
 type HistoryEntry = {
   data: ResumeData;
@@ -179,6 +180,19 @@ export const useResumeStore = create<ResumeState>()(
         resumeGoal: state.resumeGoal,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        // First-visit seed: if the persisted resume has no name, load the sample.
+        if (!state.data?.personal?.name && state.data?.personal) {
+          state.data = sampleResumeData;
+          state.layout = sampleResumeLayout;
+          state.history = [{ data: sampleResumeData, timestamp: Date.now() }];
+          state.historyIndex = 0;
+        }
+      },
     },
   ),
 );
+
+export const SAMPLE_DATA = sampleResumeData;
+export const SAMPLE_LAYOUT = sampleResumeLayout;

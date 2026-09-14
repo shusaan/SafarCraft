@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { ToastProviderWrapper } from "@/components/ui/toast";
+import { ServiceWorkerRegistrar } from "@/components/shared/service-worker-registrar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,37 +20,37 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Free AI CV Maker – CareerForge AI",
+    default: "CareerForge AI – Free ATS Resume Builder",
     template: "%s | CareerForge AI",
   },
   description:
-    "Free CV Generator and ATS Resume Checker — build, optimize, and export ATS-friendly resumes with AI assistance. No signup required, open-source, and privacy-first.",
+    "Free, open-source CV Generator and ATS Resume Checker — build, optimise, and export ATS-friendly resumes. 100% local, no signup required, privacy-first.",
   keywords: [
     "free CV maker",
     "ATS resume checker",
-    "AI resume builder",
     "resume builder",
     "ATS resume",
-    "AI resume",
     "open source resume",
     "software engineer resume",
     "CareerForge",
     "free CV generator",
+    "local-first",
+    "privacy-first",
   ],
   authors: [{ name: "CareerForge AI" }],
   openGraph: {
     type: "website",
     locale: "en_US",
     siteName: "CareerForge AI",
-    title: "Free AI CV Maker – CareerForge AI",
+    title: "CareerForge AI – Free ATS Resume Builder",
     description:
-      "Free CV Generator and ATS Resume Checker — build, optimize, and export ATS-friendly resumes with AI. Open-source, no signup required.",
+      "Free CV Generator and ATS Resume Checker — build, optimise, and export ATS-friendly resumes. Open-source, no signup required, 100% local.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Free AI CV Maker – CareerForge AI",
+    title: "CareerForge AI – Free ATS Resume Builder",
     description:
-      "Free CV Generator and ATS Resume Checker — build, optimize, and export ATS-friendly resumes with AI. Open-source, no signup required.",
+      "Free CV Generator and ATS Resume Checker — build, optimise, and export ATS-friendly resumes. Open-source, no signup required, 100% local.",
   },
   robots: {
     index: true,
@@ -72,7 +73,7 @@ const jsonLd = {
       applicationCategory: "Resume Builder",
       operatingSystem: "Web",
       description:
-        "Free AI CV Maker – Build, Optimize, and Export ATS-Friendly Resumes Instantly",
+        "CareerForge AI – Free, Open-Source ATS Resume Builder. Build, Optimise, and Export Resumes Locally.",
       offers: {
         "@type": "Offer",
         price: "0",
@@ -119,6 +120,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#6366f1" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -134,7 +137,10 @@ export default function RootLayout({
           >
             Skip to main content
           </a>
-          <ToastProviderWrapper>{children}</ToastProviderWrapper>
+          <ToastProviderWrapper>
+            <ServiceWorkerRegistrar />
+            {children}
+          </ToastProviderWrapper>
         </ThemeProvider>
 
         {/* Google Identity Services (Drive OAuth) */}
