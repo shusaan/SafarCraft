@@ -1,108 +1,73 @@
 import type { ResumeData } from "@/types";
 
-type JSONResume = {
-  basics: {
-    name: string;
-    email: string;
-    phone: string;
-    location: string;
-    url: string;
-    summary: string;
-    profiles: Array<{ network: string; url: string }>;
-  };
-  work: Array<{
-    name: string;
-    position: string;
-    location: string;
-    startDate: string;
-    endDate: string;
-    summary: string;
-    highlights: string[];
-  }>;
-  education: Array<{
-    institution: string;
-    area: string;
-    studyType: string;
-    startDate: string;
-    endDate: string;
-    gpa: string;
-  }>;
-  skills: Array<{
-    name: string;
-    keywords: string[];
-  }>;
-  certifications: Array<{
-    name: string;
-    issuer: string;
-    date: string;
-    url: string;
-  }>;
-  projects: Array<{
-    name: string;
-    description: string;
-    url: string;
-    highlights: string[];
-    roles: string[];
-  }>;
-  languages: Array<{
-    language: string;
-    fluency: string;
-  }>;
-};
-
 export function exportJSONResume(data: ResumeData): Blob {
-  const json: JSONResume = {
+  const out = {
+    $schema: "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
     basics: {
       name: data.personal.name,
+      label: data.personal.summary?.split(".")[0] ?? "",
       email: data.personal.email,
       phone: data.personal.phone,
-      location: data.personal.location,
-      url: data.personal.website,
-      summary: data.personal.summary,
+      location: data.personal.location
+        ? { address: data.personal.location, city: data.personal.location }
+        : undefined,
       profiles: [
-        ...(data.personal.linkedin ? [{ network: "LinkedIn", url: data.personal.linkedin }] : []),
-        ...(data.personal.github ? [{ network: "GitHub", url: data.personal.github }] : []),
-      ],
+        data.personal.linkedin && { network: "LinkedIn", url: data.personal.linkedin },
+        data.personal.github && { network: "GitHub", url: data.personal.github },
+        data.personal.website && { network: "Website", url: data.personal.website },
+      ].filter(Boolean),
+      summary: data.personal.summary,
     },
-    work: data.experience.map((exp) => ({
-      name: exp.company,
-      position: exp.position,
-      location: exp.location,
-      startDate: exp.startDate,
-      endDate: exp.endDate,
-      summary: "",
-      highlights: exp.bullets.filter(Boolean),
-    })),
-    education: data.education.map((edu) => ({
-      institution: edu.institution,
-      area: edu.field,
-      studyType: edu.degree,
-      startDate: edu.startDate,
-      endDate: edu.endDate,
-      gpa: edu.gpa,
-    })),
-    skills: data.skills.map((cat) => ({
-      name: cat.category,
-      keywords: cat.skills,
-    })),
-    certifications: data.certifications.map((cert) => ({
-      name: cert.name,
-      issuer: cert.issuer,
-      date: cert.date,
-      url: cert.url,
-    })),
-    projects: data.projects.map((proj) => ({
-      name: proj.name,
-      description: proj.description,
-      url: proj.url,
-      highlights: proj.highlights.filter(Boolean),
-      roles: proj.role ? [proj.role] : [],
-    })),
-    languages: data.languages.map((lang) => ({
-      language: lang.language,
-      fluency: lang.proficiency,
-    })),
+    work: data.experience
+      .filter((e) => e.company || e.position)
+      .map((e) => ({
+        name: e.company,
+        position: e.position,
+        location: e.location,
+        startDate: e.startDate,
+        endDate: e.current ? undefined : e.endDate || undefined,
+        highlights: e.bullets.filter(Boolean),
+        keywords: e.technologies,
+      })),
+    education: data.education
+      .filter((e) => e.institution)
+      .map((e) => ({
+        institution: e.institution,
+        area: e.field,
+        studyType: e.degree,
+        startDate: e.startDate,
+        endDate: e.endDate,
+        score: e.gpa,
+      })),
+    skills: data.skills.flatMap((c) =>
+      c.skills.map((skill) => ({ name: skill, level: undefined, keywords: [c.category] })),
+    ),
+    projects: data.projects
+      .filter((p) => p.name)
+      .map((p) => ({
+        name: p.name,
+        description: p.description,
+        highlights: p.highlights?.filter(Boolean) ?? [],
+        keywords: p.technologies,
+        url: p.url,
+        roles: p.role ? [p.role] : undefined,
+      })),
+    certificates: data.certifications
+      .filter((c) => c.name)
+      .map((c) => ({ name: c.name, issuer: c.issuer, date: c.date, url: c.url })),
+    languages: data.languages
+      .filter((l) => l.language)
+      .map((l) => ({ language: l.language, fluency: l.proficiency })),
+    publications: data.publications
+      ?.filter((p) => p.title)
+      .map((p) => ({
+        name: p.title,
+        publisher: p.publisher,
+        releaseDate: p.date,
+        url: p.url,
+        summary: p.description,
+      })),
   };
 
-  return new Blob([JSON.stringify(json, null, 2)], { type: "application/json" });
+  return new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
 }

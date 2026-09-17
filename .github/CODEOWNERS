@@ -1,0 +1,12 @@
+# CareerForge code ownership
+# Adjust maintainer handles as the project grows.
+
+* @yourusername
+
+# Engines — require core maintainer review
+/src/engines/ @yourusername
+/src/data/ @yourusername
+
+# Public docs
+/docs/ @yourusername
+/*.md @yourusername

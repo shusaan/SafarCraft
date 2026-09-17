@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useResumeStore } from "@/stores/resume-store";
 import { exportResume } from "@/engines/export/export-engine";
-import { authenticate, saveToDrive, pickFolder } from "@/engines/export/drive";
+import { authenticate, saveToDrive, pickFolder, createDriveFolder, getDriveFileName } from "@/engines/export/drive";
 import { trackEvent } from "@/engines/analytics";
 import type { ExportFormat, PaperSize } from "@/types";
 import { useToast } from "@/components/ui/toast";
@@ -61,20 +61,46 @@ export function ExportPanel() {
   const [driveFolder, setDriveFolder] = useState<string | null>(null);
   const [driveFolderName, setDriveFolderName] = useState<string | null>(null);
   const [pickingFolder, setPickingFolder] = useState(false);
+  const [creatingFolder, setCreatingFolder] = useState(false);
 
   const handleSelectFolder = async () => {
     setPickingFolder(true);
     try {
+      const token = await authenticate();
+      if (!token) return;
+
       const folderId = await pickFolder();
       if (folderId) {
         setDriveFolder(folderId);
-        setDriveFolderName("Selected folder");
+        const name = await getDriveFileName(folderId);
+        setDriveFolderName(name ?? "Selected folder");
         toast({ title: "Folder selected", variant: "success" });
       }
     } catch {
       toast({ title: "Folder selection failed", variant: "destructive" });
     } finally {
       setPickingFolder(false);
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    setCreatingFolder(true);
+    try {
+      const token = await authenticate();
+      if (!token) return;
+
+      const folder = await createDriveFolder("CareerForge Exports", driveFolder ?? undefined);
+      if (folder) {
+        setDriveFolder(folder.id);
+        setDriveFolderName(folder.name);
+        toast({ title: `Folder "${folder.name}" created`, variant: "success" });
+      } else {
+        toast({ title: "Failed to create folder", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Failed to create folder", variant: "destructive" });
+    } finally {
+      setCreatingFolder(false);
     }
   };
 
@@ -207,18 +233,29 @@ export function ExportPanel() {
       {/* Google Drive save */}
       <div className="border-t pt-4">
         <p className="mb-2 text-sm font-medium">Save to Cloud</p>
-        <Card className="cursor-pointer transition-colors hover:bg-muted/50">
+        <Card className="transition-colors hover:bg-muted/50">
           <CardContent className="flex items-center gap-4 p-4">
             <div className="rounded-lg bg-muted p-2">
               <Cloud className="h-5 w-5" />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 space-y-1">
               <span className="font-medium">Google Drive</span>
-              <p className="text-xs text-muted-foreground">Save your application package as {driveFolderName ? `.docx → ${driveFolderName}` : ".docx"}</p>
+              <p className="text-xs text-muted-foreground">
+                {driveFolderName
+                  ? `.docx → ${driveFolderName}`
+                  : "Select a folder or create one to save your application package"}
+              </p>
             </div>
             <div className="flex gap-1">
-              <Button variant="ghost" size="sm" disabled={pickingFolder} onClick={handleSelectFolder} title="Select Drive folder">
+              <Button variant="ghost" size="sm" disabled={pickingFolder || creatingFolder} onClick={handleSelectFolder} title="Select Drive folder">
                 <FolderOpen className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" disabled={pickingFolder || creatingFolder} onClick={handleCreateFolder} title="Create 'CareerForge Exports' folder">
+                {creatingFolder ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <span className="text-xs font-medium">+Folder</span>
+                )}
               </Button>
               <Button variant="ghost" size="sm" disabled={driveSaving} onClick={handleDriveSave}>
                 {driveSaving ? (

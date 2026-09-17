@@ -11,7 +11,7 @@ import { ResumePreview } from "./resume-preview";
 import { ResumeList } from "./resume-list";
 import { TemplateSelector } from "@/components/template-selector/template-selector";
 import { ATSPanel } from "@/components/ats/ats-panel";
-import { AIAssistant } from "@/components/ai/ai-assistant";
+import { QuickActions } from "@/components/builder/quick-actions";
 import { GitHubImport } from "@/components/github/github-import";
 import { ExportPanel } from "@/components/export/export-panel";
 import { JDAnalyzer } from "@/components/jd-analyzer/jd-analyzer";
@@ -20,7 +20,6 @@ import { VersionHistory } from "./version-history";
 import { VersionComparison } from "./version-comparison";
 import { OnboardingChecklist } from "./onboarding-checklist";
 import { ShortcutsHelp } from "./shortcuts-help";
-import { Celebration } from "./celebration";
 import { GoalSelector } from "./goal-selector";
 import { BuilderStepper, type StepperStep } from "./builder-stepper";
 import { WelcomeOverlay } from "./welcome-overlay";
@@ -28,16 +27,15 @@ import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { useAutosave } from "@/hooks/use-autosave";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { trackEvent } from "@/engines/analytics";
-import { getSampleResume } from "@/lib/sample-resume";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
   FileText, Undo2, Redo2, Eye, EyeOff, Palette, ScrollText,
   Sparkles, GitBranch, Download, Target, Globe, History, Sun, Moon,
-  GitCompare, Menu, X, HelpCircle, Clock, Save,
+  GitCompare, Menu, X, HelpCircle, Clock, Save, Zap,
 } from "lucide-react";
 
-type Panel = "editor" | "templates" | "ats" | "ai" | "github" | "export" | "jd" | "portfolio" | "compare";
+type Panel = "editor" | "templates" | "ats" | "quick" | "github" | "export" | "jd" | "portfolio" | "compare";
 
 const panelGroups = [
   {
@@ -50,10 +48,10 @@ const panelGroups = [
   {
     label: "Enhance",
     panels: [
-      { id: "ats"    as Panel, label: "ATS",    icon: ScrollText },
-      { id: "ai"     as Panel, label: "AI",     icon: Sparkles   },
-      { id: "github" as Panel, label: "GitHub", icon: GitBranch     },
-      { id: "jd"     as Panel, label: "JD",     icon: Target     },
+      { id: "ats"    as Panel, label: "ATS",       icon: ScrollText },
+      { id: "quick"  as Panel, label: "Quick Actions", icon: Zap    },
+      { id: "github" as Panel, label: "GitHub",    icon: GitBranch  },
+      { id: "jd"     as Panel, label: "JD",        icon: Target     },
     ],
   },
   {
@@ -162,20 +160,11 @@ export function BuilderLayout() {
   const isDirty    = useResumeStore((s) => s.isDirty);
   const undo       = useResumeStore((s) => s.undo);
   const redo       = useResumeStore((s) => s.redo);
-  const data       = useResumeStore((s) => s.data);
-  const updateData = useResumeStore((s) => s.updateData);
   const theme      = useUIStore((s) => s.theme);
   const setTheme   = useUIStore((s) => s.setTheme);
 
   useAutosave();
   useKeyboardShortcuts();
-
-  // Load sample resume on first visit
-  useEffect(() => {
-    const hasData = data.personal.name || data.experience.length > 0;
-    if (!hasData) updateData(getSampleResume());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -201,7 +190,11 @@ export function BuilderLayout() {
     }
   }, [panelParam, router]);
 
-  const handleMouseDown = useCallback(() => setIsResizing(true), []);
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    document.body.style.userSelect = "none";
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -209,7 +202,10 @@ export function BuilderLayout() {
       const newWidth = window.innerWidth - e.clientX;
       setPreviewWidth(Math.max(300, Math.min(newWidth, window.innerWidth * 0.6)));
     };
-    const handleMouseUp = () => setIsResizing(false);
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      document.body.style.userSelect = "";
+    };
 
     if (isResizing) {
       document.addEventListener("mousemove", handleMouseMove);
@@ -218,6 +214,7 @@ export function BuilderLayout() {
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.userSelect = "";
     };
   }, [isResizing]);
 
@@ -261,7 +258,7 @@ export function BuilderLayout() {
         );
       case "templates":  return <TemplateSelector />;
       case "ats":        return <ATSPanel />;
-      case "ai":         return <AIAssistant />;
+      case "quick":      return <QuickActions />;
       case "github":     return <GitHubImport />;
       case "export":     return <ExportPanel />;
       case "jd":         return <JDAnalyzer />;
@@ -547,7 +544,6 @@ export function BuilderLayout() {
 
       {/* ── Overlays ── */}
       <OnboardingChecklist />
-      <Celebration />
       <WelcomeOverlay />
 
       <Dialog open={showResumeList} onOpenChange={setShowResumeList}>

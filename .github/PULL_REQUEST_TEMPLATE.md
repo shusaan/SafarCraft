@@ -1,8 +1,6 @@
-## Description
+## Summary
 
-Please include a summary of the change and which issue is fixed.
-
-Fixes #(issue)
+<!-- One-line description of the change -->
 
 ## Type of change
 
@@ -11,15 +9,19 @@ Fixes #(issue)
 - [ ] Breaking change
 - [ ] Documentation update
 
-## How Has This Been Tested?
+## Checklist
 
-- [ ] Unit tests
-- [ ] E2E tests
-- [ ] Manual testing
+- [ ] I have read the [contributing guide](../CONTRIBUTING.md)
+- [ ] My changes pass `npm run typecheck`
+- [ ] My changes pass `npm run lint`
+- [ ] I have added tests that prove my fix/feature works
+- [ ] New and existing unit tests pass locally
+- [ ] I have updated relevant documentation
 
-## Checklist:
+## Screenshots (if applicable)
 
-- [ ] My code follows the project style
-- [ ] I have added tests
-- [ ] Documentation is updated
-- [ ] All tests pass
+<!-- Add screenshots for UI changes -->
+
+## Related issues
+
+<!-- Link related issues: Fixes #123 -->

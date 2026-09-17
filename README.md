@@ -1,7 +1,7 @@
 # CareerForge AI
 
-> Open-source AI resume platform for software engineers.
-> ATS-optimized, GitHub-powered, AI-assisted.
+> Open-source ATS resume builder for software engineers.
+> Local-first, GitHub-powered, 100% free.
 
 ![GitHub License](https://img.shields.io/github/license/yourusername/careerforge-ai)
 ![GitHub Stars](https://img.shields.io/github/stars/yourusername/careerforge-ai)
@@ -11,26 +11,37 @@
 
 > *Screenshots coming soon — run locally to see the platform in action.*
 
-| Builder | ATS Analysis | AI Assistant |
+| Builder | ATS Analysis | Smart Helpers |
 |---------|-------------|--------------|
-| ![Builder](public/screenshots/builder.png) | ![ATS](public/screenshots/ats.png) | ![AI](public/screenshots/ai.png) |
+| ![Builder](public/screenshots/builder.png) | ![ATS](public/screenshots/ats.png) | ![Quick Actions](public/screenshots/quick-actions.png) |
 
 ## Features
 
 - **Smart Resume Builder** — Real-time editing, drag-and-drop, autosave, undo/redo, version history
-- **ATS Analysis** — Detailed scoring with explanations for every deduction
-- **AI Assistant** — Improve bullets, rewrite summaries, check grammar, generate verbs
+- **5-Axis ATS Analysis** — Content, Format, ATS, Brevity, Impact scoring with per-deduction explanations
+- **Smart Local Helpers** — Action-verb swap, bullet rewriter, metric prompter, achievement templates, grammar checker (fully offline, no API key)
 - **GitHub Intelligence** — Import your GitHub profile, auto-generate contribution bullets
-- **Job Description Analyzer** — Compare your resume against any job description
+- **Job Description Tailoring** — Compare resume vs JD, find missing keywords, get rephrasing suggestions
+- **Snippet Library** — Save & reuse bullet snippets across resumes
+- **Insights Dashboard** — Bullet-length distribution, verb distribution, ATS-history charts
 - **Multiple Templates** — Classic ATS, Modern Professional, Executive (column/picture options)
-- **Export** — PDF, DOCX, JSON Resume, Markdown (ATS compliant)
+- **Export** — PDF, DOCX, JSON Resume, Markdown, plain TXT (all ATS compliant)
 - **Portfolio Generator** — Personal website, GitHub README, professional bio
+- **Offline-First PWA** — Install to home screen, edits work without network
 - **Privacy First** — No signup required, local-first, users own their data
+- **Optional Cloud Sync** — Self-hosted Postgres + Better Auth for multi-device sync
 - **Onboarding** — Sample resume, guided checklist, contextual empty states
+
+## Why CareerForge AI?
+
+- **100% local** — All smart helpers run in your browser. No API keys, no telemetry, no data leaves your device.
+- **Open source** — MIT licensed, self-hostable with Docker.
+- **Engineer-first** — Built around the real workflow of software engineers applying for jobs.
+- **Privacy-first** — Your resume text never touches our servers.
 
 ## Tech Stack
 
-Next.js 15 | React 19 | TypeScript | TailwindCSS | shadcn/ui | Zustand | Optional PostgreSQL
+Next.js 15 | React 19 | TypeScript | TailwindCSS | shadcn/ui | Zustand | Optional PostgreSQL | PWA
 
 ## Quick Start
 
@@ -69,6 +80,13 @@ docker compose --profile with-db up
 DATABASE_URL=postgresql://user:pass@localhost:5432/careerforge
 ```
 
+### Optional: Google Drive Export
+
+```bash
+# .env
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+```
+
 ## Testing
 
 ```bash
@@ -91,13 +109,19 @@ npm run lint
 src/
   app/         # Next.js App Router pages
   components/  # UI + feature components
-  engines/     # ATS, Export, AI, GitHub logic
+  engines/     # ATS, CV parsing, Export, GitHub, Smart Helpers
+  data/        # Curated data: action verbs, role skills, achievement templates
   stores/      # Zustand state management
   types/       # TypeScript type definitions
   lib/         # Shared utilities
   hooks/       # React hooks
+  i18n/        # Translation strings (en.json + community contributions)
 worker/        # Cloudflare Worker (visitor counter)
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/CONTRIBUTING-ENGINES.md](docs/CONTRIBUTING-ENGINES.md) for how to add new action verbs, rewriter patterns, or achievement templates.
 
 ## License
 

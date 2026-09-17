@@ -8,9 +8,9 @@ ENV CHROMIUM_PATH=/usr/bin/chromium
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY package.json ./
+COPY package.json package-lock.json* ./
 RUN npm install --legacy-peer-deps
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm install --legacy-peer-deps && npm run dev"]

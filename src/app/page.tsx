@@ -8,7 +8,7 @@ import {
   GitBranch,
   FileText,
   Target,
-  Bot,
+  Zap as ZapIcon,
   Download,
   Palette,
   CheckCircle,
@@ -27,13 +27,13 @@ const features = [
     icon: Target,
     title: "ATS Analysis",
     description:
-      "Detailed ATS scoring with per-deduction explanations and actionable recommendations to push past 90.",
+      "Detailed ATS scoring across 5 axes with per-deduction explanations and actionable recommendations to push past 90.",
   },
   {
-    icon: Bot,
-    title: "AI Assistant",
+    icon: ZapIcon,
+    title: "Smart Local Helpers",
     description:
-      "Improve bullets, rewrite summaries, fix grammar, and generate stronger action verbs with a single click.",
+      "Action-verb swap, bullet rewriter, metric prompter, grammar checker — instant, offline, no API key.",
   },
   {
     icon: GitBranch,
@@ -45,7 +45,7 @@ const features = [
     icon: Download,
     title: "Multiple Exports",
     description:
-      "Export to PDF, DOCX, JSON Resume, and Markdown — all ATS compliant and ready to send.",
+      "Export to PDF, DOCX, JSON Resume, Markdown, plain TXT — all ATS compliant and ready to send.",
   },
   {
     icon: Palette,
@@ -66,7 +66,7 @@ const steps = [
     number: "02",
     title: "Analyse & optimise",
     description:
-      "Run ATS analysis, let AI improve your bullets, and match against job descriptions.",
+      "Run ATS analysis, use Quick Actions to swap weak verbs, add metrics, and match against job descriptions.",
   },
   {
     number: "03",
@@ -129,17 +129,17 @@ export default function HomePage() {
                 className="animate-fade-up delay-100 font-extrabold tracking-tight leading-tight"
                 style={{ fontSize: "clamp(2.5rem, 8vw, 4.5rem)" }}
               >
-                Free AI CV Maker &ndash; Build, Optimize, and Export{" "}
+                Free ATS Resume Builder &ndash; Build, Optimise, and Export{" "}
                 <span className="text-primary">ATS-Friendly Resumes</span> Instantly
               </h1>
 
               <h2 className="animate-fade-up delay-150 mt-4 text-lg sm:text-xl font-semibold text-muted-foreground">
-                Enter your details, analyse with AI, and export in 5 simple steps
+                Edit locally, analyse with 5-axis ATS scoring, and export in 5 simple steps
               </h2>
 
               <p className="animate-fade-up delay-200 mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-                Open-source resume platform for software engineers. Real-time editing, AI assistance,
-                GitHub intelligence, and ATS analysis — all free, all yours.
+                Open-source resume platform for software engineers. Real-time editing, smart local helpers,
+                GitHub intelligence, and ATS analysis — all free, all yours, 100% local.
               </p>
 
               <div className="animate-fade-up delay-300 mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -163,14 +163,14 @@ export default function HomePage() {
                 <ContinueDraft />
               </div>
 
-              <p className="animate-fade-up delay-400 mt-4 text-xs text-muted-foreground">
+              <p className="animate-fade-up delay-400 mt-4 text-sm text-muted-foreground">
                 Your data stays on your device — no account, no cloud, no tracking
               </p>
             </div>
 
             <div className="animate-fade-up delay-500 mt-12">
               <BuilderPreview />
-              <p className="mt-2 text-center text-xs text-muted-foreground/60">
+              <p className="mt-2 text-center text-sm text-muted-foreground/60">
                 The resume builder — real-time editor with live ATS scoring
               </p>
             </div>
@@ -180,7 +180,7 @@ export default function HomePage() {
         {/* ── Trust bar ── */}
         <section className="border-y bg-muted/20" aria-label="Trust signals">
           <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6">
-            <p className="text-center text-xs text-muted-foreground tracking-wide">
+            <p className="text-center text-sm text-muted-foreground tracking-wide">
               <span className="font-medium text-foreground">MIT licensed</span>
               <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
               No signup or account required
@@ -224,7 +224,7 @@ export default function HomePage() {
                       <Icon className="h-4 w-4" />
                     </div>
                     <h3 className="text-sm font-semibold">{feature.title}</h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                    <p className="mt-1.5 text-base text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
                   </article>
@@ -256,7 +256,7 @@ export default function HomePage() {
                     {step.number}
                   </div>
                   <h3 className="text-sm font-semibold">{step.title}</h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                  <p className="mt-1.5 text-base text-muted-foreground leading-relaxed">
                     {step.description}
                   </p>
                 </li>
@@ -281,7 +281,7 @@ export default function HomePage() {
               >
                 Fully open source — MIT Licensed
               </h2>
-              <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground leading-relaxed">
+              <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground leading-relaxed">
                 Read the code, self-host it, contribute to it, or fork it. CareerForge AI is built
                 in the open. No vendor lock-in, no paywalls, no data sold.
               </p>
@@ -330,7 +330,7 @@ export default function HomePage() {
               <Badge variant="outline" className="text-xs">MIT</Badge>
             </div>
 
-            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs text-muted-foreground" aria-label="Footer navigation">
+            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-sm text-muted-foreground" aria-label="Footer navigation">
               <Link href="/builder" className="hover:text-foreground transition-colors">
                 Builder
               </Link>
@@ -358,7 +358,7 @@ export default function HomePage() {
               </Link>
             </nav>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} CareerForge AI &mdash; Open source. Free forever.
             </p>
           </div>

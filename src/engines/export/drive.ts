@@ -131,6 +131,52 @@ export async function silentAuthenticate(): Promise<string | null> {
   });
 }
 
+export async function createDriveFolder(
+  folderName: string,
+  parentId?: string,
+): Promise<{ id: string; name: string } | null> {
+  const token = accessToken;
+  if (!token) return null;
+
+  try {
+    const body: Record<string, unknown> = {
+      name: folderName,
+      mimeType: "application/vnd.google-apps.folder",
+    };
+    if (parentId) body.parents = [parentId];
+
+    const res = await fetch("https://www.googleapis.com/drive/v3/files", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getDriveFileName(fileId: string): Promise<string | null> {
+  const token = accessToken;
+  if (!token) return null;
+
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${fileId}?fields=name`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.name ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function listDriveFiles(): Promise<
   Array<{ id: string; name: string; modifiedTime: string }>
 > {
