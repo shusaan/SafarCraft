@@ -6,6 +6,8 @@ import { ThemeProvider } from "@/components/shared/theme-provider";
 import { ToastProviderWrapper } from "@/components/ui/toast";
 import { ServiceWorkerRegistrar } from "@/components/shared/service-worker-registrar";
 
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID?.trim() || "";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -149,22 +151,26 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
 
-        {/* Google Analytics (anonymized) */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"
-          strategy="afterInteractive"
-        />
-        <Script id="ga-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-XXXXXXXXXX', {
-              anonymize_ip: true,
-              cookie_flags: 'SameSite=None;Secure'
-            });
-          `}
-        </Script>
+        {/* Google Analytics (anonymized) — only when NEXT_PUBLIC_GA_ID is set */}
+        {GA_ID ? (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_ID}', {
+                  anonymize_ip: true,
+                  cookie_flags: 'SameSite=None;Secure'
+                });
+              `}
+            </Script>
+          </>
+        ) : null}
       </body>
     </html>
   );

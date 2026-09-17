@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BuilderPreview } from "@/components/marketing/builder-preview";
 import { ContinueDraft } from "@/components/marketing/continue-draft";
+import { REPO_URL, REPO_CONTRIBUTING_URL } from "@/lib/external-urls";
 import {
   ArrowRight,
   GitBranch,
@@ -94,7 +95,7 @@ export default function HomePage() {
               <Button variant="ghost" size="sm">Templates</Button>
             </Link>
             <a
-              href="https://github.com/yourusername/careerforge-ai"
+              href={REPO_URL}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -126,11 +127,12 @@ export default function HomePage() {
 
               <h1
                 id="hero-heading"
-                className="animate-fade-up delay-100 font-extrabold tracking-tight leading-tight"
-                style={{ fontSize: "clamp(2.5rem, 8vw, 4.5rem)" }}
+                className="animate-fade-up delay-100 font-extrabold tracking-tight leading-[1.05]"
+                style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
               >
-                Free ATS Resume Builder &ndash; Build, Optimise, and Export{" "}
-                <span className="text-primary">ATS-Friendly Resumes</span> Instantly
+                Free ATS Resume Builder &ndash;{" "}
+                <span className="whitespace-nowrap">Build, Optimise &amp; Export</span>{" "}
+                <span className="text-primary">ATS-Friendly Resumes</span>
               </h1>
 
               <h2 className="animate-fade-up delay-150 mt-4 text-lg sm:text-xl font-semibold text-muted-foreground">
@@ -150,7 +152,7 @@ export default function HomePage() {
                   </Button>
                 </Link>
                 <a
-                  href="https://github.com/yourusername/careerforge-ai"
+                  href={REPO_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -306,7 +308,7 @@ export default function HomePage() {
                   </Button>
                 </Link>
                 <a
-                  href="https://github.com/yourusername/careerforge-ai"
+                  href={REPO_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -338,7 +340,7 @@ export default function HomePage() {
                 Templates
               </Link>
               <a
-                href="https://github.com/yourusername/careerforge-ai"
+                href={REPO_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors"
@@ -346,7 +348,7 @@ export default function HomePage() {
                 GitHub
               </a>
               <a
-                href="https://github.com/yourusername/careerforge-ai/blob/main/CONTRIBUTING.md"
+                href={REPO_CONTRIBUTING_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors"
@@ -359,7 +361,8 @@ export default function HomePage() {
             </nav>
 
             <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} CareerForge AI &mdash; Open source. Free forever.
+              &copy; {new Date().getFullYear()} {" "}
+              CareerForge AI &mdash; Open source. Free forever.
             </p>
           </div>
         </div>

@@ -40,7 +40,7 @@ export function WelcomeOverlay() {
   if (!current) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-xs animate-in slide-in-from-bottom-4 fade-in" role="dialog" aria-label="Welcome guide">
+    <div className="fixed bottom-[18rem] right-4 z-50 max-w-xs animate-in slide-in-from-bottom-4 fade-in" role="dialog" aria-label="Welcome guide">
       <div className="bg-background border rounded-lg shadow-xl p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] font-medium text-muted-foreground">

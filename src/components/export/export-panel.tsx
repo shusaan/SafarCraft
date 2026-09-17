@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useResumeStore } from "@/stores/resume-store";
 import { exportResume } from "@/engines/export/export-engine";
+import { importJSONResume } from "@/engines/export/providers/json-resume-import";
 import { authenticate, saveToDrive, pickFolder, createDriveFolder, getDriveFileName } from "@/engines/export/drive";
 import { trackEvent } from "@/engines/analytics";
 import type { ExportFormat, PaperSize } from "@/types";
 import { useToast } from "@/components/ui/toast";
-import { Download, FileText, FileCode, CheckCircle, Cloud, FolderOpen } from "lucide-react";
+import { Download, FileText, FileCode, CheckCircle, Cloud, FolderOpen, Upload, FileJson } from "lucide-react";
 
 const paperSizes: Record<PaperSize, { label: string; dimensions: string }> = {
   letter: { label: "US Letter", dimensions: '8.5" × 11"' },
@@ -46,15 +47,25 @@ const formats: Array<{
     description: "Plain text with formatting",
     useCase: "Best for: GitHub profiles, documentation",
   },
+  {
+    id: "json",
+    label: "JSON Resume",
+    icon: FileJson,
+    description: "Open standard, swap with other tools",
+    useCase: "Best for: Importing into Reactive Resume, FlowCV, etc.",
+  },
 ];
 
 export function ExportPanel() {
   const [exporting, setExporting] = useState<string | null>(null);
   const [exported, setExported] = useState<Set<string>>(new Set());
   const [paperSize, setPaperSize] = useState<PaperSize>("letter");
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const data = useResumeStore((s) => s.data);
   const layout = useResumeStore((s) => s.layout);
   const template = useResumeStore((s) => s.template);
+  const replaceData = useResumeStore((s) => s.replaceData);
   const { toast } = useToast();
 
   const [driveSaving, setDriveSaving] = useState(false);
@@ -169,9 +180,61 @@ export function ExportPanel() {
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <h2 className="text-lg font-semibold">Export</h2>
-        <p className="text-sm text-muted-foreground">Download your resume in various formats</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold">Export</h2>
+          <p className="text-sm text-muted-foreground">Download in any format, or bring in an existing JSON Resume.</p>
+        </div>
+        <div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importing}
+          >
+            {importing ? (
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              <Upload className="h-3.5 w-3.5" />
+            )}
+            Import JSON Resume
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            data-testid="import-json-input"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              setImporting(true);
+              try {
+                const text = await file.text();
+                const { data: imported, warnings } = importJSONResume(text);
+                replaceData(imported);
+                const summary = warnings.length
+                  ? ` — ${warnings.length} warning${warnings.length > 1 ? "s" : ""}`
+                  : "";
+                toast({
+                  title: "Resume imported",
+                  description: `${imported.experience.length} jobs, ${imported.skills.length} skill groups${summary}.`,
+                  variant: "success",
+                });
+              } catch (err) {
+                toast({
+                  title: "Import failed",
+                  description: err instanceof Error ? err.message : "Could not parse this JSON Resume file.",
+                  variant: "destructive",
+                });
+              } finally {
+                setImporting(false);
+                if (fileInputRef.current) fileInputRef.current.value = "";
+              }
+            }}
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

@@ -12,26 +12,43 @@ export type {
 
 export { defaultResumeData, defaultResumeLayout } from "./resume";
 
-export type TemplateId = "classic-ats" | "modern-professional" | "executive";
+export type TemplateId =
+  | "classic-ats"
+  | "modern-professional"
+  | "executive"
+  | "pikachu"
+  | "onyx"
+  | "leafish"
+  | "bronzor"
+  | "gengar";
 
-export type ExportFormat = "pdf" | "docx" | "markdown";
+export type ExportFormat = "pdf" | "docx" | "markdown" | "json";
 
 export type PaperSize = "letter" | "a4" | "legal";
 
 export type ColumnLayout = "one" | "two";
 
-export type ATSResult = {
-  score: number;
-  deductions: ATSDeduction[];
-  recommendations: string[];
-  keywordMatch: KeywordMatch[];
-};
-
 export type ATSDeduction = {
   category: string;
+  axis: "content" | "format" | "ats" | "brevity" | "impact";
   points: number;
   reason: string;
   severity: "high" | "medium" | "low";
+};
+
+export type ATSAxis = {
+  id: "content" | "format" | "ats" | "brevity" | "impact";
+  label: string;
+  description: string;
+  score: number;
+};
+
+export type ATSResult = {
+  score: number;
+  axes: ATSAxis[];
+  deductions: ATSDeduction[];
+  recommendations: string[];
+  keywordMatch: KeywordMatch[];
 };
 
 export type KeywordMatch = {
@@ -44,6 +61,7 @@ export type KeywordMatch = {
 export type JDParseResult = {
   skills: string[];
   technologies: string[];
+  jdSkills: string[];
   responsibilities: string[];
   experienceLevel: string;
   matchScore: number;
