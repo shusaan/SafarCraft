@@ -13,6 +13,29 @@ function logIssue(severity, area, message, detail = "") {
   REPORT.push({ severity, area, message, detail });
 }
 
+// Hostnames we ignore in network reporting. Compared via URL parsing, not substring,
+// to avoid matching arbitrary text (path/query/fragment) that merely *contains* a hostname.
+const IGNORED_HOSTNAMES = new Set([
+  "google-analytics.com",
+  "www.google-analytics.com",
+  "favicon.ico",
+  "localhost",
+  "accounts.google.com",
+  "github.com",
+]);
+function isIgnoredUrl(urlString) {
+  try {
+    const host = new URL(urlString).hostname;
+    return (
+        IGNORED_HOSTNAMES.has(host) ||
+        host.endsWith(".chrome-extension.google.com") ||
+        host.endsWith(".chromiumextension.com")
+      );
+  } catch {
+    return false;
+  }
+}
+
 let SHOT_N = 1;
 async function shot(page, name, opts = {}) {
   const n = String(SHOT_N++).padStart(3, "0");
@@ -40,15 +63,14 @@ function check(cond, severity, area, msg, detail = "") {
   const consoleErrors = [];
   context.on("pageerror", (err) => logIssue("major", "runtime", "Uncaught page error", err.message));
   context.on("requestfailed", (req) => {
-    const url = req.url();
-    if (url.includes("google-analytics") || url.includes("favicon") || url.includes("chrome-extension") || url.includes("accounts.google.com")) return;
-    logIssue("major", "network", "Request failed", req.method() + " " + url + " -> " + req.failure()?.errorText);
+    if (isIgnoredUrl(req.url())) return;
+    logIssue("major", "network", "Request failed", req.method() + " " + req.url() + " -> " + req.failure()?.errorText);
   });
   context.on("response", (resp) => {
-    if (resp.status() >= 400 && !resp.url().includes("favicon") && !resp.url().includes("chrome-extension")) {
-      if ((resp.url().endsWith("/api/parse-cv") || resp.url().endsWith("/api/resumes")) && resp.status() === 501) return;
-      logIssue("major", "network", "HTTP " + resp.status(), resp.url());
-    }
+    if (resp.status() < 400) return;
+    if (isIgnoredUrl(resp.url())) return;
+    if ((resp.url().endsWith("/api/parse-cv") || resp.url().endsWith("/api/resumes")) && resp.status() === 501) return;
+    logIssue("major", "network", "HTTP " + resp.status(), resp.url());
   });
 
   const page = await context.newPage();
