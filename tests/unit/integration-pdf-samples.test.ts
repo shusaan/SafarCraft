@@ -1,15 +1,19 @@
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { extractPDFText } from "@/engines/cv/pdf-extractor";
 import { parseCVFallback } from "@/engines/cv/cv-parser";
 
+// Local-only PDF fixtures. Skip the whole suite if they aren't on disk (CI,
+// fresh clone, etc.) — these tests are regression checks for the local PDF
+// parser, not a release gate.
 const samples = [
   "/tmp/opencode/cv-samples/pdfs/cv1-single-column.html.pdf",
   "/tmp/opencode/cv-samples/pdfs/cv2-two-column-sidebar.html.pdf",
   "/tmp/opencode/cv-samples/pdfs/cv3-modern-compact.html.pdf",
 ];
+const haveSamplePdfs = samples.every((p) => existsSync(p));
 
-describe("Real PDF CV samples", () => {
+describe.skipIf(!haveSamplePdfs)("Real PDF CV samples", () => {
   for (const path of samples) {
     const name = path.split("/").pop()!;
 

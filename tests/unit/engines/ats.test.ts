@@ -57,8 +57,8 @@ describe("JD Analyzer", () => {
   it("extracts skills from job description", () => {
     const jd = "We are looking for a Senior React developer with TypeScript and Node.js experience";
     const result = analyzeJobDescription(jd, defaultResumeData);
-    expect(result.skills.length).toBeGreaterThan(0);
-    expect(result.skills).toContain("react");
+    expect(result.jdSkills.length).toBeGreaterThan(0);
+    expect(result.jdSkills).toContain("react");
     expect(result.experienceLevel).toBe("senior");
   });
 
