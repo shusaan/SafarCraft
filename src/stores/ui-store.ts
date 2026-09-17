@@ -6,10 +6,12 @@ type UIState = {
   theme: "light" | "dark" | "system";
   previewMode: "edit" | "preview";
   visitorCount: number;
+  isMobile: boolean;
   toggleSidebar: () => void;
   setTheme: (theme: "light" | "dark" | "system") => void;
   setPreviewMode: (mode: "edit" | "preview") => void;
   setVisitorCount: (count: number) => void;
+  setIsMobile: (isMobile: boolean) => void;
 };
 
 export const useUIStore = create<UIState>()(
@@ -19,10 +21,12 @@ export const useUIStore = create<UIState>()(
       theme: "system",
       previewMode: "edit",
       visitorCount: 0,
+      isMobile: false,
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
       setTheme: (theme) => set({ theme }),
       setPreviewMode: (mode) => set({ previewMode: mode }),
       setVisitorCount: (count) => set({ visitorCount: count }),
+      setIsMobile: (isMobile) => set({ isMobile }),
     }),
     {
       name: "careerforge-ui",

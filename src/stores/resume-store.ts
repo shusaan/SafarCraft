@@ -4,6 +4,7 @@ import type { ResumeData, ResumeLayout } from "@/types";
 export type ResumeGoal = "startup" | "faang" | "government" | "academia";
 import { defaultResumeData, defaultResumeLayout } from "@/types";
 import { sampleResumeData, sampleResumeLayout } from "@/data/sample-resume";
+import { generateId } from "@/lib/utils";
 
 type HistoryEntry = {
   data: ResumeData;
@@ -36,6 +37,7 @@ type ResumeState = {
   setResumeGoal: (goal: ResumeGoal) => void;
   setActiveResume: (id: string) => void;
   updateData: (data: Partial<ResumeData>) => void;
+  replaceData: (data: ResumeData) => void;
   updatePersonal: (personal: Partial<ResumeData["personal"]>) => void;
   updateSkills: (skills: ResumeData["skills"]) => void;
   setLayout: (layout: Partial<ResumeLayout>) => void;
@@ -90,6 +92,15 @@ export const useResumeStore = create<ResumeState>()(
           const newData = { ...state.data, ...partial };
           return { data: newData, ...pushHistory({ ...state, data: newData }) };
         });
+      },
+
+      replaceData: (newData) => {
+        set((state) => ({
+          data: newData,
+          layout: state.layout,
+          template: state.template,
+          ...pushHistory({ ...state, data: newData }),
+        }));
       },
 
       updatePersonal: (personal) => {
@@ -180,14 +191,49 @@ export const useResumeStore = create<ResumeState>()(
         resumeGoal: state.resumeGoal,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (!state) return;
-        // First-visit seed: if the persisted resume has no name, load the sample.
-        if (!state.data?.personal?.name && state.data?.personal) {
-          state.data = sampleResumeData;
-          state.layout = sampleResumeLayout;
-          state.history = [{ data: sampleResumeData, timestamp: Date.now() }];
-          state.historyIndex = 0;
+      onRehydrateStorage: () => () => {
+        // Persist has finished rehydration. Run the first-visit bootstrap here
+        // (load the sample resume + register it in resumes[]) so the
+        // "Manage Resumes" dialog and resume switcher have an entry.
+        const bootstrap = () => {
+          const cur = useResumeStore.getState();
+          const patch: Record<string, unknown> = {};
+          // Load the sample data on first visit (empty data, no resumes).
+          if (!cur.data?.personal?.name && cur.data?.personal) {
+            patch.data = sampleResumeData;
+            patch.layout = sampleResumeLayout;
+            patch.history = [{ data: sampleResumeData, timestamp: Date.now() }];
+            patch.historyIndex = 0;
+          }
+          if (cur.resumes.length === 0 && !cur.activeResumeId) {
+            const id = generateId();
+            const finalData = (patch.data as typeof cur.data) ?? cur.data;
+            patch.resumes = [{
+              id,
+              title: finalData?.personal?.name
+                ? `${finalData.personal.name} – Resume`
+                : "Untitled Resume",
+              data: finalData ?? defaultResumeData,
+            }];
+            patch.activeResumeId = id;
+          } else if (cur.activeResumeId && !cur.resumes.find((r) => r.id === cur.activeResumeId)) {
+            patch.resumes = [{
+              id: cur.activeResumeId,
+              title: cur.data?.personal?.name
+                ? `${cur.data.personal.name} – Resume`
+                : "Untitled Resume",
+              data: cur.data ?? defaultResumeData,
+            }, ...cur.resumes];
+          }
+          if (Object.keys(patch).length > 0) {
+            useResumeStore.setState(patch as Partial<ResumeState>);
+          }
+        };
+        // Defer to a real task so hydration has fully settled before we mutate.
+        if (typeof window !== "undefined") {
+          window.setTimeout(bootstrap, 0);
+        } else {
+          bootstrap();
         }
       },
     },

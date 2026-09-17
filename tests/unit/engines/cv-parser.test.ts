@@ -261,15 +261,19 @@ jane@example.com
 // ─── PDF-extractor regression tests ────────────────────────────────────────
 
 import { extractPDFText } from "@/engines/cv/pdf-extractor";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
+// Sample CV PDFs are local-only fixtures (developer machine path). When absent
+// (CI, fresh clone, etc.) we skip these tests — they're meant to catch
+// regressions in the local PDF parser, not gate the build.
 const SAMPLE_PDFS = [
   "/tmp/opencode/cv-samples/pdfs/cv1-single-column.html.pdf",
   "/tmp/opencode/cv-samples/pdfs/cv2-two-column-sidebar.html.pdf",
   "/tmp/opencode/cv-samples/pdfs/cv3-modern-compact.html.pdf",
 ];
+const haveSamplePdfs = SAMPLE_PDFS.every((p) => existsSync(p));
 
-describe("PDF extraction — real sample CVs", () => {
+describe.skipIf(!haveSamplePdfs)("PDF extraction — real sample CVs", () => {
   it("strips Chrome date/URL header and footer noise", async () => {
     const buf = readFileSync(SAMPLE_PDFS[0]!);
     const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
@@ -289,7 +293,7 @@ describe("PDF extraction — real sample CVs", () => {
 
 // ─── End-to-end parse for each sample PDF ───────────────────────────────────
 
-describe("End-to-end parse on real sample CVs", () => {
+describe.skipIf(!haveSamplePdfs)("End-to-end parse on real sample CVs", () => {
   for (const path of SAMPLE_PDFS) {
     const name = path.split("/").pop()!;
 
@@ -385,6 +389,8 @@ describe("End-to-end parse on real sample CVs", () => {
     expect(techCorp.bullets.length).toBe(3);
   });
 });
+
+// ─── New parser edge cases ─────────────────────────────────────────────────
 
 // ─── New parser edge cases ─────────────────────────────────────────────────
 

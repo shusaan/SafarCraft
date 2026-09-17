@@ -49,13 +49,20 @@ export function ResumeList({ onClose }: { onClose: () => void }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">My Resumes</h3>
+        <p className="text-xs text-muted-foreground">
+          {resumes.length === 0 ? "Create a new resume to get started." : `${resumes.length} saved`}
+        </p>
         <Button size="sm" onClick={() => setShowNew(true)}>
           New
         </Button>
       </div>
 
       <div className="space-y-2">
+        {resumes.length === 0 && (
+          <p className="rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground">
+            No saved resumes yet. Edit the current resume and it will appear here automatically.
+          </p>
+        )}
         {resumes.map((resume) => (
           <div
             key={resume.id}
@@ -69,6 +76,9 @@ export function ResumeList({ onClose }: { onClose: () => void }) {
           >
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{resume.title}</p>
+              <p className="mt-0.5 truncate text-[10px] text-muted-foreground">
+                {resume.data?.personal?.name || "No name"} · {resume.data?.experience?.length ?? 0} experience
+              </p>
             </div>
             <Button
               variant="ghost"

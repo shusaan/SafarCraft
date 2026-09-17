@@ -1,16 +1,97 @@
 "use client";
 
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { calculateATSScore, getATSScoreLabel } from "@/engines/ats/ats-engine";
+import { validateAgainstVendors, VENDOR_LABELS, VENDOR_DESCRIPTIONS } from "@/engines/ats/vendor-validation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/engines/analytics";
-import { CheckCircle, Lightbulb, XCircle, Plus, Sparkles, ArrowRight } from "lucide-react";
+import { CheckCircle, Lightbulb, XCircle, Plus, Sparkles, ArrowRight, Target, ShieldCheck } from "lucide-react";
 import { cn, generateId } from "@/lib/utils";
+import type { ResumeData } from "@/types";
 
 const RADIUS = 52;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+
+function VendorValidationSection({ data }: { data: ResumeData }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const results = useMemo(() => validateAgainstVendors(data), [data]);
+
+  return (
+    <div className="space-y-2" aria-label="ATS vendor validation">
+      <h3 className="flex items-center gap-2 text-sm font-semibold">
+        <ShieldCheck className="h-4 w-4 text-primary" />
+        Tested Against Real ATS Parsers
+      </h3>
+      <p className="text-[10px] text-muted-foreground">
+        How the same resume would parse inside 3 popular applicant tracking systems.
+      </p>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {results.map((r) => {
+          const bar =
+            r.score >= 80 ? "bg-green-500" :
+            r.score >= 60 ? "bg-amber-500" :
+            r.score >= 40 ? "bg-orange-500" :
+            "bg-red-500";
+          const open = expanded === r.vendor;
+          return (
+            <button
+              key={r.vendor}
+              type="button"
+              onClick={() => setExpanded(open ? null : r.vendor)}
+              className={cn(
+                "rounded-lg border bg-card p-3 text-left shadow-sm transition-all hover:ring-2 hover:ring-primary/40",
+                open && "ring-2 ring-primary",
+              )}
+              aria-expanded={open}
+            >
+              <div className="flex items-center justify-between gap-1">
+                <p className="text-sm font-semibold">{VENDOR_LABELS[r.vendor]}</p>
+                <span className={cn(
+                  "shrink-0 rounded-md px-2 py-0.5 text-xs font-bold tabular-nums",
+                  r.score >= 80 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" :
+                  r.score >= 60 ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100" :
+                  r.score >= 40 ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100" :
+                                   "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
+                )}>{r.score}</span>
+              </div>
+              <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground">{VENDOR_DESCRIPTIONS[r.vendor]}</p>
+              <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={r.score} aria-valuemin={0} aria-valuemax={100}>
+                <div className={cn("h-full rounded-full transition-all", bar)} style={{ width: `${r.score}%` }} />
+              </div>
+              {open && (
+                <div className="mt-3 space-y-2 border-t pt-2 text-[11px]">
+                  <ul className="space-y-1">
+                    {r.notes.map((n, i) => (
+                      <li key={i} className="text-muted-foreground">{n}</li>
+                    ))}
+                  </ul>
+                  {r.warnings.length > 0 && (
+                    <div className="rounded bg-amber-50 p-2 dark:bg-amber-950/30">
+                      <p className="mb-0.5 font-semibold text-amber-700 dark:text-amber-300">Warnings</p>
+                      <ul className="space-y-0.5 text-amber-800 dark:text-amber-200">
+                        {r.warnings.map((w, i) => <li key={i}>• {w}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                  {r.recommendations.length > 0 && (
+                    <div className="rounded bg-blue-50 p-2 dark:bg-blue-950/30">
+                      <p className="mb-0.5 font-semibold text-blue-700 dark:text-blue-300">Tips</p>
+                      <ul className="space-y-0.5 text-blue-800 dark:text-blue-200">
+                        {r.recommendations.map((w, i) => <li key={i}>• {w}</li>)}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 const SUGGESTED_KEYWORDS = [
   "react", "typescript", "javascript", "python", "node.js", "aws",
@@ -149,6 +230,69 @@ export function ATSPanel() {
         <p className={cn("mt-3 text-sm font-semibold", color)}>{label}</p>
         <p className="mt-1 text-xs text-muted-foreground">{getScoreMessage(result.score)}</p>
       </div>
+
+      {/* 5-Axis Breakdown */}
+      <div className="space-y-3" aria-label="5-axis ATS breakdown">
+        <div className="flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <Target className="h-4 w-4 text-primary" />
+            5-Axis Breakdown
+          </h3>
+          <span className="text-xs text-muted-foreground">each axis weighted</span>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-1">
+          {result.axes.map((axis) => {
+            const pct = axis.score;
+            const barColor =
+              pct >= 80 ? "bg-green-500" :
+              pct >= 60 ? "bg-amber-500" :
+              pct >= 40 ? "bg-orange-500" :
+                          "bg-red-500";
+            return (
+              <div
+                key={axis.id}
+                className="rounded-lg border bg-card p-3 shadow-sm"
+                role="group"
+                aria-label={`${axis.label} score: ${pct} out of 100`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{axis.label}</p>
+                    <p className="text-[10px] text-muted-foreground">{axis.description}</p>
+                  </div>
+                  <span
+                    className={cn(
+                      "shrink-0 rounded-md px-2 py-0.5 text-xs font-semibold tabular-nums",
+                      pct >= 80 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" :
+                      pct >= 60 ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100" :
+                      pct >= 40 ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100" :
+                                   "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
+                    )}
+                  >
+                    {pct}
+                  </span>
+                </div>
+                <div
+                  className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
+                  role="progressbar"
+                  aria-valuenow={pct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`${axis.label} axis progress`}
+                >
+                  <div
+                    className={cn("h-full rounded-full transition-all duration-700", barColor)}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Vendor validation — tested against Workday, Greenhouse, Lever */}
+      <VendorValidationSection data={data} />
 
       {/* Status banner */}
       {result.score >= 85 ? (

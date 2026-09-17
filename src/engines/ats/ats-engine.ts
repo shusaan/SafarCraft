@@ -1,4 +1,4 @@
-import type { ResumeData, ATSResult, ATSDeduction, KeywordMatch } from "@/types";
+import type { ResumeData, ATSResult, ATSDeduction, KeywordMatch, ATSAxis } from "@/types";
 
 const WEAK_VERBS = [
   "was", "were", "been", "being", "had", "has", "have", "did", "does",
@@ -51,6 +51,7 @@ function analyzeBullets(bullets: string[]): ATSDeduction[] {
     if (firstWord && WEAK_VERBS.includes(firstWord)) {
       deductions.push({
         category: "Weak Verbs",
+        axis: "impact",
         points: 2,
         reason: `Bullet starts with weak verb "${firstWord}". Use stronger action verbs.`,
         severity: "medium",
@@ -60,6 +61,7 @@ function analyzeBullets(bullets: string[]): ATSDeduction[] {
     if (bullet.length > LONG_PARAGRAPH_THRESHOLD) {
       deductions.push({
         category: "Long Paragraph",
+        axis: "brevity",
         points: 3,
         reason: "Bullet is too long (over 150 chars). Break into shorter points.",
         severity: "medium",
@@ -69,6 +71,7 @@ function analyzeBullets(bullets: string[]): ATSDeduction[] {
     if (!bullet.match(/^\d/) && !bullet.match(/[0-9]/)) {
       deductions.push({
         category: "No Metrics",
+        axis: "impact",
         points: 1,
         reason: "Bullet lacks measurable achievements. Add numbers, percentages, or quantifiable results.",
         severity: "low",
@@ -88,6 +91,7 @@ function analyzeSectionOrder(data: ResumeData): ATSDeduction[] {
   if (!hasExperience) {
     deductions.push({
       category: "Missing Section",
+      axis: "content",
       points: 10,
       reason: "No experience section found. Experience is critical for ATS ranking.",
       severity: "high",
@@ -97,6 +101,7 @@ function analyzeSectionOrder(data: ResumeData): ATSDeduction[] {
   if (!hasSkills) {
     deductions.push({
       category: "Missing Section",
+      axis: "ats",
       points: 8,
       reason: "No skills section found. Skills help match with job requirements.",
       severity: "high",
@@ -106,6 +111,7 @@ function analyzeSectionOrder(data: ResumeData): ATSDeduction[] {
   if (!hasEducation) {
     deductions.push({
       category: "Missing Section",
+      axis: "content",
       points: 5,
       reason: "No education section found.",
       severity: "medium",
@@ -121,6 +127,7 @@ function analyzeFormatting(data: ResumeData): ATSDeduction[] {
   if (!data.personal.name) {
     deductions.push({
       category: "Formatting",
+      axis: "format",
       points: 15,
       reason: "Name is missing. This is critical for ATS identification.",
       severity: "high",
@@ -130,6 +137,7 @@ function analyzeFormatting(data: ResumeData): ATSDeduction[] {
   if (!data.personal.email) {
     deductions.push({
       category: "Formatting",
+      axis: "format",
       points: 5,
       reason: "Email is missing. Recruiters cannot contact you.",
       severity: "high",
@@ -140,6 +148,7 @@ function analyzeFormatting(data: ResumeData): ATSDeduction[] {
   if (totalBullets === 0 && data.experience.length > 0) {
     deductions.push({
       category: "Bullet Quality",
+      axis: "content",
       points: 10,
       reason: "Experience entries have no bullet points. Add achievements and responsibilities.",
       severity: "high",
@@ -156,6 +165,7 @@ function analyzeFormatting(data: ResumeData): ATSDeduction[] {
   if (emptySections >= 3) {
     deductions.push({
       category: "Incomplete",
+      axis: "content",
       points: 10,
       reason: "Resume is largely empty. Fill in multiple sections to improve ATS score.",
       severity: "high",
@@ -163,6 +173,32 @@ function analyzeFormatting(data: ResumeData): ATSDeduction[] {
   }
 
   return deductions;
+}
+
+const AXIS_LABELS: Record<ATSAxis["id"], { label: string; description: string; max: number }> = {
+  content: { label: "Content",  description: "Sections, completeness & required fields", max: 35 },
+  format:  { label: "Format",   description: "Identifiable structure & required contact info", max: 25 },
+  ats:     { label: "ATS",      description: "Skills, keywords & machine-readability", max: 18 },
+  brevity: { label: "Brevity",  description: "Bullet length & scannability", max: 12 },
+  impact:  { label: "Impact",   description: "Action verbs & quantifiable metrics", max: 10 },
+};
+
+function buildAxes(deductions: ATSDeduction[]): ATSAxis[] {
+  const grouped: Record<ATSAxis["id"], number> = {
+    content: 0, format: 0, ats: 0, brevity: 0, impact: 0,
+  };
+  for (const d of deductions) grouped[d.axis] = (grouped[d.axis] ?? 0) + d.points;
+
+  return (Object.keys(AXIS_LABELS) as ATSAxis["id"][]).map((id) => {
+    const meta = AXIS_LABELS[id];
+    const lost = Math.min(grouped[id] ?? 0, meta.max);
+    return {
+      id,
+      label: meta.label,
+      description: meta.description,
+      score: Math.max(0, Math.round(((meta.max - lost) / meta.max) * 100)),
+    };
+  });
 }
 
 export function calculateATSScore(data: ResumeData): ATSResult {
@@ -177,6 +213,8 @@ export function calculateATSScore(data: ResumeData): ATSResult {
 
   const totalDeductions = deductions.reduce((sum, d) => sum + d.points, 0);
   score = Math.max(0, 100 - totalDeductions);
+
+  const axes = buildAxes(deductions);
 
   const keywords = extractKeywords(data);
   const keywordMatch: KeywordMatch[] = keywords.slice(0, 20).map((kw) => ({
@@ -204,7 +242,7 @@ export function calculateATSScore(data: ResumeData): ATSResult {
     recommendations.push("Consider using CareerForge AI's AI Assistant to improve your bullet points");
   }
 
-  return { score, deductions, recommendations, keywordMatch };
+  return { score, axes, deductions, recommendations, keywordMatch };
 }
 
 export function getATSScoreLabel(score: number): { label: string; color: string } {

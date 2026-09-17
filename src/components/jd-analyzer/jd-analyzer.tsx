@@ -81,14 +81,35 @@ export function JDAnalyzer() {
             <div className="space-y-2">
               <h3 className="flex items-center gap-2 text-sm font-semibold">
                 <CheckCircle className="h-4 w-4 text-green-500" />
-                Detected Skills ({result.skills.length})
+                Skills Found in Your Resume ({result.skills.length})
               </h3>
               <div className="flex flex-wrap gap-1">
                 {result.skills.map((skill) => (
-                  <Badge key={skill} variant={result.missingSkills.includes(skill) ? "destructive" : "success"}>
-                    {skill}
-                  </Badge>
+                  <Badge key={skill} variant="success">{skill}</Badge>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {result.jdSkills?.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="flex items-center gap-2 text-sm font-semibold">
+                <Target className="h-4 w-4 text-muted-foreground" />
+                All JD Keywords ({result.jdSkills.length})
+              </h3>
+              <div className="flex flex-wrap gap-1">
+                {result.jdSkills.map((skill) => {
+                  const matched = result.skills.includes(skill);
+                  return (
+                    <Badge
+                      key={skill}
+                      variant={matched ? "secondary" : "outline"}
+                      className={matched ? "" : "opacity-60"}
+                    >
+                      {skill}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
           )}

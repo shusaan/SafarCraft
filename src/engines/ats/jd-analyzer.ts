@@ -13,7 +13,7 @@ const TECH_KEYWORDS = [
 export function analyzeJobDescription(jd: string, resume: ResumeData): JDParseResult {
   const lowerJD = jd.toLowerCase();
 
-  const foundSkills = TECH_KEYWORDS.filter((kw) => lowerJD.includes(kw));
+  const jdSkills = TECH_KEYWORDS.filter((kw) => lowerJD.includes(kw));
   const allResumeText = [
     ...resume.experience.flatMap((e) => [e.position, e.company, ...e.bullets, ...e.technologies]),
     ...resume.education.flatMap((e) => [e.degree, e.field, e.institution]),
@@ -26,7 +26,8 @@ export function analyzeJobDescription(jd: string, resume: ResumeData): JDParseRe
     .join(" ")
     .toLowerCase();
 
-  const missingSkills = foundSkills.filter((skill) => !allResumeText.includes(skill));
+  const skillsInResume = jdSkills.filter((skill) => allResumeText.includes(skill));
+  const missingSkills = jdSkills.filter((skill) => !allResumeText.includes(skill));
 
   const experienceLevels = ["junior", "mid-level", "senior", "staff", "principal", "lead"];
   const experienceLevel = experienceLevels.find((level) => lowerJD.includes(level)) ?? "Not specified";
@@ -40,12 +41,12 @@ export function analyzeJobDescription(jd: string, resume: ResumeData): JDParseRe
     }
   }
 
-  const matchScore = foundSkills.length > 0
-    ? Math.round(((foundSkills.length - missingSkills.length) / foundSkills.length) * 100)
+  const matchScore = jdSkills.length > 0
+    ? Math.round((skillsInResume.length / jdSkills.length) * 100)
     : 0;
 
   const keywordHeatmap: Record<string, number> = {};
-  for (const skill of foundSkills) {
+  for (const skill of jdSkills) {
     keywordHeatmap[skill] = (lowerJD.match(new RegExp(skill, "g")) ?? []).length;
   }
 
@@ -61,8 +62,9 @@ export function analyzeJobDescription(jd: string, resume: ResumeData): JDParseRe
   }
 
   return {
-    skills: foundSkills,
-    technologies: foundSkills,
+    skills: skillsInResume,
+    technologies: skillsInResume,
+    jdSkills,
     responsibilities: responsibilities.slice(0, 10),
     experienceLevel,
     matchScore,
