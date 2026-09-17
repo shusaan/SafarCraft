@@ -19,6 +19,7 @@ import { PortfolioGenerator } from "@/components/portfolio/portfolio-generator";
 import { VersionHistory } from "./version-history";
 import { VersionComparison } from "./version-comparison";
 import { OnboardingChecklist } from "./onboarding-checklist";
+import { ShareLinkDialog } from "./share-link-dialog";
 import { ShortcutsHelp } from "./shortcuts-help";
 import { GoalSelector } from "./goal-selector";
 import { BuilderStepper, type StepperStep } from "./builder-stepper";
@@ -32,7 +33,7 @@ import { cn } from "@/lib/utils";
 import {
   FileText, Undo2, Redo2, Eye, EyeOff, Palette, ScrollText,
   Sparkles, GitBranch, Download, Target, Globe, History, Sun, Moon,
-  GitCompare, Menu, X, HelpCircle, Clock, Save, Zap,
+  GitCompare, Menu, X, HelpCircle, Clock, Save, Zap, Link2,
 } from "lucide-react";
 
 type Panel = "editor" | "templates" | "ats" | "quick" | "github" | "export" | "jd" | "portfolio" | "compare";
@@ -144,6 +145,7 @@ export function BuilderLayout() {
   const [showResumeList,    setShowResumeList]     = useState(false);
   const [showVersionHistory,setShowVersionHistory] = useState(false);
   const [showShortcuts,     setShowShortcuts]      = useState(false);
+  const [showShareLink,     setShowShareLink]      = useState(false);
   const [activePanel,       setActivePanel]        = useState<Panel>("editor");
   const [mobileMenuOpen,    setMobileMenuOpen]     = useState(false);
   const [previewWidth,      setPreviewWidth]       = useState(500);
@@ -156,6 +158,17 @@ export function BuilderLayout() {
     const mq = window.matchMedia("(max-width: 768px)");
     setShowPreview(!mq.matches);
   }, []);
+
+  const isMobile = useUIStore((s) => s.isMobile);
+  const setIsMobile = useUIStore((s) => s.setIsMobile);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const onChange = () => setIsMobile(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [setIsMobile]);
 
   const isDirty    = useResumeStore((s) => s.isDirty);
   const undo       = useResumeStore((s) => s.undo);
@@ -386,6 +399,16 @@ export function BuilderLayout() {
             variant="ghost"
             size="icon"
             className="h-8 w-8"
+            onClick={() => setShowShareLink(true)}
+            title="Share public link"
+            aria-label="Share resume link"
+          >
+            <Link2 className="h-3.5 w-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
             onClick={() => setShowShortcuts(true)}
             title="Keyboard Shortcuts (?)"
             aria-label="Keyboard shortcuts"
@@ -515,14 +538,20 @@ export function BuilderLayout() {
         {showPreview && (
           <aside
             ref={previewRef}
-            className="shrink-0 border-l relative flex flex-col max-md:fixed max-md:inset-0 max-md:z-30 max-md:bg-background"
-            style={{ width: `${previewWidth}px` }}
+            className={cn(
+              "shrink-0 border-l relative flex flex-col bg-background",
+              isMobile
+                ? "fixed inset-x-0 bottom-0 top-12 z-30 rounded-t-2xl shadow-2xl border-t"
+                : "",
+            )}
+            style={isMobile ? undefined : { width: `${previewWidth}px` }}
             role="complementary"
             aria-label="Resume preview"
           >
             <div
               className={cn(
-                "absolute left-0 top-0 h-full w-1 cursor-col-resize transition-colors max-md:hidden",
+                "absolute left-0 top-0 h-full w-1 cursor-col-resize transition-colors",
+                isMobile ? "hidden" : "max-md:hidden",
                 isResizing ? "bg-primary/60" : "hover:bg-primary/30",
               )}
               onMouseDown={handleMouseDown}
@@ -535,10 +564,41 @@ export function BuilderLayout() {
                 if (e.key === "ArrowRight") setPreviewWidth((w) => Math.min(window.innerWidth * 0.6, w + 20));
               }}
             />
+            {isMobile && (
+              <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-2">
+                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                  <span className="h-1 w-8 rounded-full bg-muted-foreground/30" aria-hidden="true" />
+                  Preview
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 text-xs"
+                  onClick={() => setShowPreview(false)}
+                  aria-label="Hide preview"
+                >
+                  <EyeOff className="h-3.5 w-3.5" />
+                  Hide
+                </Button>
+              </div>
+            )}
             <ErrorBoundary>
               <ResumePreview />
             </ErrorBoundary>
           </aside>
+        )}
+
+        {/* ── Mobile FAB: show preview when hidden ── */}
+        {isMobile && !showPreview && (
+          <Button
+            size="lg"
+            className="fixed bottom-4 right-4 z-30 gap-1.5 rounded-full shadow-lg"
+            onClick={() => setShowPreview(true)}
+            aria-label="Show preview"
+          >
+            <Eye className="h-4 w-4" />
+            Preview
+          </Button>
         )}
       </main>
 
@@ -547,7 +607,7 @@ export function BuilderLayout() {
       <WelcomeOverlay />
 
       <Dialog open={showResumeList} onOpenChange={setShowResumeList}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>My Resumes</DialogTitle></DialogHeader>
           <ResumeList onClose={() => setShowResumeList(false)} />
         </DialogContent>
@@ -561,6 +621,7 @@ export function BuilderLayout() {
       </Dialog>
 
       <ShortcutsHelp open={showShortcuts} onOpenChange={setShowShortcuts} />
+      <ShareLinkDialog open={showShareLink} onOpenChange={setShowShareLink} />
     </div>
   );
 }

@@ -123,6 +123,10 @@ worker/        # Cloudflare Worker (visitor counter)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/CONTRIBUTING-ENGINES.md](docs/CONTRIBUTING-ENGINES.md) for how to add new action verbs, rewriter patterns, or achievement templates.
 
+## Roadmap & tiers
+
+Tier 1 (free forever) is live. Tier 2 (Pro, $5/mo) is designed with an open question list. See **[PLAN.md](./PLAN.md)** for the full tier model, revenue-first build order, and deferred decisions.
+
 ## License
 
 MIT — free to use, modify, and distribute.
