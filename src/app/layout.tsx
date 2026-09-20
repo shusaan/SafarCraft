@@ -5,6 +5,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { ToastProviderWrapper } from "@/components/ui/toast";
 import { ServiceWorkerRegistrar } from "@/components/shared/service-worker-registrar";
+import { organizationLd } from "@/lib/seo/jsonld";
+import { REPO_URL } from "@/lib/external-urls";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID?.trim() || "";
 
@@ -126,7 +128,9 @@ export default function RootLayout({
         <meta name="theme-color" content="#6366f1" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationLd({ sameAs: [REPO_URL] })),
+          }}
         />
       </head>
       <body
