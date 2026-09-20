@@ -1,91 +1,32 @@
 import Link from "next/link";
+import { GitBranch, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { BuilderPreview } from "@/components/marketing/builder-preview";
+import { Hero } from "@/components/marketing/hero";
+import { StatsRibbon } from "@/components/marketing/stats-ribbon";
+import { TwoTrackEntry } from "@/components/marketing/two-track-entry";
+import { HowItWorks } from "@/components/marketing/how-it-works";
+import { FeaturesGrid } from "@/components/marketing/features-grid";
+import { BuiltForEngineers } from "@/components/marketing/built-for-engineers";
+import { PricingTeaser } from "@/components/marketing/pricing-teaser";
+import { SocialProof } from "@/components/marketing/social-proof";
+import { MarketingFooter } from "@/components/marketing/footer";
+import { Section } from "@/components/primitives/section";
+import { Container } from "@/components/primitives/container";
+import { REPO_URL } from "@/lib/external-urls";
 import { ContinueDraft } from "@/components/marketing/continue-draft";
-import { REPO_URL, REPO_CONTRIBUTING_URL } from "@/lib/external-urls";
-import {
-  ArrowRight,
-  GitBranch,
-  FileText,
-  Target,
-  Zap as ZapIcon,
-  Download,
-  Palette,
-  CheckCircle,
-  Star,
-  Zap,
-} from "lucide-react";
-
-const features = [
-  {
-    icon: FileText,
-    title: "Smart Resume Builder",
-    description:
-      "Real-time editing, drag-and-drop sections, live preview, autosave, and full version history — all in one flow.",
-  },
-  {
-    icon: Target,
-    title: "ATS Analysis",
-    description:
-      "Detailed ATS scoring across 5 axes with per-deduction explanations and actionable recommendations to push past 90.",
-  },
-  {
-    icon: ZapIcon,
-    title: "Smart Local Helpers",
-    description:
-      "Action-verb swap, bullet rewriter, metric prompter, grammar checker — instant, offline, no API key.",
-  },
-  {
-    icon: GitBranch,
-    title: "GitHub Intelligence",
-    description:
-      "Import your GitHub profile and auto-generate contribution bullets, project sections, and skill lists.",
-  },
-  {
-    icon: Download,
-    title: "Multiple Exports",
-    description:
-      "Export to PDF, DOCX, JSON Resume, Markdown, plain TXT — all ATS compliant and ready to send.",
-  },
-  {
-    icon: Palette,
-    title: "Professional Templates",
-    description:
-      "Classic ATS, Modern Professional, Executive — with column layout and picture options per template.",
-  },
-];
-
-const steps = [
-  {
-    number: "01",
-    title: "Fill in your details",
-    description:
-      "Start from a pre-filled sample or paste in your existing experience. No account required.",
-  },
-  {
-    number: "02",
-    title: "Analyse & optimise",
-    description:
-      "Run ATS analysis, use Quick Actions to swap weak verbs, add metrics, and match against job descriptions.",
-  },
-  {
-    number: "03",
-    title: "Export & apply",
-    description:
-      "Download a pixel-perfect PDF or DOCX, or generate a portfolio site — in one click.",
-  },
-];
 
 export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* ── Navbar ── */}
-      <header className="sticky top-0 z-50 border-b bg-background">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-semibold tracking-tight">CareerForge AI</span>
-          </div>
+      {/* ── Sticky navbar ── */}
+      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <Container className="flex h-14 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-white">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+            CareerForge AI
+          </Link>
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
             <Link href="/builder">
@@ -94,11 +35,7 @@ export default function HomePage() {
             <Link href="/builder?panel=templates">
               <Button variant="ghost" size="sm">Templates</Button>
             </Link>
-            <a
-              href={REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
               <Button variant="ghost" size="sm" className="gap-1.5">
                 <GitBranch className="h-3.5 w-3.5" />
                 GitHub
@@ -106,267 +43,63 @@ export default function HomePage() {
             </a>
           </nav>
 
-          <Link href="/builder">
-            <Button size="sm" className="gap-1.5">
-              Start free
-              <ArrowRight className="h-3.5 w-3.5" />
+          <div className="flex items-center gap-2">
+            <ContinueDraft />
+            <Button asChild size="sm" className="gap-1.5">
+              <Link href="/onboarding?path=import">
+                Start free
+                <span aria-hidden>→</span>
+              </Link>
             </Button>
-          </Link>
-        </div>
+          </div>
+        </Container>
       </header>
 
       <main className="flex-1">
-        {/* ── Hero ── */}
-        <section className="px-4 pt-20 pb-16 sm:px-6 sm:pb-20 sm:pt-24" aria-labelledby="hero-heading">
-          <div className="mx-auto max-w-6xl">
-            <div className="mx-auto max-w-3xl text-center">
-              <div className="animate-fade-up mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                MIT licensed &middot; No signup required
-              </div>
+        <Hero />
+        <StatsRibbon />
+        <TwoTrackEntry />
+        <HowItWorks />
+        <FeaturesGrid />
+        <BuiltForEngineers />
+        <PricingTeaser />
+        <SocialProof />
 
-              <h1
-                id="hero-heading"
-                className="animate-fade-up delay-100 font-extrabold tracking-tight leading-[1.05]"
-                style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
-              >
-                Free ATS Resume Builder &ndash;{" "}
-                <span className="whitespace-nowrap">Build, Optimise &amp; Export</span>{" "}
-                <span className="text-primary">ATS-Friendly Resumes</span>
-              </h1>
-
-              <h2 className="animate-fade-up delay-150 mt-4 text-lg sm:text-xl font-semibold text-muted-foreground">
-                Edit locally, analyse with 5-axis ATS scoring, and export in 5 simple steps
-              </h2>
-
-              <p className="animate-fade-up delay-200 mx-auto mt-5 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground">
-                Open-source resume platform for software engineers. Real-time editing, smart local helpers,
-                GitHub intelligence, and ATS analysis — all free, all yours, 100% local.
-              </p>
-
-              <div className="animate-fade-up delay-300 mt-8 flex flex-wrap items-center justify-center gap-3">
-                <Link href="/builder">
-                  <Button size="lg" className="gap-2">
-                    <Zap className="h-4 w-4" />
-                    Start building free
-                  </Button>
-                </Link>
-                <a
-                  href={REPO_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="lg" className="gap-2">
-                    <GitBranch className="h-4 w-4" />
-                    View on GitHub
-                    <Badge variant="secondary" className="ml-0.5 text-xs">MIT</Badge>
-                  </Button>
-                </a>
-                <ContinueDraft />
-              </div>
-
-              <p className="animate-fade-up delay-400 mt-4 text-sm text-muted-foreground">
-                Your data stays on your device — no account, no cloud, no tracking
-              </p>
-            </div>
-
-            <div className="animate-fade-up delay-500 mt-12">
-              <BuilderPreview />
-              <p className="mt-2 text-center text-sm text-muted-foreground/60">
-                The resume builder — real-time editor with live ATS scoring
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Trust bar ── */}
-        <section className="border-y bg-muted/20" aria-label="Trust signals">
-          <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6">
-            <p className="text-center text-sm text-muted-foreground tracking-wide">
-              <span className="font-medium text-foreground">MIT licensed</span>
-              <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
-              No signup or account required
-              <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
-              Self-hostable with Docker
-              <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
-              95+ Lighthouse score
-              <span aria-hidden="true" className="mx-2 text-muted-foreground/30">&middot;</span>
-              Data stays on your device
-            </p>
-          </div>
-        </section>
-
-        {/* ── Features ── */}
-        <section className="px-4 py-20 sm:px-6 sm:py-24" aria-labelledby="features-heading">
-          <div className="mx-auto max-w-6xl">
-            <div className="mx-auto mb-14 max-w-2xl text-center">
-              <h2
-                id="features-heading"
-                className="animate-fade-up text-3xl font-extrabold tracking-tight sm:text-4xl"
-              >
-                Built for engineers
-              </h2>
-              <p className="animate-fade-up delay-100 mt-4 text-muted-foreground leading-relaxed">
-                Every feature is designed around the real workflow of a software engineer applying for jobs.
-              </p>
-            </div>
-
-            <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3 bg-border rounded-lg overflow-hidden border">
-              {features.map((feature, i) => {
-                const Icon = feature.icon;
-                return (
-                  <article
-                    key={feature.title}
-                    className={`animate-fade-up delay-${(i % 6) * 100 + 100} bg-background p-6 sm:p-7`}
-                  >
-                    <div
-                      className="mb-4 flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary"
-                      aria-hidden="true"
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <h3 className="text-sm font-semibold">{feature.title}</h3>
-                    <p className="mt-1.5 text-base text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ── How it works ── */}
-        <section className="border-y bg-muted/20 px-4 py-20 sm:px-6 sm:py-24" aria-labelledby="how-heading">
-          <div className="mx-auto max-w-4xl">
-            <div className="mx-auto mb-14 max-w-2xl text-center">
-              <h2
-                id="how-heading"
-                className="animate-fade-up text-3xl font-extrabold tracking-tight sm:text-4xl"
-              >
-                From blank to hired in three steps
-              </h2>
-            </div>
-
-            <ol className="grid gap-8 sm:grid-cols-3" aria-label="Steps">
-              {steps.map((step, i) => (
-                <li
-                  key={step.number}
-                  className={`animate-fade-up delay-${i * 200 + 100} relative text-center`}
-                >
-                  <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary/30 bg-background text-sm font-bold text-primary">
-                    {step.number}
-                  </div>
-                  <h3 className="text-sm font-semibold">{step.title}</h3>
-                  <p className="mt-1.5 text-base text-muted-foreground leading-relaxed">
-                    {step.description}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-
-        {/* ── Open source trust ── */}
-        <section className="px-4 py-20 sm:px-6 sm:py-24" aria-labelledby="oss-heading">
-          <div className="mx-auto max-w-3xl">
-            <div className="animate-fade-up rounded-lg border bg-card p-8 sm:p-10 text-center shadow-sm">
+        {/* ── Open source trust card ── */}
+        <Section background="muted">
+          <Container size="narrow">
+            <div className="rounded-2xl border bg-card p-8 text-center shadow-sm md:p-12">
               <div
-                className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-lg border bg-background"
+                className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl border bg-background"
                 aria-hidden="true"
               >
                 <GitBranch className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h2
-                id="oss-heading"
-                className="text-2xl font-extrabold tracking-tight sm:text-3xl"
-              >
-                Fully open source — MIT Licensed
+              <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+                Fully open source — MIT licensed
               </h2>
-              <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground leading-relaxed">
-                Read the code, self-host it, contribute to it, or fork it. CareerForge AI is built
-                in the open. No vendor lock-in, no paywalls, no data sold.
+              <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
+                Read the code, self-host it, contribute to it, or fork it. CareerForge AI
+                is built in the open. No vendor lock-in, no paywalls, no data sold.
               </p>
-              <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
-                {[
-                  "No account required",
-                  "Data stays on your device",
-                  "No analytics without consent",
-                  "Self-hostable",
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-1.5 text-muted-foreground">
-                    <CheckCircle className="h-4 w-4 shrink-0 text-primary" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-                <Link href="/builder">
-                  <Button size="lg" className="gap-2">
-                    <Zap className="h-4 w-4" />
+                <Button asChild variant="gradient" size="lg">
+                  <Link href="/onboarding?path=scratch">
                     Start for free
-                  </Button>
-                </Link>
-                <a
-                  href={REPO_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" size="lg" className="gap-2">
-                    <Star className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
                     Star on GitHub
-                  </Button>
-                </a>
+                  </a>
+                </Button>
               </div>
             </div>
-          </div>
-        </section>
+          </Container>
+        </Section>
       </main>
 
-      {/* ── Footer ── */}
-      <footer className="border-t" role="contentinfo">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">CareerForge AI</span>
-              <Badge variant="outline" className="text-xs">MIT</Badge>
-            </div>
-
-            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-sm text-muted-foreground" aria-label="Footer navigation">
-              <Link href="/builder" className="hover:text-foreground transition-colors">
-                Builder
-              </Link>
-              <Link href="/builder?panel=templates" className="hover:text-foreground transition-colors">
-                Templates
-              </Link>
-              <a
-                href={REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground transition-colors"
-              >
-                GitHub
-              </a>
-              <a
-                href={REPO_CONTRIBUTING_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground transition-colors"
-              >
-                Contributing
-              </a>
-              <Link href="/privacy" className="hover:text-foreground transition-colors">
-                Privacy Policy
-              </Link>
-            </nav>
-
-            <p className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} {" "}
-              CareerForge AI &mdash; Open source. Free forever.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   );
 }

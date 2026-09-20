@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, Github, Send } from "lucide-react";
+import { Sparkles, GitBranch, Send } from "lucide-react";
 import { Container } from "@/components/primitives/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -133,7 +133,7 @@ export function MarketingFooter() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
-            <Github className="h-4 w-4" />
+            <GitBranch className="h-4 w-4" />
             View on GitHub
           </Link>
         </div>
