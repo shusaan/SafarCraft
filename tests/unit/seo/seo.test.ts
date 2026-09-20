@@ -25,9 +25,11 @@ describe("buildMetadata", () => {
     expect(meta.title).toBe("Test Page");
     expect(meta.description).toBe("A test description.");
     expect(meta.alternates?.canonical).toBe(`${siteConfig.url}/test`);
-    expect(meta.openGraph?.title).toBe("Test Page");
-    expect(meta.openGraph?.siteName).toBe(siteConfig.name);
-    expect(meta.twitter?.card).toBe("summary_large_image");
+    const og = Array.isArray(meta.openGraph) ? meta.openGraph[0] : meta.openGraph;
+    const tw = Array.isArray(meta.twitter) ? meta.twitter[0] : meta.twitter;
+    expect(og?.title).toBe("Test Page");
+    expect(og?.siteName).toBe(siteConfig.name);
+    expect(tw?.card).toBe("summary_large_image");
     expect(meta.robots).toBeDefined();
   });
 
@@ -43,8 +45,9 @@ describe("buildMetadata", () => {
       type: "article",
       publishedTime: "2026-01-01T00:00:00Z",
     });
-    expect(meta.openGraph?.type).toBe("article");
-    expect((meta.openGraph as { publishedTime?: string }).publishedTime).toBe("2026-01-01T00:00:00Z");
+    const og = Array.isArray(meta.openGraph) ? meta.openGraph[0] : meta.openGraph;
+    expect(og?.type).toBe("article");
+    expect((og as { publishedTime?: string })?.publishedTime).toBe("2026-01-01T00:00:00Z");
   });
 });
 

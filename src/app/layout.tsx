@@ -62,59 +62,8 @@ export const metadata: Metadata = {
   },
 };
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Person",
-      name: "CareerForge AI",
-      description: "Creator of CareerForge AI, an open-source resume builder",
-    },
-    {
-      "@type": "WebApplication",
-      name: "CareerForge AI",
-      url: "https://careerforge-ai.vercel.app",
-      applicationCategory: "Resume Builder",
-      operatingSystem: "Web",
-      description:
-        "CareerForge AI – Free, Open-Source ATS Resume Builder. Build, Optimise, and Export Resumes Locally.",
-      offers: {
-        "@type": "Offer",
-        price: "0",
-        priceCurrency: "USD",
-      },
-    },
-    {
-      "@type": "FAQPage",
-      mainEntity: [
-        {
-          "@type": "Question",
-          name: "Is CareerForge AI free?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes, CareerForge AI is completely free and open-source under the MIT license. No signup required.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Does it check ATS compatibility?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes, the built-in ATS Resume Checker analyzes your resume for keywords, formatting, and structure to maximize your pass rate through Applicant Tracking Systems.",
-          },
-        },
-        {
-          "@type": "Question",
-          name: "Can I export my resume?",
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: "Yes, you can export to PDF, DOCX, JSON Resume, and Markdown — all ATS-compliant with selectable text and clickable links.",
-          },
-        },
-      ],
-    },
-  ],
-};
+// Schema.org JSON-LD is now emitted in <head> via organisationLd()
+// (see Phase 5). The legacy inline jsonLd constant was removed.
 
 export default function RootLayout({
   children,
