@@ -107,11 +107,25 @@ const LINKEDIN_RE = /(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i;
 function normaliseText(raw: string): string {
   return raw
     .replace(/\r\n/g, "\n")
-    .replace(/\u2013|\u2014/g, "-") // en/em dash → hyphen for matching
-    .replace(/\u2018|\u2019/g, "'")
-    .replace(/\u201c|\u201d/g, '"')
+    .replace(/[\u2013\u2014]/g, "-") // en/em dash → hyphen for matching
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201c\u201d]/g, '"')
     .replace(/[ \t]{2,}/g, " ");    // only collapse horizontal whitespace, NEVER \n
 }
+
+// Words that almost always indicate a job title / tagline line, not a
+// person's name. Used to detect when line 2 is a tagline (so we don't
+// concatenate it onto the name). This list is intentionally broad — it
+// catches "Lead X", "Senior X", "X Engineer", "X Architect", etc., across
+// industries. New entries can be added without breaking anything.
+const JOB_TITLE_KEYWORDS = [
+  "Engineer", "Architect", "Manager", "Developer", "Designer",
+  "Consultant", "Analyst", "Specialist", "Lead", "Senior", "Junior",
+  "Head", "Director", "Principal", "Staff", "Associate",
+  "Officer", "Executive", "Coordinator", "Administrator",
+  "Scientist", "Researcher", "Writer", "Editor", "Producer",
+  "Consultant", "Strategist", "Advisor", "Architect",
+];
 
 const MONTH_MAP: Record<string, string> = {
   jan:"01", feb:"02", mar:"03", apr:"04", may:"05", jun:"06",
@@ -168,6 +182,17 @@ function matchSectionHeader(line: string): string | null {
       return header.toUpperCase();
     }
   }
+  // Fallback: pdfjs sometimes glues the section header onto the tail of
+  // the previous line ("…timely manner. CERTIFICATIONS"). Match when a
+  // known header appears as a trailing word boundary in the line.
+  const lastWord = stripped.match(/[A-Z]+$/);
+  if (lastWord) {
+    for (const header of SECTION_HEADERS) {
+      if (lastWord[0] === header.replace(/\s+/g, "").toUpperCase()) {
+        return header.toUpperCase();
+      }
+    }
+  }
   return null;
 }
 
@@ -175,21 +200,51 @@ function splitSections(lines: string[]): Record<string, string[]> {
   const sections: Record<string, string[]> = { HEADER: [] };
   let current = "HEADER";
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
     if (!trimmed) continue;
 
-    // Check if this line is a section header (normal or letter-spaced).
-    const header = matchSectionHeader(trimmed);
-    if (header) {
-      current = header;
+    // If a section header is glued onto the END of a previous-content line
+    // (common in PDFs where two lines have a tiny vertical gap, e.g.
+    // "timely manner. CERTIFICATIONS"), split the line at the boundary.
+    // Conservative split: only when the trailing word is exactly a known
+    // header, and the prefix is non-empty.
+    let prefixPart = trimmed;
+    let trailerHeader: string | null = null;
+    const lastWordMatch = trimmed.match(/^(.*?)\b([A-Z]{3,20})$/);
+    if (lastWordMatch) {
+      const prefix = lastWordMatch[1]!.trim();
+      const tail   = lastWordMatch[2]!;
+      const strippedTail = tail.replace(/[:|\-–—]/g, "");
+      for (const header of SECTION_HEADERS) {
+        if (strippedTail === header.replace(/\s+/g, "").toUpperCase() && prefix.length > 0) {
+          prefixPart = prefix;
+          trailerHeader = header.toUpperCase();
+          break;
+        }
+      }
+    }
+
+    // 1. Standalone header (the line itself is the header)
+    const standalone = matchSectionHeader(prefixPart);
+    if (standalone) {
+      current = standalone;
       if (!sections[current]) sections[current] = [];
       continue;
     }
 
-    // Also accept the SECTION_RE form for backwards compatibility.
-    if (SECTION_RE.test(trimmed)) {
-      current = trimmed.replace(/[:|\-–—]/g, "").trim().toUpperCase();
+    // 2. SECTION_RE fallback
+    if (SECTION_RE.test(prefixPart)) {
+      current = prefixPart.replace(/[:|\-–—]/g, "").trim().toUpperCase();
+      if (!sections[current]) sections[current] = [];
+      continue;
+    }
+
+    // 3. Glued trailer header — emit the prefix into the CURRENT section,
+    //    then transition to the new section for subsequent lines.
+    if (trailerHeader) {
+      sections[current]!.push(prefixPart);
+      current = trailerHeader;
       if (!sections[current]) sections[current] = [];
       continue;
     }
@@ -272,42 +327,65 @@ function extractPhone(rawText: string): string {
 }
 
 function parseName(lines: string[]): string {
-  // Walk the first 8 lines and collect short capitalised fragments until
-  // we hit something that looks like contact info. This handles multi-line
-  // names like "Maria\nGarcia" produced by sidebar-style CVs.
+  // Walk the first few lines and accumulate short capitalised fragments.
+  // Stops at:
+  //   - contact-info (email / phone / URL)
+  //   - any line containing common separators (" | " or " · " etc.)
+  //   - any line that looks like a job title / tagline (contains words like
+  //     "Engineer", "Architect", "Senior", etc.) — this is critical, because
+  //     many CVs put the name on line 1 and the title/tagline on line 2.
+  //   - any "section-like" header (SUMMARY, EXPERIENCE, etc.)
+  //
+  // Multi-line first names ("Maria\nGarcia") are handled because both lines
+  // are short, capitalised, and don't look like contact / title lines.
   const parts: string[] = [];
   for (const line of lines.slice(0, 8)) {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
     if (EMAIL_RE.test(trimmed) || PHONE_RE.test(trimmed) || URL_RE.test(trimmed)) break;
-    if (trimmed.length > 60) break;
     if (SECTION_RE.test(trimmed)) break;
-    // Looks like contact line "key: value" or contains separators
+    if (trimmed.length > 60) break;
+    // Looks like contact line "key: value" or contains separators — most CVs
+    // put contact info on the first or second line after the name.
     if (/[:|]/.test(trimmed) && trimmed.length > 20) break;
-    // A line that is a single short capitalised word/phrase — accumulate
+    // Job-title / tagline detection. The second line is usually the role
+    // ("Lead DevOps Engineer", "Senior Architect"). Skip it so we don't
+    // concatenate the title onto the name.
+    if (parts.length >= 1) {
+      const lower = trimmed.toLowerCase();
+      if (JOB_TITLE_KEYWORDS.some((kw) => lower.includes(kw.toLowerCase()))) break;
+    }
     parts.push(trimmed);
     if (parts.length >= 3) break;
   }
   return parts.join(" ").trim();
 }
 
-function parseLocation(headerText: string, fullText: string): string {
-  // Try headerText first (typically the contact lines at the top of the
-  // document); fall back to fullText if that has no match. fullText covers
-  // sidebar-style CVs where contact info lives in a dedicated section
-  // (CONTACT) that's no longer part of the "HEADER" bucket.
-  const RE = /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?),\s*([A-Z]{2}|[A-Z][a-zA-Z]+)(?=\s+(?:linkedin|github|email|phone|tel|portfolio|website|blog|twitter|x\.com)|\s*$|\.|,)/i;
-  const candidates = [
-    (headerText ?? "").replace(/[\n|]+/g, " "),
-    (fullText ?? "").replace(/[\n|]+/g, " ").slice(0, 2000),
-  ];
-  for (const c of candidates) {
-    const m = c.match(RE);
+function parseLocation(headerText: string, _fullText: string): string {
+  // We ONLY search the HEADER section for location. Searching the whole
+  // document produces false positives — for example a summary containing
+  // "(CKS, CKA, AWS)" gets mis-parsed as a City, ST pair. Real locations
+  // appear on the contact line(s) at the top of the document.
+  //
+  // Accepts both:
+  //   - "City, ST" (US-style with 2-letter state code)
+  //   - "City | Country" (UK / EU-style pipe-separated, e.g. "London | UK")
+  //   - "City, Country" (longer country names)
+  //
+  // We strip parenthetical text first so "(CKS, CKA)" doesn't get
+  // mistaken for "City, ST".
+  const RE_COMMA =
+    /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)\s*,\s*(?:([A-Z]{2})|([A-Z][a-zA-Z]+))(?=\s+(?:linkedin|github|email|phone|tel|portfolio|website|blog|twitter|x\.com)|\s*$|\.|,)/;
+  const RE_PIPE =
+    /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)?)\s*\|\s*(?:([A-Z]{2,3})|([A-Z][a-zA-Z]+))(?=\s*[|·•]|$|\.)/;
+
+  const stripped = (headerText ?? "").replace(/\([^)]*\)/g, " ");
+  for (const RE of [RE_COMMA, RE_PIPE]) {
+    const m = stripped.match(RE);
     if (m) {
-      let loc = `${m[1]}, ${m[2]}`.trim();
-      loc = loc.replace(/[.,;]+$/, "").trim();
-      return loc;
+      const country = m[2] ?? m[3] ?? "";
+      return `${m[1]}, ${country}`.trim().replace(/[.,;]+$/, "").trim();
     }
   }
   return "";
@@ -423,6 +501,46 @@ function parseSkills(lines: string[]): ParsedSkillGroup[] {
       pushCurrent();
       currentCategory = lone;
       continue;
+    }
+
+    // Sub-section category header — a short line without bullets, dates,
+    // or sentence punctuation that introduces a bullet list.
+    // Common examples: "Architecture & Design", "Cloud Platforms",
+    // "Databases", "Networking & Virtualization". We accept it as a new
+    // category when:
+    //   - length ≤ 35 chars (one or two words typical)
+    //   - has 1-5 words (not a full sentence)
+    //   - doesn't end with a period / question mark
+    //   - doesn't contain digits / date range
+    //   - the NEXT non-empty line is a bullet (so we know it's a heading
+    //     for a list, not a body line)
+    //
+    // Without the "next line is bullet" check, any short phrase like
+    // "GitHub Repository" (which the PDF extracts from the AI Traffic
+    // Simulator project URL) gets treated as a category.
+    const wordCount = stripped.split(/\s+/).filter(Boolean).length;
+    const isShortHeading = stripped.length <= 35 && wordCount >= 1 && wordCount <= 5;
+    const hasNoBullets = !BULLET_RE.test(line);
+    const hasNoPeriod = !/[.!?]$/.test(stripped);
+    const hasNoDate = !extractDateRange(stripped) && !/\b(20|19)\d{2}\b/.test(stripped);
+    if (isShortHeading && hasNoBullets && hasNoPeriod && hasNoDate) {
+      // Look ahead — peek the next non-empty line. If it's a bullet, this
+      // is a category header.
+      const idxInLines = lines.indexOf(line);
+      const nextIdx = idxInLines + 1;
+      let peek = "";
+      for (let k = nextIdx; k < lines.length; k++) {
+        const cand = lines[k]?.trim() ?? "";
+        if (!cand) continue;
+        peek = cand;
+        break;
+      }
+      const peekIsBullet = /^[●○•·▪▫◦►▸]/.test(peek);
+      if (peekIsBullet) {
+        pushCurrent();
+        currentCategory = stripped;
+        continue;
+      }
     }
 
     // Default: append skills to current group
@@ -830,13 +948,29 @@ function parseProjects(lines: string[]): ParsedProject[] {
   const entries: ParsedProject[] = [];
   let current: ParsedProject | null = null;
 
+  // A real "new project" header line:
+  //   - doesn't start with a bullet
+  //   - has a year (e.g. "AI Traffic Simulator (Hackathon Project) - 2025")
+  //     OR a URL
+  //     OR is short and ends with a year like " - 2025"
+  // A non-bullet line that is body text (e.g. "the migration was a big
+  // success") is treated as part of the current project's description,
+  // not a new project header — that was the bug that created 3 fake
+  // projects out of one paragraph of body text.
+  const looksLikeProjectHeader = (s: string): boolean =>
+    /\b(20|19)\d{2}\b/.test(s) || /https?:\/\//.test(s);
+
   for (const line of lines) {
     const stripped = line.replace(BULLET_RE, "").trim();
     if (!stripped) continue;
 
     if (BULLET_RE.test(line)) {
       if (current) current.highlights.push(stripped);
-    } else {
+      continue;
+    }
+
+    if (looksLikeProjectHeader(stripped) || current === null) {
+      // New project header (year/URL), OR first non-bullet we see.
       if (current) entries.push(current);
       const urlMatch = stripped.match(/https?:\/\/\S+/);
       current = {
@@ -844,6 +978,13 @@ function parseProjects(lines: string[]): ParsedProject[] {
         role: "", description: "", technologies: [],
         url: urlMatch?.[0] ?? "", highlights: [],
       };
+      continue;
+    }
+
+    // Body text continuation of the current project.
+    if (current) {
+      if (current.description) current.description += " " + stripped;
+      else current.description = stripped;
     }
   }
   if (current) entries.push(current);
@@ -851,9 +992,28 @@ function parseProjects(lines: string[]): ParsedProject[] {
 }
 
 function parseCertifications(lines: string[]): ParsedCertification[] {
+  // A real cert entry is short, named, credential-like:
+  //   - doesn't start with any bullet marker
+  //   - is short (under 70 chars — long lines are sentence bullets that
+  //     leaked in from another section, not cert entries)
+  //   - doesn't end with a period (cert names don't terminate sentences)
+  //   - contains a year (most certs have one) OR is 5-50 chars long
   return lines
     .map((l) => l.replace(BULLET_RE, "").trim())
-    .filter((l) => l.length > 0)
+    .filter((l) => {
+      if (!l) return false;
+      if (l.length === 0 || l.length > 70) return false;
+      if (/^[○▪▫◦●•·►▸]\s*/.test(l)) return false;
+      if (/^[\s○▪▫◦●•·►▸]+$/.test(l)) return false;
+      if (/[.!?]$/.test(l)) return false;
+      if (!/[A-Za-z]/.test(l)) return false;
+      // Either has a year (typical of cert entries with issue date) OR
+      // looks like a credential (short, mixed case, contains hyphens or
+      // known cert keywords).
+      if (/\b(20|19)\d{2}\b/.test(l)) return true;
+      if (/[A-Z]{2,}/.test(l) && /\b(CKA|CKS|CCSK|PMP|AWS|GCP|OCI|RHCSA|MCSA|MCSE|MCTS|CCNA|JN0|BCVRE|VCA|CSAA|CCP|CISSP)\b/i.test(l)) return true;
+      return false;
+    })
     .map((name) => ({ name, issuer: "", date: "", url: "" }));
 }
 
