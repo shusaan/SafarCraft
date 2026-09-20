@@ -166,7 +166,9 @@ export function personLd(opts: PersonOptions): { __html: string } {
       url,
       ...(opts.phone && { telephone: opts.phone }),
       ...(opts.address && { homeLocation: { "@type": "Place", name: opts.address } }),
-      ...(opts.sameAs && { sameAs: opts.sameAs }),
+      ...(opts.sameAs && {
+        sameAs: opts.sameAs.filter((u) => /^https?:\/\//.test(u)),
+      }),
     },
     {
       "@type": "WebSite",

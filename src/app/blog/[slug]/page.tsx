@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BLOG_POSTS, getPostBySlug } from "@/data/blog-posts";
+import { buildMetadata } from "@/lib/seo/metadata";
+import { articleLd } from "@/lib/seo/jsonld";
 
 export async function generateStaticParams() {
   return BLOG_POSTS.map((p) => ({ slug: p.slug }));
@@ -15,20 +17,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = getPostBySlug(slug);
   if (!post) return { title: "Not found" };
-  return {
+  return buildMetadata({
     title: post.title,
     description: post.description,
-    alternates: { canonical: `/blog/${post.slug}` },
-    openGraph: {
-      title: post.title,
-      description: post.description,
-      type: "article",
-      publishedTime: post.date,
-      tags: post.tags,
-      url: `/blog/${post.slug}`,
-    },
-    twitter: { card: "summary_large_image", title: post.title, description: post.description },
-  };
+    path: `/blog/${post.slug}`,
+    type: "article",
+    publishedTime: post.date,
+  });
 }
 
 export default async function BlogPostPage({
@@ -40,31 +35,19 @@ export default async function BlogPostPage({
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
+  const jsonLd = articleLd({
+    title: post.title,
     description: post.description,
+    path: `/blog/${post.slug}`,
     datePublished: post.date,
-    keywords: post.tags.join(", "),
-    author: { "@type": "Organization", name: "CareerForge AI" },
-    publisher: { "@type": "Organization", name: "CareerForge AI", url: "https://careerforge.app" },
-  };
-  if (post.faq && post.faq.length > 0) {
-    Object.assign(jsonLd, {
-      mainEntity: post.faq.map((f) => ({
-        "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
-      })),
-    });
-  }
+    faq: post.faq,
+  });
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={jsonLd}
       />
 
       <Link href="/blog" className="text-xs font-medium text-muted-foreground hover:text-foreground">

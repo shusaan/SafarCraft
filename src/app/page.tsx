@@ -14,6 +14,15 @@ import { Section } from "@/components/primitives/section";
 import { Container } from "@/components/primitives/container";
 import { REPO_URL } from "@/lib/external-urls";
 import { ContinueDraft } from "@/components/marketing/continue-draft";
+import { buildMetadata } from "@/lib/seo/metadata";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Build an ATS-friendly resume in minutes",
+  description:
+    "CareerForge AI is a free, open-source ATS resume builder for engineers. Local-first, AI-assisted when you want it, zero signup.",
+  path: "/",
+});
 
 export default function HomePage() {
   return (
