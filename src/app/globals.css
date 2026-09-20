@@ -6,28 +6,84 @@
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
+  /* Marketing-tier palette: deeper indigo → vibrant violet → fuchsia accent */
   --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(220 20% 10%);
+  --color-foreground: hsl(222 47% 11%);
   --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(220 20% 10%);
+  --color-card-foreground: hsl(222 47% 11%);
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(220 20% 10%);
+  --color-popover-foreground: hsl(222 47% 11%);
 
-  --color-primary: hsl(221 83% 53%);
+  --color-primary: hsl(238 84% 67%);              /* indigo-500 */
   --color-primary-foreground: hsl(0 0% 100%);
 
   --color-secondary: hsl(220 14% 96%);
-  --color-secondary-foreground: hsl(220 20% 10%);
+  --color-secondary-foreground: hsl(222 47% 11%);
   --color-muted: hsl(220 14% 96%);
   --color-muted-foreground: hsl(218 11% 45%);
-  --color-accent: hsl(221 83% 95%);
-  --color-accent-foreground: hsl(221 83% 35%);
+  --color-accent: hsl(258 90% 66% / 0.1);        /* violet-500 @ 10% for soft accents */
+  --color-accent-foreground: hsl(258 90% 50%);
   --color-destructive: hsl(0 72% 51%);
   --color-destructive-foreground: hsl(0 0% 100%);
+  --color-success: hsl(142 71% 45%);
+  --color-success-foreground: hsl(0 0% 100%);
+  --color-warning: hsl(38 92% 50%);
+  --color-warning-foreground: hsl(0 0% 100%);
   --color-border: hsl(220 13% 91%);
   --color-input: hsl(220 13% 91%);
-  --color-ring: hsl(221 83% 53%);
-  --radius: 0.5rem;
+  --color-ring: hsl(238 84% 67%);
+  --radius: 0.625rem;
+
+  /* Surface tokens (semantic) */
+  --color-surface: hsl(220 20% 99%);
+  --color-surface-elevated: hsl(0 0% 100%);
+  --color-surface-muted: hsl(220 14% 96%);
+
+  /* Hero / brand gradients */
+  --gradient-hero: linear-gradient(135deg, hsl(238 84% 67%) 0%, hsl(258 90% 66%) 50%, hsl(290 84% 60%) 100%);
+  --gradient-soft: linear-gradient(180deg, hsl(220 20% 99%) 0%, hsl(0 0% 100%) 100%);
+  --gradient-aurora: radial-gradient(circle at 50% 0%, hsl(258 90% 66% / 0.15), transparent 60%);
+
+  /* Type scale tuned for marketing — large display sizes + tighter tracking */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.6;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.85rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.4rem;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 1.15;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1.1;
+  --text-6xl: 3.75rem;
+  --text-6xl--line-height: 1.05;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+
+  /* Display utilities for marketing hero */
+  --text-display-sm: 2.5rem;
+  --text-display-sm--line-height: 1.1;
+  --text-display-sm--letter-spacing: -0.02em;
+  --text-display-md: 3.5rem;
+  --text-display-md--line-height: 1.05;
+  --text-display-md--letter-spacing: -0.025em;
+  --text-display-lg: 4.5rem;
+  --text-display-lg--line-height: 1;
+  --text-display-lg--letter-spacing: -0.03em;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-glow: 0 0 30px hsl(238 84% 67% / 0.3);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -37,40 +93,40 @@
   --space-8: 2rem;
   --space-12: 3rem;
   --space-16: 4rem;
-
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 1.875rem;
+  --space-24: 6rem;
 }
 
 .dark {
-  --color-background: hsl(220 20% 4%);
+  --color-background: hsl(222 47% 6%);
   --color-foreground: hsl(220 14% 96%);
-  --color-card: hsl(220 20% 6%);
+  --color-card: hsl(222 47% 8%);
   --color-card-foreground: hsl(220 14% 96%);
-  --color-popover: hsl(220 20% 6%);
+  --color-popover: hsl(222 47% 8%);
   --color-popover-foreground: hsl(220 14% 96%);
-  --color-primary: hsl(221 83% 60%);
+  --color-primary: hsl(238 84% 67%);
   --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(220 14% 12%);
+  --color-secondary: hsl(222 47% 14%);
   --color-secondary-foreground: hsl(220 14% 96%);
-  --color-muted: hsl(220 14% 12%);
+  --color-muted: hsl(222 47% 12%);
   --color-muted-foreground: hsl(218 11% 60%);
-  --color-accent: hsl(221 83% 14%);
-  --color-accent-foreground: hsl(221 83% 75%);
-  --color-destructive: hsl(0 62% 30%);
+  --color-accent: hsl(258 90% 66% / 0.15);
+  --color-accent-foreground: hsl(258 90% 75%);
+  --color-destructive: hsl(0 62% 35%);
   --color-destructive-foreground: hsl(0 0% 100%);
-  --color-border: hsl(220 13% 14%);
-  --color-input: hsl(220 13% 14%);
-  --color-ring: hsl(221 83% 60%);
+  --color-success: hsl(142 71% 45%);
+  --color-success-foreground: hsl(0 0% 100%);
+  --color-warning: hsl(38 92% 50%);
+  --color-warning-foreground: hsl(0 0% 100%);
+  --color-border: hsl(222 47% 16%);
+  --color-input: hsl(222 47% 16%);
+  --color-ring: hsl(238 84% 67%);
+  --color-surface: hsl(222 47% 8%);
+  --color-surface-elevated: hsl(222 47% 10%);
+  --color-surface-muted: hsl(222 47% 14%);
+  --gradient-hero: linear-gradient(135deg, hsl(238 84% 67%) 0%, hsl(258 90% 66%) 50%, hsl(290 84% 60%) 100%);
+  --gradient-soft: linear-gradient(180deg, hsl(222 47% 8%) 0%, hsl(222 47% 6%) 100%);
+  --gradient-aurora: radial-gradient(circle at 50% 0%, hsl(258 90% 66% / 0.2), transparent 60%);
+  --shadow-glow: 0 0 30px hsl(238 84% 67% / 0.4);
 }
 
 * {
