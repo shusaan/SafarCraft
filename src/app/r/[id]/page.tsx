@@ -53,7 +53,6 @@ export default async function SharedResumePage({ params }: { params: Promise<{ i
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950">
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={jsonLd}
       />
       {/* Top banner */}
