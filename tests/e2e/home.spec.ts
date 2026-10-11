@@ -25,8 +25,10 @@ test.describe("Home Page", () => {
     await expect(
       page.getByText("Your data stays in your browser"),
     ).toBeVisible();
+    // 'Export PDF, DOCX, JSON Resume' is unique to the Hero trust strip
+    // (the same phrase doesn't appear elsewhere on the landing page)
     await expect(
-      page.getByText(/ATS-tested templates/i),
+      page.getByText("Export PDF, DOCX, JSON Resume"),
     ).toBeVisible();
   });
 });
