@@ -52,3 +52,7 @@ docker/data/
 # use 'git add -f <path>' to force-include a root-level PDF if ever needed.
 /*.pdf
 /*.PDF
+
+# planning/roadmap docs (local-only drafts)
+/PLAN.md
+/PLAN*.md
