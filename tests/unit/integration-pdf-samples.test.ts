@@ -1,43 +1,39 @@
 import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import { extractPDFText } from "@/engines/cv/pdf-extractor";
 import { parseCVFallback } from "@/engines/cv/cv-parser";
 
-// Local-only PDF fixtures. Skip the whole suite if they aren't on disk (CI,
-// fresh clone, etc.) — these tests are regression checks for the local PDF
-// parser, not a release gate.
-const samples = [
-  "/tmp/opencode/cv-samples/pdfs/cv1-single-column.html.pdf",
-  "/tmp/opencode/cv-samples/pdfs/cv2-two-column-sidebar.html.pdf",
-  "/tmp/opencode/cv-samples/pdfs/cv3-modern-compact.html.pdf",
+// Fixtures that ship with the repo so CI can exercise the parser.
+// `tests/fixtures/husn-devops-cv.pdf` is a real-world 2-page CV that
+// caught several parser regressions (split sections, mixed Y-buckets,
+// glued cert headers, etc.).
+const fixtures = [
+  path.resolve(__dirname, "..", "fixtures", "husn-devops-cv.pdf"),
 ];
-const haveSamplePdfs = samples.every((p) => existsSync(p));
+const haveFixtures = fixtures.every((p) => existsSync(p));
 
-describe.skipIf(!haveSamplePdfs)("Real PDF CV samples", () => {
-  for (const path of samples) {
-    const name = path.split("/").pop()!;
+describe.skipIf(!haveFixtures)("Real PDF CV samples (in-repo fixtures)", () => {
+  for (const path of fixtures) {
+    const name = path.split(/[/\\]/).pop()!;
 
-    it(`parses ${name}`, async () => {
+    it(`parses ${name} end-to-end`, async () => {
       const buf = readFileSync(path);
       const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
       const extracted = await extractPDFText(ab);
       const result = parseCVFallback(extracted.text);
 
-      // eslint-disable-next-line no-console
-      console.log(`\n=== ${name} ===\n` + extracted.text);
-
-      // eslint-disable-next-line no-console
-      console.log(`\n--- parsed ${name} ---`);
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(result.parsed, null, 2));
-
-      // Minimum sanity: name and email should be extracted for all CVs
+      // ---- Universal sanity (every CV should satisfy) ----
       expect(result.parsed.name.length).toBeGreaterThan(0);
       expect(result.parsed.name).not.toMatch(/\d{1,2}\/\d{1,2}\/\d/); // no date leak
       expect(result.parsed.email).toMatch(/@/);
       expect(result.parsed.experience.length).toBeGreaterThan(0);
       expect(result.parsed.skillGroups.length).toBeGreaterThan(0);
       expect(result.parsed.education.length).toBeGreaterThan(0);
+      // pdf-extractor's Y-sort fix: dates must land in the experience section.
+      expect(result.parsed.experience[0]?.startDate).toMatch(/^\d{4}-\d{2}$/);
+      expect(result.parsed.experience[0]?.endDate).toMatch(/^\d{4}-\d{2}$/);
     });
   }
 });
+

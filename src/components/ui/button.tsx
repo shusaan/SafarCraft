@@ -14,11 +14,20 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // Marketing-grade primary: gradient + glow
+        gradient:
+          "bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-white shadow-lg hover:shadow-glow hover:brightness-110",
+        // Subtle outline that pops on dark
+        glow: "border-primary/40 bg-primary/5 text-foreground shadow-sm hover:bg-primary/10 hover:border-primary",
       },
       size: {
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
+        xl: "h-12 rounded-lg px-10 text-base",
+        // Display-tier button for marketing hero
+        "display-md": "h-14 rounded-lg px-10 text-lg gap-3",
+        "display-lg": "h-16 rounded-xl px-12 text-xl gap-3",
         icon: "h-9 w-9",
       },
     },

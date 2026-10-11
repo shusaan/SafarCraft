@@ -47,3 +47,12 @@ drizzle/*.sql
 
 # docker
 docker/data/
+
+# personal/root-level PDFs (project ships CV PDFs only under tests/fixtures)
+# use 'git add -f <path>' to force-include a root-level PDF if ever needed.
+/*.pdf
+/*.PDF
+
+# planning/roadmap docs (local-only drafts)
+/PLAN.md
+/PLAN*.md

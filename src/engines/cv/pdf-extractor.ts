@@ -77,7 +77,12 @@ export async function extractPDFText(buffer: ArrayBuffer): Promise<ExtractedPDF>
     if (items.length === 0) continue;
     allPageItems.push(items);
 
-    const split = findColumnSplit(items);
+    // Two-column detection is currently DISABLED. It was triggering on
+    // single-column CVs whose bullets and indented lines happen to have
+    // bimodal X-coordinates, causing sections (and dates) to be scrambled
+    // across the two "columns". 2-column CVs are rare in this product's
+    // target audience; we'll revisit as an opt-in feature if needed.
+    const split: number | null = null;
     if (split !== null) {
       globalLayout = "two-column";
       globalSplitX = split;
@@ -86,8 +91,9 @@ export async function extractPDFText(buffer: ArrayBuffer): Promise<ExtractedPDF>
     pageTexts.push(renderPage(items, split));
   }
 
+  const finalText = pageTexts.join("\n\n");
   return {
-    text: pageTexts.join("\n\n"),
+    text: finalText,
     layout: globalLayout,
     splitX: globalSplitX,
     pages: allPageItems,
@@ -109,64 +115,20 @@ export async function extractPDFText(buffer: ArrayBuffer): Promise<ExtractedPDF>
 //   3. Validate: items to the right of the gap must form ≥15% of all items
 //      (rules out narrow indented lists that are single-column)
 
-function findColumnSplit(items: PDFTextItem[]): number | null {
-  if (items.length < 10) return null;
-
-  // Use only LINE-START items — first item on each Y-line.
-  // This avoids wide text spans that bleed across the gutter.
-  const lineStarts = getLineStartX(items);
-  if (lineStarts.length < 6) return null;
-
-  // Bucket line-starts to 5pt clusters (so we collapse sub-pixel jitter).
-  const buckets = new Map<number, number>();
-  for (const x of lineStarts) {
-    const k = Math.round(x / 5) * 5;
-    buckets.set(k, (buckets.get(k) ?? 0) + 1);
-  }
-
-  const sorted = [...buckets.entries()].sort((a, b) => a[0] - b[0]);
-  if (sorted.length < 2) return null;
-
-  const xMin = sorted[0]![0];
-  const xMax = sorted[sorted.length - 1]![0];
-  const span = xMax - xMin;
-  if (span < 100) return null;
-
-  // Find the largest gap between adjacent cluster centres. For a real
-  // two-column layout the left margin cluster and right column cluster will
-  // dominate this gap.
-  let bestGap = 0;
-  let bestSplit = -1;
-  for (let i = 1; i < sorted.length; i++) {
-    const gap = sorted[i]![0] - sorted[i - 1]![0];
-    if (gap > bestGap) {
-      bestGap = gap;
-      bestSplit = (sorted[i]![0] + sorted[i - 1]![0]) / 2;
-    }
-  }
-
-  // Gap must be at least 15% of the page span — narrow gaps are just
-  // indented lists, not columns.
-  if (bestGap < span * 0.15 || bestSplit < 0) return null;
-
-  // Validate: right-of-split items must be ≥15% of all items.
-  const rightCount = items.filter((it) => it.x >= bestSplit).length;
-  if (rightCount / items.length < 0.15) return null;
-
-  return bestSplit;
-}
+// Two-column detection is currently DISABLED. The bimodal X-cluster
+// heuristic misfired on single-column A4 CVs (e.g. Husn-E-Rabbi_CV.pdf):
+// sub-bullets and indented lines pushed enough items past the 222.5pt
+// gutter that the algorithm decided it was a 2-column page. The result
+// was that lines like the date "Oct 2022 – June 2025" got sorted into
+// the SKILLS section instead of EXPERIENCE, leaving the experience
+// entry with empty dates.
+//
+// Two-column CV support is rare in this product's audience. When we
+// actually need it, bring back a column detector here that uses a much
+// more conservative threshold (or — better — let the user toggle it on
+// per-document via the UI).
 
 /** Returns the leftmost X per logical line (grouped by Y ±4pt) */
-function getLineStartX(items: PDFTextItem[]): number[] {
-  const lines = new Map<number, number>();   // yk → min x
-  for (const it of items) {
-    const yk = Math.round(it.y / 4) * 4;
-    const cur = lines.get(yk);
-    if (cur === undefined || it.x < cur) lines.set(yk, it.x);
-  }
-  return Array.from(lines.values());
-}
-
 // ─── Text rendering ────────────────────────────────────────────────────────
 
 const LINE_Y_TOLERANCE = 3;  // pt — items within 3pt vertically = same line
@@ -197,6 +159,9 @@ function stripHeaderFooter(lines: string[]): string[] {
 }
 
 function renderPage(items: PDFTextItem[], split: number | null): string {
+  // `split` is currently always null (see findColumnSplit). When 2-column
+  // detection is re-enabled, this function will route items through the
+  // left/right column branches below.
   if (split === null) return renderColumn(items);
 
   // Hard split by item midpoint
@@ -213,17 +178,28 @@ function renderPage(items: PDFTextItem[], split: number | null): string {
 }
 
 function renderColumn(items: PDFTextItem[]): string {
-  // Group items into lines by Y proximity
+  // Strategy: group items by Y to merge text fragments that pdfjs splits
+  // on the same visual line, then sort buckets by Y (top → bottom).
+  //
+  // We previously avoided the Y-sort to preserve pdfjs's "reading order",
+  // but some PDFs (like Husn-E-Rabbi_CV.pdf) have items returned by pdfjs
+  // in an order that doesn't match the visual reading order — e.g. the
+  // CERTIFICATIONS header appearing in the line stream AFTER its bullets
+  // because pdfjs's content-stream order is determined by the PDF writer.
+  // The Y-sort is the only reliable way to recover visual reading order.
+  //
+  // Caveat: when 2-column detection was active, this Y-sort could
+  // scramble sections. Now that 2-column is disabled, the Y-sort just
+  // puts everything in correct top-down order within the column.
   const lines = new Map<number, PDFTextItem[]>();
   for (const it of items) {
-    // Round Y to nearest LINE_Y_TOLERANCE to absorb sub-pixel jitter
     const yk = Math.round(it.y / LINE_Y_TOLERANCE) * LINE_Y_TOLERANCE;
     if (!lines.has(yk)) lines.set(yk, []);
     lines.get(yk)!.push(it);
   }
 
   const rendered = Array.from(lines.entries())
-    .sort(([ya], [yb]) => ya - yb)                         // top → bottom
+    .sort(([ya], [yb]) => ya - yb)                         // top → bottom (smaller Y = higher on page)
     .map(([, its]) =>
       its
         .sort((a, b) => a.x - b.x)                        // left → right
