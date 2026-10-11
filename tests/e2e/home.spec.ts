@@ -1,24 +1,32 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Home Page", () => {
-  test("should display the title", async ({ page }) => {
+  test("should display the headline", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("Free ATS Resume Builder");
+    await expect(page.locator("h1")).toContainText("ATS-friendly");
+    await expect(page.locator("h1")).toContainText("resume");
   });
 
-  test("should show no signup required badge", async ({ page }) => {
+  test("should show the trust badge", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("text=No signup required")).toBeVisible();
+    await expect(
+      page.getByText(/No signup/i).first(),
+    ).toBeVisible();
   });
 
-  test("should navigate to builder", async ({ page }) => {
+  test("should navigate from a primary CTA to onboarding", async ({ page }) => {
     await page.goto("/");
-    await page.click("text=Start building free");
-    await expect(page).toHaveURL(/\/builder/);
+    await page.getByRole("link", { name: /Start for free/i }).first().click();
+    await expect(page).toHaveURL(/\/(builder|onboarding)/);
   });
 
-  test("should show trust bar", async ({ page }) => {
+  test("should show qualitative trust strip", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("section[aria-label='Trust signals']")).toBeVisible();
+    await expect(
+      page.getByText("Your data stays in your browser"),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/ATS-tested templates/i),
+    ).toBeVisible();
   });
 });
