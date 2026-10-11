@@ -25,9 +25,9 @@ export async function getAppCss(): Promise<string> {
     let source: string | undefined;
     let sourcePath: string | undefined;
     for (const p of candidates) {
-      if (existsSync(p)) {
+      if (existsSync(/* turbopackIgnore: true */ p)) {
         sourcePath = p;
-        source = readFileSync(p, "utf-8");
+        source = readFileSync(/* turbopackIgnore: true */ p, "utf-8");
         break;
       }
     }

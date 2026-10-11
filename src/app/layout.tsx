@@ -7,6 +7,7 @@ import { ToastProviderWrapper } from "@/components/ui/toast";
 import { ServiceWorkerRegistrar } from "@/components/shared/service-worker-registrar";
 import { organizationLd } from "@/lib/seo/jsonld";
 import { REPO_URL } from "@/lib/external-urls";
+import { siteConfig } from "@/lib/seo/site";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID?.trim() || "";
 
@@ -23,6 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: "CareerForge AI – Free ATS Resume Builder",
     template: "%s | CareerForge AI",
