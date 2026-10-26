@@ -4,16 +4,17 @@ import { headers } from "next/headers";
 import { parseShareId, decodeResume } from "@/engines/share/encode";
 import { renderTemplate } from "@/engines/templates/registry";
 import { personLd } from "@/lib/seo/jsonld";
+import { siteConfig } from "@/lib/seo/site";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const encoded = parseShareId(id);
-  if (!encoded) return { title: "Shared resume — CareerForge AI", robots: { index: false, follow: false } };
+  if (!encoded) return { title: "Shared resume — SafarCraft", robots: { index: false, follow: false } };
   const { data } = decodeResume(encoded);
-  const title = data.personal.name ? `${data.personal.name} — Resume` : "Shared resume — CareerForge AI";
-  const description = data.personal.summary?.slice(0, 160) ?? "Shared resume built with CareerForge AI";
+  const title = data.personal.name ? `${data.personal.name} — Resume` : "Shared resume — SafarCraft";
+  const description = data.personal.summary?.slice(0, 160) ?? "Shared resume built with SafarCraft";
   return {
     title,
     description,
@@ -28,7 +29,7 @@ export default async function SharedResumePage({ params }: { params: Promise<{ i
   const { data, layout, template } = decodeResume(encoded);
 
   const headersList = await headers();
-  const host = headersList.get("host") ?? "careerforge.app";
+  const host = headersList.get("host") ?? new URL(siteConfig.url).host;
   const proto = headersList.get("x-forwarded-proto") ?? "https";
   const origin = `${proto}://${host}`;
   const resumePath = `/r/${id}`;
@@ -59,10 +60,10 @@ export default async function SharedResumePage({ params }: { params: Promise<{ i
       <header className="border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-200">
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-indigo-500 text-white">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <span className="text-[10px]">◆</span>
             </span>
-            CareerForge AI
+            SafarCraft
           </Link>
           <Link
             href={`${origin}/builder`}
@@ -82,7 +83,7 @@ export default async function SharedResumePage({ params }: { params: Promise<{ i
         <p className="mt-6 text-center text-xs text-zinc-500">
           Shared via{" "}
           <Link href="/" className="underline hover:text-zinc-700">
-            CareerForge AI
+            SafarCraft
           </Link>
           {" "}— free, local-first, MIT-licensed.
         </p>

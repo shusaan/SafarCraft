@@ -1,6 +1,6 @@
 # Frequently Asked Questions
 
-## Is CareerForge really 100% free?
+## Is SafarCraft really 100% free?
 
 Yes. MIT licensed. No paid tier, no upsells, no "Pro" features behind a paywall.
 

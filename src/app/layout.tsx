@@ -26,37 +26,41 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "CareerForge AI – Free ATS Resume Builder",
-    template: "%s | CareerForge AI",
+    default: "SafarCraft — Free, Private Resume Builder",
+    template: "%s | SafarCraft",
   },
   description:
-    "Free, open-source CV Generator and ATS Resume Checker — build, optimise, and export ATS-friendly resumes. 100% local, no signup required, privacy-first.",
+    "Create and edit a resume or CV in your browser with SafarCraft. Free, open source, private by default, and no account required.",
   keywords: [
     "free CV maker",
     "ATS resume checker",
-    "resume builder",
+    "free resume builder",
+    "private resume builder",
+    "resume builder no signup",
     "ATS resume",
     "open source resume",
     "software engineer resume",
-    "CareerForge",
+    "SafarCraft",
     "free CV generator",
     "local-first",
     "privacy-first",
   ],
-  authors: [{ name: "CareerForge AI" }],
+  authors: [{ name: "SafarCraft" }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "CareerForge AI",
-    title: "CareerForge AI – Free ATS Resume Builder",
+    siteName: "SafarCraft",
+    title: "SafarCraft — Free, Private Resume Builder",
     description:
-      "Free CV Generator and ATS Resume Checker — build, optimise, and export ATS-friendly resumes. Open-source, no signup required, 100% local.",
+      "Create and edit a resume or CV in your browser. Free, open source, private by default, and no account required.",
+    images: [{ url: `${siteConfig.url}${siteConfig.ogImage}`, width: 1200, height: 630, alt: "SafarCraft — Free, private resume builder" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CareerForge AI – Free ATS Resume Builder",
+    title: "SafarCraft — Free, Private Resume Builder",
     description:
-      "Free CV Generator and ATS Resume Checker — build, optimise, and export ATS-friendly resumes. Open-source, no signup required, 100% local.",
+      "Create and edit a resume or CV in your browser. Free, open source, private by default, and no account required.",
+    images: [`${siteConfig.url}${siteConfig.ogImage}`],
   },
   robots: {
     index: true,
@@ -76,7 +80,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#6366f1" />
+        <meta name="theme-color" content="#166451" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

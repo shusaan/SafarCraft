@@ -33,7 +33,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { cn } from "@/lib/utils";
 import {
   FileText, Undo2, Redo2, Eye, EyeOff, Palette, ScrollText,
-  Sparkles, GitBranch, Download, Target, Globe, History, Sun, Moon,
+  Route, GitBranch, Download, Target, Globe, History, Sun, Moon,
   GitCompare, Menu, X, HelpCircle, Clock, Save, Zap, Link2,
 } from "lucide-react";
 
@@ -309,10 +309,10 @@ export function BuilderLayout() {
             onClick={() => setShowResumeList(true)}
             aria-label="Manage resumes"
           >
-            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-indigo-500 shadow-sm" aria-hidden="true">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary" aria-hidden="true">
+              <Route className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
-            <span className="hidden text-sm font-semibold sm:inline">CareerForge</span>
+            <span className="hidden text-sm font-semibold sm:inline">SafarCraft</span>
           </button>
 
           <div className="mx-2 h-4 w-px bg-border hidden sm:block" aria-hidden="true" />
@@ -349,7 +349,7 @@ export function BuilderLayout() {
                         <span className="hidden xl:inline">{label}</span>
                         {isActive && (
                           <span
-                            className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500"
+                            className="absolute bottom-0 left-1/2 h-0.5 w-4 -translate-x-1/2 rounded-full bg-primary"
                             aria-hidden="true"
                           />
                         )}
@@ -474,10 +474,10 @@ export function BuilderLayout() {
           >
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500">
-                  <Sparkles className="h-4 w-4 text-white" />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+                  <Route className="h-4 w-4 text-primary-foreground" />
                 </div>
-                <span className="font-semibold">CareerForge</span>
+                <span className="font-semibold">SafarCraft</span>
               </div>
               <Button
                 variant="ghost"

@@ -1,6 +1,6 @@
-# CareerForge AI — Requirements & Tasks
+# SafarCraft — Requirements & Tasks
 
-> Open-source AI resume platform for software engineers.
+> Open-source resume builder for software engineers.
 > Built as innovation evidence for UK Global Talent visa.
 
 ---
@@ -9,8 +9,8 @@
 
 | Property | Value |
 |---|---|
-| **Name** | CareerForge AI |
-| **Type** | Open-source AI Resume Platform |
+| **Name** | SafarCraft |
+| **Type** | Open-source Resume Platform |
 | **Target Users** | Software Engineers, DevOps, SREs, Cloud Architects, Students |
 | **License** | MIT |
 | **Deployment** | Vercel / Cloudflare Pages (free tier) |

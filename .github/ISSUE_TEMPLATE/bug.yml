@@ -31,7 +31,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: CareerForge version
+      label: SafarCraft version
       placeholder: v0.1.0
     validations:
       required: true

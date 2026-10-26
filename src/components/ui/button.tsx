@@ -14,9 +14,9 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        // Marketing-grade primary: gradient + glow
+        // Marketing-grade primary: deep journey green, no AI-template rainbow
         gradient:
-          "bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 text-white shadow-lg hover:shadow-glow hover:brightness-110",
+          "bg-gradient-to-r from-primary to-emerald-600 text-primary-foreground shadow-lg hover:shadow-glow hover:brightness-110 dark:to-emerald-500 dark:text-background",
         // Subtle outline that pops on dark
         glow: "border-primary/40 bg-primary/5 text-foreground shadow-sm hover:bg-primary/10 hover:border-primary",
       },

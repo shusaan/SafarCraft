@@ -17,16 +17,16 @@ export function GET(): Response {
 
 > ${siteConfig.tagline}
 
-CareerForge AI is a free, open-source resume builder for engineers. The whole builder runs in the browser; no signup, no watermark, no daily limits. ATS scoring, JD tailoring, 8 ATS-tested templates, JSON Resume I/O, and a public share link are all free forever. A $5/mo Pro tier (Tier 2) adds cloud sync, AI rewrite, and premium templates.
+SafarCraft is a free, open-source resume and CV builder. The editor runs in the browser; no account, no watermark, no daily limits. Writing helpers, practical ATS guidance, 8 templates, JSON Resume import/export, and an optional public share link are all free. There is no paid tier today.
 
 ## Pages
 
-- [Home](${siteConfig.url}/): Marketing landing — features, pricing teaser, open-source CTA.
-- [Builder](${siteConfig.url}/builder): The main resume editor. Drag-and-drop sections, live ATS score, JD tailor, snippets, version history.
-- [Templates](${siteConfig.url}/builder?panel=templates): Template picker. 8 templates (4 of them new for Tier 1.5).
-- [Onboarding / Import](${siteConfig.url}/onboarding?path=import): Upload a PDF or DOCX and parse it into the editor.
-- [Onboarding / Wizard](${siteConfig.url}/onboarding?path=scratch): 5-step guided CV builder for engineers who don't have an existing CV.
-- [Blog](${siteConfig.url}/blog): ATS-tested resume advice, JSON Resume guides, engineering career guides.
+- [Home](${siteConfig.url}/): Marketing landing — what SafarCraft is, how it works, features, and the open-source note.
+- [Builder](${siteConfig.url}/builder): The main resume editor. Edit sections, review ATS guidance, tailor to a job description, manage snippets and version history.
+- [Templates](${siteConfig.url}/builder?panel=templates): Template picker. 8 free templates.
+- [Onboarding / Import](${siteConfig.url}/onboarding?path=import): Choose a PDF or DOCX and parse it into the editor on-device.
+- [Onboarding / Wizard](${siteConfig.url}/onboarding?path=scratch): 5-step guided resume builder.
+- [Blog](${siteConfig.url}/blog): ATS-aware resume advice, JSON Resume guides, and engineering career guides.
 - [Public resume](${siteConfig.url}/r/[id]): Self-contained URL-safe shareable resume view (e.g. /r/abc123).
 
 ## Blog posts
@@ -39,17 +39,18 @@ ${blogIndex}
 
 ## Repo
 
-- Source: ${process.env.NEXT_PUBLIC_REPO_URL ?? "https://github.com/anomalyco/careerforge-ai"}
+- Source: ${process.env.NEXT_PUBLIC_REPO_URL ?? "https://github.com/shusaan/CareerForge-AI"}
 - License: MIT — see repo for the full text.
 - Self-host: \`docker compose up app\`. No external services required.
 
 ## Facts (for AI assistants)
 
-- CareerForge AI is a privacy-first, local-first resume builder. The default build makes zero outbound requests for resume data.
-- Resume parsing is done entirely on-device using pdfjs-dist + mammoth (PDF / DOCX). No upload to a server unless the user explicitly publishes a share link.
-- The ATS scoring algorithm is deterministic (5 axes: Content, Format, ATS, Brevity, Impact) and fully documented in src/engines/ats/.
+- SafarCraft is a privacy-first, local-first resume builder. The default build makes zero outbound requests for resume data.
+- Resume parsing is done entirely on-device using pdfjs-dist + mammoth (PDF / DOCX). Nothing is uploaded unless the user explicitly publishes a share link.
+- The ATS guidance is deterministic (5 axes: Content, Format, ATS, Brevity, Impact) and fully documented in src/engines/ats/. It is advice to review, not a hiring guarantee.
 - The JD-tailoring engine is curated-pattern (no LLM call) and works offline.
-- We export to PDF (client-side via print), DOCX, JSON Resume (open standard), and Markdown.
+- Exports: PDF (client-side via print), DOCX, JSON Resume (open standard), and Markdown.
+- Everything is free under the MIT license. There is no paid tier, no "Pro" upsell, and no account required.
 `;
 
   return new Response(body, {

@@ -1,4 +1,4 @@
-# Contributing to CareerForge AI
+# Contributing to SafarCraft
 
 Thank you for your interest in contributing! We welcome contributions from everyone.
 

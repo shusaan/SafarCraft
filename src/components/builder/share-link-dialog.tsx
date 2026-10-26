@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useResumeStore } from "@/stores/resume-store";
 import { useToast } from "@/components/ui/toast";
 import { buildShareUrl, encodeResume } from "@/engines/share/encode";
+import { siteConfig } from "@/lib/seo/site";
 import { Link2, Copy, ExternalLink, Check } from "lucide-react";
 
 export function ShareLinkDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -18,7 +19,7 @@ export function ShareLinkDialog({ open, onOpenChange }: { open: boolean; onOpenC
   const [copied, setCopied] = useState(false);
 
   // Generate the share URL on demand (only when dialog is open, to keep things responsive)
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://careerforge.app";
+  const origin = typeof window !== "undefined" ? window.location.origin : siteConfig.url;
   const shareUrl = open ? buildShareUrl(origin, { data, layout, template }) : "";
 
   const sizeKB = (new Blob([encodeResume({ data, layout, template })]).size / 1024).toFixed(1);
@@ -72,7 +73,7 @@ export function ShareLinkDialog({ open, onOpenChange }: { open: boolean; onOpenC
           <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
             <p className="font-medium text-foreground">Free tier includes</p>
             <ul className="mt-1 space-y-0.5 list-disc pl-4">
-              <li>Public read-only link with careerforge.app branding</li>
+              <li>Public read-only link with light SafarCraft branding</li>
               <li>Anyone with the link can view (and ATS-parse) your resume</li>
               <li>Encoding is client-side; nothing is uploaded</li>
             </ul>

@@ -6,34 +6,23 @@ import HomePage from "@/app/page";
 // The page is a server component; we render its JSX output directly.
 
 describe("HomePage (landing)", () => {
-  it("renders hero, all marketing sections, and footer", () => {
+  it("renders hero, marketing sections, and footer", () => {
     render(<HomePage />);
 
-    // Hero CTAs both present (Hero + TwoTrackEntry both render them,
-    // so use getAllByText).
-    expect(screen.getAllByText("Import my CV").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText("Start from scratch").length).toBeGreaterThanOrEqual(1);
+    // Hero CTAs
+    expect(screen.getAllByText("Import a resume").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Start a new resume").length).toBeGreaterThanOrEqual(1);
 
-    // Stats ribbon labels
-    expect(screen.getByText("resumes built")).toBeTruthy();
-    expect(screen.getByText("rating")).toBeTruthy();
-    expect(screen.getByText("countries")).toBeTruthy();
-    expect(screen.getByText("licensed")).toBeTruthy();
-
-    // Section headings — use regex/unique substrings (some phrases
-    // appear in multiple sections, e.g. hero subtitle vs section header).
-    expect(screen.getByText(/Two ways in\./)).toBeTruthy();
-    expect(screen.getByText(/Three steps\. About three minutes\./)).toBeTruthy();
+    // Section headings
+    expect(screen.getByText(/A clear path from draft to application\./)).toBeTruthy();
     expect(screen.getByText(/Everything you need to ship a resume today\./)).toBeTruthy();
-    expect(screen.getByText(/Local-first\. Source-available\./)).toBeTruthy();
-    expect(screen.getByText(/Free forever\. Pro when you need it\./)).toBeTruthy();
-    expect(screen.getByText(/Built for the way engineers actually work\./)).toBeTruthy();
+    expect(screen.getByText(/Private by default\. Open source by design\./)).toBeTruthy();
+    expect(screen.getByText(/Everything is free\./)).toBeTruthy();
     expect(screen.getByText(/Fully open source — MIT licensed/)).toBeTruthy();
 
     // Footer columns
     expect(screen.getByText("Product")).toBeTruthy();
     expect(screen.getByText("Resources")).toBeTruthy();
-    expect(screen.getByText("Compare")).toBeTruthy();
     expect(screen.getByText("Legal")).toBeTruthy();
 
     // Navbar links (these duplicate footer link text)
@@ -42,10 +31,18 @@ describe("HomePage (landing)", () => {
     expect(screen.getAllByText("GitHub").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("navbar Start-free CTA routes to /onboarding?path=import", () => {
+  it("does not render removed placeholder sections", () => {
+    render(<HomePage />);
+    expect(screen.queryByText("resumes built")).toBeNull();
+    expect(screen.queryByText(/Two ways in\./)).toBeNull();
+    expect(screen.queryByText(/logo 1/)).toBeNull();
+    expect(screen.queryByText(/Coming soon/)).toBeNull();
+  });
+
+  it("navbar CTA routes to /onboarding?path=import", () => {
     render(<HomePage />);
     const cta = screen.getAllByRole("link").find(
-      (a) => a.textContent?.trim().startsWith("Start free"),
+      (a) => a.textContent?.trim().startsWith("Build a resume"),
     );
     expect(cta?.getAttribute("href")).toBe("/onboarding?path=import");
   });

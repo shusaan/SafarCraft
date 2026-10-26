@@ -3,7 +3,7 @@ import { t, setLocale, listAvailableLocales, getLocale } from "@/i18n";
 
 describe("i18n", () => {
   it("returns translated string", () => {
-    expect(t("app.title")).toBe("CareerForge AI");
+    expect(t("app.title")).toBe("SafarCraft");
   });
 
   it("returns key when translation is missing", () => {

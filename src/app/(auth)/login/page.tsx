@@ -25,7 +25,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle>Sign In</CardTitle>
-          <CardDescription>Access your CareerForge account</CardDescription>
+          <CardDescription>Access your SafarCraft account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

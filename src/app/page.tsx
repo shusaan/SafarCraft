@@ -1,14 +1,11 @@
 import Link from "next/link";
-import { GitBranch, Sparkles } from "lucide-react";
+import { GitBranch, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Hero } from "@/components/marketing/hero";
-import { StatsRibbon } from "@/components/marketing/stats-ribbon";
-import { TwoTrackEntry } from "@/components/marketing/two-track-entry";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { FeaturesGrid } from "@/components/marketing/features-grid";
 import { BuiltForEngineers } from "@/components/marketing/built-for-engineers";
 import { PricingTeaser } from "@/components/marketing/pricing-teaser";
-import { SocialProof } from "@/components/marketing/social-proof";
 import { MarketingFooter } from "@/components/marketing/footer";
 import { Section } from "@/components/primitives/section";
 import { Container } from "@/components/primitives/container";
@@ -17,12 +14,18 @@ import { ContinueDraft } from "@/components/marketing/continue-draft";
 import { buildMetadata } from "@/lib/seo/metadata";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = buildMetadata({
-  title: "Build an ATS-friendly resume in minutes",
-  description:
-    "CareerForge AI is a free, open-source ATS resume builder for engineers. Local-first, AI-assisted when you want it, zero signup.",
-  path: "/",
-});
+const HOME_TITLE = "SafarCraft — Free, private resume builder";
+
+export const metadata: Metadata = {
+  ...buildMetadata({
+    title: HOME_TITLE,
+    description:
+      "Build a resume or CV with SafarCraft, a free, private, open-source resume builder. Edit locally, review ATS guidance, and export without creating an account.",
+    path: "/",
+  }),
+  // Absolute title: the homepage carries the brand directly.
+  title: { absolute: HOME_TITLE },
+};
 
 export default function HomePage() {
   return (
@@ -31,10 +34,10 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <Container className="flex h-14 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 text-white">
-              <Sparkles className="h-3.5 w-3.5" />
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+              <Route className="h-4 w-4" />
             </span>
-            CareerForge AI
+            SafarCraft
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
@@ -56,7 +59,7 @@ export default function HomePage() {
             <ContinueDraft />
             <Button asChild size="sm" className="gap-1.5">
               <Link href="/onboarding?path=import">
-                Start free
+                Build a resume
                 <span aria-hidden>→</span>
               </Link>
             </Button>
@@ -66,14 +69,10 @@ export default function HomePage() {
 
       <main className="flex-1">
         <Hero />
-        <StatsRibbon />
-        <TwoTrackEntry />
         <HowItWorks />
         <FeaturesGrid />
         <BuiltForEngineers />
         <PricingTeaser />
-        <SocialProof />
-
         {/* ── Open source trust card ── */}
         <Section background="muted">
           <Container size="narrow">
@@ -88,7 +87,7 @@ export default function HomePage() {
                 Fully open source — MIT licensed
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
-                Read the code, self-host it, contribute to it, or fork it. CareerForge AI
+                Read the code, self-host it, contribute to it, or fork it. SafarCraft
                 is built in the open. No vendor lock-in, no paywalls, no data sold.
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3">

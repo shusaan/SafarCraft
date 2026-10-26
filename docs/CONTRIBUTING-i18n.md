@@ -1,6 +1,6 @@
 # Contributing Translations (i18n)
 
-CareerForge ships with English only. Community members can add translations by creating new locale files.
+SafarCraft ships with English only. Community members can add translations by creating new locale files.
 
 ## Add a Language
 

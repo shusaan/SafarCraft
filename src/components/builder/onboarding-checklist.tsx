@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, X, Sparkles } from "lucide-react";
+import { CheckCircle2, X, Route } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const steps = [
@@ -87,14 +87,14 @@ export function OnboardingChecklist() {
       {/* Glass card */}
       <div className="bg-background/80 backdrop-blur-lg overflow-hidden rounded-2xl border shadow-2xl">
         {/* Gradient top strip */}
-        <div className="h-1 w-full bg-gradient-to-r from-violet-500 via-indigo-500 to-blue-500" aria-hidden="true" />
+        <div className="h-1 w-full bg-primary" aria-hidden="true" />
 
         <div className="p-4">
           {/* Header */}
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-indigo-500" aria-hidden="true">
-                <Sparkles className="h-3.5 w-3.5 text-white" />
+              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary" aria-hidden="true">
+                <Route className="h-3.5 w-3.5 text-primary-foreground" />
               </div>
               <h3 className="text-sm font-semibold">Quick Setup</h3>
             </div>
@@ -123,7 +123,7 @@ export function OnboardingChecklist() {
             aria-label={`${completedCount} of ${steps.length} steps complete`}
           >
             <div
-              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all duration-700 ease-out"
+              className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -139,7 +139,7 @@ export function OnboardingChecklist() {
                     className={cn(
                       "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all duration-300",
                       isDone
-                        ? "bg-gradient-to-br from-violet-500 to-indigo-500 text-white scale-110"
+                        ? "bg-primary text-primary-foreground scale-110"
                         : "border-2 border-muted-foreground/30 text-muted-foreground",
                     )}
                     aria-hidden="true"

@@ -100,7 +100,7 @@ export function ExportPanel() {
       const token = await authenticate();
       if (!token) return;
 
-      const folder = await createDriveFolder("CareerForge Exports", driveFolder ?? undefined);
+      const folder = await createDriveFolder("SafarCraft Exports", driveFolder ?? undefined);
       if (folder) {
         setDriveFolder(folder.id);
         setDriveFolderName(folder.name);
@@ -313,7 +313,7 @@ export function ExportPanel() {
               <Button variant="ghost" size="sm" disabled={pickingFolder || creatingFolder} onClick={handleSelectFolder} title="Select Drive folder">
                 <FolderOpen className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" disabled={pickingFolder || creatingFolder} onClick={handleCreateFolder} title="Create 'CareerForge Exports' folder">
+              <Button variant="ghost" size="sm" disabled={pickingFolder || creatingFolder} onClick={handleCreateFolder} title="Create 'SafarCraft Exports' folder">
                 {creatingFolder ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 ) : (

@@ -1,11 +1,12 @@
-# CareerForge AI
+# SafarCraft
 
-> Open-source ATS resume builder for software engineers.
-> Local-first, GitHub-powered, 100% free.
+> Free, open-source resume builder for software engineers.
+> Local-first, private by default, 100% free.
 
-![GitHub License](https://img.shields.io/github/license/yourusername/careerforge-ai)
-![GitHub Stars](https://img.shields.io/github/stars/yourusername/careerforge-ai)
-![Visitor Count](https://visitor-badge.laobi.icu/badge?page_id=yourusername.careerforge-ai)
+![GitHub License](https://img.shields.io/github/license/shusaan/CareerForge-AI)
+![GitHub Stars](https://img.shields.io/github/stars/shusaan/CareerForge-AI)
+
+*Safar (سفر) means "journey" in Urdu. SafarCraft helps you craft the next step of yours.*
 
 ## Screenshots
 
@@ -18,26 +19,26 @@
 ## Features
 
 - **Smart Resume Builder** — Real-time editing, drag-and-drop, autosave, undo/redo, version history
-- **5-Axis ATS Analysis** — Content, Format, ATS, Brevity, Impact scoring with per-deduction explanations
+- **5-Axis ATS Guidance** — Content, Format, ATS, Brevity, Impact checks with per-deduction explanations (guidance to review, not a hiring guarantee)
 - **Smart Local Helpers** — Action-verb swap, bullet rewriter, metric prompter, achievement templates, grammar checker (fully offline, no API key)
 - **GitHub Intelligence** — Import your GitHub profile, auto-generate contribution bullets
 - **Job Description Tailoring** — Compare resume vs JD, find missing keywords, get rephrasing suggestions
 - **Snippet Library** — Save & reuse bullet snippets across resumes
 - **Insights Dashboard** — Bullet-length distribution, verb distribution, ATS-history charts
-- **Multiple Templates** — Classic ATS, Modern Professional, Executive (column/picture options)
-- **Export** — PDF, DOCX, JSON Resume, Markdown, plain TXT (all ATS compliant)
+- **Multiple Templates** — 8 free templates including Classic ATS, Modern Professional, Executive (column/picture options)
+- **Export** — PDF, DOCX, JSON Resume, Markdown, plain TXT
 - **Portfolio Generator** — Personal website, GitHub README, professional bio
 - **Offline-First PWA** — Install to home screen, edits work without network
 - **Privacy First** — No signup required, local-first, users own their data
 - **Optional Cloud Sync** — Self-hosted Postgres + Better Auth for multi-device sync
 - **Onboarding** — Sample resume, guided checklist, contextual empty states
 
-## Why CareerForge AI?
+## Why SafarCraft?
 
-- **100% local** — All smart helpers run in your browser. No API keys, no telemetry, no data leaves your device.
+- **100% local** — All smart helpers run in your browser. No API keys, no required telemetry, no data leaves your device.
 - **Open source** — MIT licensed, self-hostable with Docker.
 - **Engineer-first** — Built around the real workflow of software engineers applying for jobs.
-- **Privacy-first** — Your resume text never touches our servers.
+- **Private by default** — Your resume text never touches our servers.
 
 ## Tech Stack
 
@@ -47,8 +48,8 @@ Next.js 15 | React 19 | TypeScript | TailwindCSS | shadcn/ui | Zustand | Optiona
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/careerforge-ai.git
-cd careerforge-ai
+git clone https://github.com/shusaan/CareerForge-AI.git
+cd CareerForge-AI
 
 # Start with Docker (no database required)
 docker compose up app
@@ -123,9 +124,9 @@ worker/        # Cloudflare Worker (visitor counter)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/CONTRIBUTING-ENGINES.md](docs/CONTRIBUTING-ENGINES.md) for how to add new action verbs, rewriter patterns, or achievement templates.
 
-## Roadmap & tiers
+## Pricing
 
-Tier 1 (free forever) is live. Tier 2 (Pro, $5/mo) is designed with an open question list. See **[PLAN.md](./PLAN.md)** for the full tier model, revenue-first build order, and deferred decisions.
+There is no paid tier. SafarCraft is free under the MIT license — every feature is available to everyone, and the whole builder works offline. If a paid option is ever added, the core builder will stay free and this README will say exactly what changed.
 
 ## License
 

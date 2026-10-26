@@ -15,7 +15,7 @@
  */
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Route } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/engines/analytics";
 
@@ -71,9 +71,9 @@ export function WizardWelcomeSheet() {
         className="relative w-full max-w-md animate-in slide-in-from-bottom-4 fade-in rounded-2xl border bg-card p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <Sparkles
+        <Route
           aria-hidden
-          className="absolute -top-4 -right-4 h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 p-2 text-white shadow-lg"
+          className="absolute -top-4 -right-4 h-10 w-10 rounded-full bg-primary p-2 text-primary-foreground shadow-lg"
         />
 
         <p className="text-xs font-semibold uppercase tracking-wider text-primary">You're in.</p>

@@ -26,44 +26,71 @@ function chunk(type, data) {
   return Buffer.concat([len, t, data, crcBuf]);
 }
 
-// Renders a soft violet->indigo gradient with a centred sparkles-style "C" glyph.
+// Renders the SafarCraft mark: deep emerald rounded-square with a cream
+// journey path (gentle S-curve) and a warm gold waypoint at its end.
 function renderIcon(size) {
   // Build raw RGBA pixel data.
   const raw = Buffer.alloc(size * size * 4);
-  const cx = size / 2, cy = size / 2;
-  const radius = size * 0.48;
-  const innerRadius = radius * 0.62;
-  // Glyph path (centred "C"): outer arc + inner arc carve
-  const glyphCenter = { x: cx, y: cy };
-  const glyphOuter = size * 0.30;
-  const glyphThickness = size * 0.085;
-  const glyphInner = glyphOuter - glyphThickness;
-  const glyphStart = Math.PI * 0.18;
-  const glyphEnd = Math.PI * (2 - 0.18);
+  const corner = size * 0.22;
+  const thickness = size * 0.075;
+
+  // Journey path: cubic bezier from lower-left to upper-right with a gentle S-curve.
+  const p0 = { x: size * 0.28, y: size * 0.74 };
+  const p1 = { x: size * 0.30, y: size * 0.36 };
+  const p2 = { x: size * 0.70, y: size * 0.64 };
+  const p3 = { x: size * 0.72, y: size * 0.26 };
+
+  const samples = [];
+  const N = 240;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const mt = 1 - t;
+    const x = mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x;
+    const y = mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y;
+    samples.push({ x, y });
+  }
+
+  function insideRounded(x, y) {
+    if (x < 0 || y < 0 || x >= size || y >= size) return false;
+    const minX = corner, maxX = size - corner, minY = corner, maxY = size - corner;
+    if (x >= minX && x <= maxX) return true;
+    if (y >= minY && y <= maxY) return true;
+    const dx = x < minX ? minX - x : x - maxX;
+    const dy = y < minY ? minY - y : y - maxY;
+    return dx * dx + dy * dy <= corner * corner;
+  }
+
+  function distToPath(x, y) {
+    let best = Infinity;
+    for (const s of samples) {
+      const d = (s.x - x) * (s.x - x) + (s.y - y) * (s.y - y);
+      if (d < best) best = d;
+    }
+    return Math.sqrt(best);
+  }
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const i = (y * size + x) * 4;
-      const dx = x - cx, dy = y - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const angle = Math.atan2(dy, dx);
-
       let r, g, b, a;
-      if (dist <= radius) {
-        // Gradient: top-left violet (#8b5cf6 ~ rgb(139,92,246)) -> bottom-right indigo (#6366f1 ~ rgb(99,102,241))
-        const t = ((x + y) / (size * 2));
-        r = Math.round(139 + (99 - 139) * t);
-        g = Math.round(92 + (102 - 92) * t);
-        b = Math.round(246 + (241 - 246) * t);
+      if (insideRounded(x, y)) {
+        // Gradient: deep emerald (#14573f) -> journey green (#1c7f63)
+        const t = (x + y) / (size * 2);
+        r = Math.round(20 + (28 - 20) * t);
+        g = Math.round(87 + (127 - 87) * t);
+        b = Math.round(63 + (99 - 63) * t);
         a = 255;
 
-        // Carve the "C" glyph: between outer and inner radii within the arc range.
-        if (dist >= glyphInner && dist <= glyphOuter && angle >= glyphStart && angle <= glyphEnd) {
-          r = 255; g = 255; b = 255; a = 255;
+        const d = distToPath(x, y);
+        const dw = Math.hypot(x - p3.x, y - p3.y);
+        if (d <= thickness / 2) {
+          // Warm cream stroke
+          r = 250; g = 245; b = 233;
         }
-        // Soft round edge for the badge background
-        const edgeFade = Math.max(0, 1 - (dist - radius * 0.97) / (radius * 0.03));
-        a = Math.round(255 * Math.min(1, edgeFade));
+        if (dw <= size * 0.075) {
+          // Gold waypoint at the journey's next step
+          r = 232; g = 163; b = 61;
+        }
       } else {
         r = 0; g = 0; b = 0; a = 0;
       }

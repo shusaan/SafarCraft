@@ -48,7 +48,7 @@ Lever's content scoring literally drops bullets without a number. Aim for one nu
 ## 5. Match the JD, not the role
 
 Every application you send should reorder the same skills to match the job description's keyword frequency.
-**CareerForge AI's** JD Tailor does this for free — try it.
+**SafarCraft's** JD Tailor does this for free — try it.
 
 ## What this looks like
 
@@ -62,7 +62,7 @@ Every application you send should reorder the same skills to match the job descr
       },
       {
         q: "What about JSON Resume?",
-        a: "JSON Resume is the most ATS-safe format — there's literally nothing to mis-parse. CareerForge AI exports JSON Resume for free.",
+        a: "JSON Resume is the most ATS-safe format — there's literally nothing to mis-parse. SafarCraft exports JSON Resume for free.",
       },
     ],
   },
@@ -96,7 +96,7 @@ After reviewing 500+ engineering resumes, here's the structure that consistently
 
 ## Get the template
 
-CareerForge AI ships with 8 free templates — pick "Leafish" for a dense single-page layout or "Pikachu" if you want
+SafarCraft ships with 8 free templates — pick "Leafish" for a dense single-page layout or "Pikachu" if you want
 a bit of visual punch. Both export to PDF, DOCX, Markdown, and JSON Resume.
 `.trim(),
     faq: [
@@ -127,11 +127,11 @@ transform it, render it.
 - **ATS-safe by definition** — there is nothing to mis-parse, it's structured data
 - **Tool-agnostic** — you can render it with any of 100+ themes, or build your own
 - **Version-controlled** — put it in git, diff your resume between applications
-- **Switch tools without retyping** — Reactive Resume, CareerForge AI, FlowCV, and others all support JSON Resume
+- **Switch tools without retyping** — Reactive Resume, SafarCraft, FlowCV, and others all support JSON Resume
 
 ## How to use it
 
-1. Edit your resume in **CareerForge AI** (free, local-first)
+1. Edit your resume in **SafarCraft** (free, local-first)
 2. Export as **JSON Resume**
 3. Import into any other tool — your data follows you
 

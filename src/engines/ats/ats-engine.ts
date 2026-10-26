@@ -239,7 +239,7 @@ export function calculateATSScore(data: ResumeData): ATSResult {
     recommendations.push("Add a professional summary to give ATS systems context about your profile");
   }
   if (deductions.filter((d) => d.points >= 10).length > 0) {
-    recommendations.push("Consider using CareerForge AI's AI Assistant to improve your bullet points");
+    recommendations.push("Try the writing helpers to strengthen bullet points with specific actions and results");
   }
 
   return { score, axes, deductions, recommendations, keywordMatch };

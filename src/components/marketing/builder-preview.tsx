@@ -1,10 +1,10 @@
 "use client";
 
-import { FileText, Palette, Sparkles, GitBranch, Download, Target, Zap } from "lucide-react";
+import { FileText, Palette, Route, Download, Target, Zap } from "lucide-react";
 
 export function BuilderPreview() {
   return (
-    <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+    <div aria-label="Illustrative resume editor preview" className="overflow-hidden rounded-xl border bg-card shadow-xl shadow-foreground/5">
       {/* Browser chrome */}
       <div className="flex items-center gap-2 border-b bg-muted/50 px-3 py-2">
         <div className="flex gap-1.5" aria-hidden="true">
@@ -13,11 +13,11 @@ export function BuilderPreview() {
           <div className="h-2.5 w-2.5 rounded-full text-[#22C55E]"><svg viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg></div>
         </div>
         <div className="mx-auto flex-1 max-w-[220px] rounded-md bg-background/80 px-3 py-1 text-center text-[10px] text-muted-foreground/70 font-mono">
-          careerforge.app/builder
+          safarcraft / resume editor
         </div>
         <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[9px] font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
           <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-          ATS 95
+          5-point review
         </div>
       </div>
 
@@ -73,7 +73,7 @@ export function BuilderPreview() {
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] font-semibold text-foreground">
-                  Senior Software Engineer — <span className="text-muted-foreground">Vercel</span>
+                  Senior Software Engineer — <span className="text-muted-foreground">Northstar Labs</span>
                 </p>
                 <p className="mt-0.5 text-[9px] text-muted-foreground">Remote · 2021 – Present</p>
               </div>
@@ -84,15 +84,15 @@ export function BuilderPreview() {
             <ul className="mt-2 space-y-1.5 text-[10px] leading-relaxed text-foreground/90">
               <li className="flex gap-1.5">
                 <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                Reduced p99 cold-start latency by <strong>45%</strong> by optimising the edge runtime.
+                Improved request handling by <strong>45%</strong> through focused service profiling.
               </li>
               <li className="flex gap-1.5">
                 <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                Shipped the App Router used by <strong>1M+ developers</strong> within 3 months.
+                Shipped a shared routing system used across customer-facing products.
               </li>
               <li className="flex gap-1.5">
                 <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                Led migration from Pages Router to App Router across <strong>200+ internal apps</strong>.
+                Coordinated a staged migration with engineering, product, and support teams.
               </li>
             </ul>
           </div>
@@ -117,9 +117,9 @@ export function BuilderPreview() {
               100%
             </span>
           </div>
-          <p className="text-[12px] font-bold leading-tight text-zinc-900">Alex Johnson</p>
+          <p className="text-[12px] font-bold leading-tight text-zinc-900">Morgan Lee</p>
           <p className="mt-0.5 text-[8px] text-zinc-500">
-            alex@example.com · San Francisco
+            morgan@example.com · Remote
           </p>
           <p className="mt-2 text-[8px] font-semibold uppercase tracking-wider text-zinc-500">
             Summary
@@ -131,7 +131,7 @@ export function BuilderPreview() {
             Experience
           </p>
           <p className="mt-1 font-semibold text-zinc-900">
-            Senior Software Engineer <span className="font-normal text-zinc-500">— Vercel</span>
+            Senior Software Engineer <span className="font-normal text-zinc-500">— Northstar Labs</span>
           </p>
           <p className="text-[8px] italic text-zinc-500">Remote · 2021 – Present</p>
           <p className="mt-1 leading-snug text-zinc-700">
@@ -155,7 +155,7 @@ export function BuilderPreview() {
           { Icon: Palette },
           { Icon: Target },
           { Icon: Zap },
-          { Icon: GitBranch },
+          { Icon: Route },
           { Icon: Download },
         ].map(({ Icon }, i) => (
           <div
@@ -166,7 +166,7 @@ export function BuilderPreview() {
           </div>
         ))}
         <div className="ml-auto flex items-center gap-1.5">
-          <Sparkles className="h-3 w-3 text-amber-500" />
+            <Route className="h-3 w-3 text-primary" />
           <span className="text-[10px] font-medium text-muted-foreground">
             <strong className="text-foreground">3</strong> quick-action suggestions
           </span>

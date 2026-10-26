@@ -75,14 +75,14 @@ async function settle(page, ms = 500) { await page.waitForTimeout(ms); }
 
   const title = await page.title();
   info("title: " + title);
-  if (!title.toLowerCase().includes("careerforge")) logIssue("major", "seo", "Title missing brand", title);
+  if (!title.toLowerCase().includes("safarcraft")) logIssue("major", "seo", "Title missing brand", title);
 
   const heroH1 = await page.locator("h1").first().innerText().catch(() => "");
   info("H1: " + heroH1.replace(/\n/g, " ").slice(0, 140));
 
   // Hero CTA presence
-  const ctaStart = page.locator("a:has-text('Start building free')").first();
-  if (!(await ctaStart.isVisible())) logIssue("critical", "marketing", "Hero 'Start building free' CTA missing");
+  const ctaStart = page.locator("a:has-text('Start a new resume')").first();
+  if (!(await ctaStart.isVisible())) logIssue("critical", "marketing", "Hero 'Start a new resume' CTA missing");
 
   const ctaGitHub = page.locator("a:has-text('View on GitHub')").first();
   if (!(await ctaGitHub.isVisible())) logIssue("minor", "marketing", "GitHub CTA missing on hero");
@@ -372,7 +372,7 @@ async function settle(page, ms = 500) { await page.waitForTimeout(ms); }
   /* ─────────────────────────────────────────── */
   section("19) Resume list dialog (Manage resumes)");
   await page.locator("button[aria-label='Manage resumes']").click().catch(async () => {
-    await page.locator("button:has-text('CareerForge')").first().click().catch(() => {});
+    await page.locator("button:has-text('SafarCraft')").first().click().catch(() => {});
   });
   await settle(page, 400);
   await shot(page, "31-resume-list");

@@ -7,19 +7,19 @@ const STEPS = [
   {
     n: 1,
     title: "Drop in your CV",
-    body: "Upload a PDF or DOCX. We extract every section into an editable draft.",
+    body: "Choose a PDF or DOCX. SafarCraft reads it in your browser and turns it into an editable draft.",
     icon: Upload,
   },
   {
     n: 2,
     title: "Tailor to the role",
-    body: "Paste the job ad. We reorder skills and surface the bullets that match the role.",
+    body: "Paste a job ad to compare its language with your resume and bring relevant details forward.",
     icon: Wand2,
   },
   {
     n: 3,
     title: "Export & ship",
-    body: "Pick from 8 ATS-tested templates. Export to PDF, DOCX, or share via a public link.",
+    body: "Choose from 8 templates, review your resume, then export to PDF, DOCX, or JSON Resume.",
     icon: Download,
   },
 ];
@@ -30,8 +30,8 @@ export function HowItWorks() {
       <Container>
         <SectionHeader
           eyebrow="How it works"
-          title="Three steps. About three minutes."
-          description="No login, no setup wizard, no learning curve. Just your CV and a job ad."
+          title="A clear path from draft to application."
+          description="Start with the resume you have or build a new one. Your work is saved in your browser as you go."
           align="center"
         />
 
