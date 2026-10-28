@@ -13,7 +13,8 @@ test.describe("Export Panel", () => {
   });
 
   test("should show use case descriptions", async ({ page }) => {
-    await expect(page.locator("text=Best for: Submitting to employers")).toBeVisible();
+    await expect(page.getByText(/Opens your browser's print dialog/i)).toBeVisible();
+    await expect(page.getByText(/Best for: Editing in Word/i)).toBeVisible();
   });
 
   test("should show ATS compliance note", async ({ page }) => {
