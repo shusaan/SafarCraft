@@ -40,7 +40,7 @@ const formats: Array<{
     label: "PDF",
     icon: FileText,
     description: "Standard format for job applications",
-    useCase: "Best for: Submitting to employers, ATS systems",
+    useCase: "Opens your browser's print dialog — choose \"Save as PDF\"",
   },
   {
     id: "docx",
@@ -234,7 +234,15 @@ export function ExportPanel() {
     try {
       await exportResume(data, layout, format, template, paperSize);
       setExported((prev) => new Set(prev).add(format));
-      toast({ title: `Exported as ${format.toUpperCase()}`, variant: "success" });
+      if (format === "pdf") {
+        toast({
+          title: "Print dialog opened",
+          description: "Choose \"Save as PDF\" to save your resume.",
+          variant: "default",
+        });
+      } else {
+        toast({ title: `Exported as ${format.toUpperCase()}`, variant: "success" });
+      }
     } catch {
       toast({
         title: "Export failed",
