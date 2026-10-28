@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/shusaan/SafarCraft/compare/v1.0.0...v1.1.0) (2026-10-28)
+
+
+### Features
+
+* polish progress stepper with filled track ([bdc5a14](https://github.com/shusaan/SafarCraft/commit/bdc5a1425eae982836c41cda03499c27a517ee9a))
+
+
+### Bug Fixes
+
+* exclude forked repos from github intelligence ([b9aaac6](https://github.com/shusaan/SafarCraft/commit/b9aaac6ab13ea890d2d680435bc4287be1c7d499))
+* group repeated ats deductions and make keywords job-driven ([676440f](https://github.com/shusaan/SafarCraft/commit/676440f43a9cc37edcae3b7a01b3779a3dd7dcdb))
+
 ## 1.0.0 (2026-10-28)
 
 

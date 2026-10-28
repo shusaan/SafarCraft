@@ -1,6 +1,6 @@
 {
   "name": "careerforge-ai",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "SafarCraft — free, open-source resume builder for software engineers. Local-first, private by default.",
   "license": "MIT",
