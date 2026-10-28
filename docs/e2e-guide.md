@@ -168,15 +168,15 @@ tests/
 
 | Test | What it verifies |
 |------|-----------------|
-| Sample resume | Alex Johnson is pre-filled |
-| Onboarding | "Quick Setup" checklist visible |
+| First visit | Builder starts with an empty resume (no sample data) |
+| No popups | Quick Setup / tips cards do not appear |
 | Grouped toolbar | Build/Enhance/Output groups |
 | Panel switching | Click Templates shows template selector |
 | Shortcuts help | ? button shows shortcuts dialog |
 | Dark mode | Toggle switches theme |
 | Preview toggle | Eye button hides preview |
 | Version history | History button shows dialog |
-| Resume list | Resumes button shows dialog |
+| Home navigation | Logo navigates to the home page |
 
 ### 3. Section Tests (`sections.spec.ts`)
 

@@ -77,7 +77,7 @@ export function JDTailorMode() {
         <CardTitle className="flex items-center gap-2 text-sm">
           <Wand2 className="h-4 w-4 text-primary" />
           JD Tailoring Mode
-          <Badge variant="secondary" className="ml-auto text-[10px]">Local · No AI key</Badge>
+          <Badge variant="secondary" className="ml-auto text-[11px]">Local · No AI key</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -159,7 +159,7 @@ export function JDTailorMode() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="mt-2 h-6 gap-1 text-[10px]"
+                    className="mt-2 h-6 gap-1 text-[11px]"
                     onClick={() =>
                       applyChange(-1, {
                         kind: "summary",
@@ -194,13 +194,13 @@ export function JDTailorMode() {
                 .slice(0, 1)
                 .map((c, i) => (
                   <div key={`add-${i}`} className="rounded-md border bg-card p-2.5">
-                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Suggested bullet</p>
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Suggested bullet</p>
                     <p className="text-xs italic">{c.after}</p>
-                    <p className="mt-1 text-[10px] text-muted-foreground">{c.reason}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{c.reason}</p>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="mt-2 h-6 gap-1 text-[10px]"
+                      className="mt-2 h-6 gap-1 text-[11px]"
                       onClick={() => applyChange(100, c)}
                     >
                       <Plus className="h-3 w-3" />
@@ -221,14 +221,14 @@ export function JDTailorMode() {
                         <span className="italic">"{c.before}"</span>
                       </div>
                     ))}
-                  <p className="mt-1 text-[10px] text-muted-foreground">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Tip: drag these to the top of their role in the Experience panel.
                   </p>
                 </div>
               )}
 
               {appliedChanges.size > 0 && (
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   ✓ {appliedChanges.size} change{appliedChanges.size === 1 ? "" : "s"} applied. Re-run the JD to re-suggest after edits.
                 </p>
               )}

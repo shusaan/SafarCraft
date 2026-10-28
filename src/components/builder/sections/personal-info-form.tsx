@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -95,6 +96,24 @@ export function PersonalInfoForm() {
   const [preview, setPreview] = useState<{ parsed: ParsedCVLike; counts: PreviewCounts; fileName: string } | null>(null);
   const [appliedAt, setAppliedAt] = useState<number | null>(null);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const importTriggeredRef = useRef(false);
+
+  // Arriving from "Import a resume" (hero/onboarding): open the native OS
+  // file picker right away so the user can pick a .pdf/.docx from their
+  // laptop or any location, then strip the flag so reloads don't re-trigger.
+  useEffect(() => {
+    if (importTriggeredRef.current) return;
+    if (searchParams.get("onboarding") !== "import") return;
+    importTriggeredRef.current = true;
+    fileInputRef.current?.click();
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete("onboarding");
+    const qs = next.toString();
+    router.replace(`${pathname}${qs ? `?${qs}` : ""}`);
+  }, [searchParams, router, pathname]);
 
   const applyParsed = useCallback((parsed: ParsedCVLike) => {
     const id = () => crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
@@ -347,11 +366,6 @@ export function PersonalInfoForm() {
             )}
           </div>
         )}
-
-        <p className="mt-2 text-[10px] text-muted-foreground/60">
-          We only collect anonymized IP addresses via Google Analytics to improve user experience.
-          We do not store or share your resume text or personal data on our servers.
-        </p>
       </div>
 
       <div className="flex items-start gap-6">
@@ -435,7 +449,7 @@ function PreviewRow({ label, ok, count, suffix }: { label: string; ok?: boolean;
       <span className={filled ? "" : "text-muted-foreground"}>
         {label}
         {typeof count === "number" ? (
-          <span className="ml-1 font-mono text-[10px] text-muted-foreground">
+          <span className="ml-1 font-mono text-[11px] text-muted-foreground">
             {count} {suffix ?? ""}
           </span>
         ) : null}

@@ -21,12 +21,9 @@ test.describe("Home Page", () => {
 
   test("should show qualitative trust strip", async ({ page }) => {
     await page.goto("/");
-    await expect(
-      page.getByText("Private by default"),
-    ).toBeVisible();
-    await expect(
-      page.getByText("PDF, DOCX, and JSON exports"),
-    ).toBeVisible();
+    const strip = page.locator("ul[aria-label='Trust signals']");
+    await expect(strip.getByText("Private by default")).toBeVisible();
+    await expect(strip.getByText("PDF, DOCX, and JSON exports")).toBeVisible();
   });
 
   test("should show a single free pricing card with no paid tier", async ({ page }) => {

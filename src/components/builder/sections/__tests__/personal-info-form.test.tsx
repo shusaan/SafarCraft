@@ -28,6 +28,20 @@ vi.mock("@/stores/resume-store", () => ({
   useResumeStore: vi.fn(<T,>(selector: (s: typeof baseState) => T) => selector(baseState)),
 }));
 
+let mockSearchParams = new URLSearchParams();
+const replaceMock = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useSearchParams: () => mockSearchParams,
+  usePathname: () => "/builder",
+  useRouter: () => ({ push: vi.fn(), replace: replaceMock, refresh: vi.fn() }),
+}));
+
+beforeEach(() => {
+  mockSearchParams = new URLSearchParams();
+  replaceMock.mockClear();
+});
+
 function renderWithProviders(ui: React.ReactElement) {
   return render(<ToastProviderWrapper>{ui}</ToastProviderWrapper>);
 }
@@ -92,6 +106,33 @@ describe("PersonalInfoForm — import flow", () => {
   it("renders Import Existing CV panel", () => {
     renderWithProviders(<PersonalInfoForm />);
     expect(screen.getByText(/Import Existing CV/i)).toBeInTheDocument();
+  });
+
+  it("auto-opens the OS file picker when arriving from the import flow", () => {
+    mockSearchParams = new URLSearchParams("onboarding=import");
+    const clickSpy = vi
+      .spyOn(HTMLInputElement.prototype, "click")
+      .mockImplementation(() => {});
+
+    renderWithProviders(<PersonalInfoForm />);
+
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(replaceMock).toHaveBeenCalledWith("/builder");
+
+    clickSpy.mockRestore();
+  });
+
+  it("does not open the file picker without the onboarding flag", () => {
+    const clickSpy = vi
+      .spyOn(HTMLInputElement.prototype, "click")
+      .mockImplementation(() => {});
+
+    renderWithProviders(<PersonalInfoForm />);
+
+    expect(clickSpy).not.toHaveBeenCalled();
+    expect(replaceMock).not.toHaveBeenCalled();
+
+    clickSpy.mockRestore();
   });
 
   it("shows a preview card with field counts after a successful parse", async () => {

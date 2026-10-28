@@ -3,11 +3,24 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+# Cancel superseded runs on the same branch/PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
+  quality:
+    name: Lint, typecheck & unit tests
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -18,19 +31,11 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
       - run: npm run test:run
 
   build:
+    name: Production build
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -42,6 +47,7 @@ jobs:
       - run: npm run build
 
   e2e:
+    name: End-to-end tests
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -50,6 +56,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
       - run: npm ci
-      - run: npx playwright install --with-deps
+      - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

@@ -3,11 +3,20 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useResumeStore } from "@/stores/resume-store";
 import { exportResume } from "@/engines/export/export-engine";
 import { importJSONResume } from "@/engines/export/providers/json-resume-import";
-import { authenticate, saveToDrive, pickFolder, createDriveFolder, getDriveFileName } from "@/engines/export/drive";
+import {
+  authenticate,
+  saveToDrive,
+  findOrCreateFolder,
+  listFilesInFolder,
+  downloadFileContent,
+  isDriveConfigured,
+  type DriveFileMeta,
+} from "@/engines/export/drive";
 import { trackEvent } from "@/engines/analytics";
 import type { ExportFormat, PaperSize } from "@/types";
 import { useToast } from "@/components/ui/toast";
@@ -66,65 +75,61 @@ export function ExportPanel() {
   const layout = useResumeStore((s) => s.layout);
   const template = useResumeStore((s) => s.template);
   const replaceData = useResumeStore((s) => s.replaceData);
+  const setLayout = useResumeStore((s) => s.setLayout);
+  const setTemplate = useResumeStore((s) => s.setTemplate);
   const { toast } = useToast();
 
   const [driveSaving, setDriveSaving] = useState(false);
-  const [driveFolder, setDriveFolder] = useState<string | null>(null);
-  const [driveFolderName, setDriveFolderName] = useState<string | null>(null);
-  const [pickingFolder, setPickingFolder] = useState(false);
-  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [driveListing, setDriveListing] = useState(false);
+  const [driveFiles, setDriveFiles] = useState<DriveFileMeta[] | null>(null);
+  const [driveImporting, setDriveImporting] = useState<string | null>(null);
 
-  const handleSelectFolder = async () => {
-    setPickingFolder(true);
-    try {
-      const token = await authenticate();
-      if (!token) return;
-
-      const folderId = await pickFolder();
-      if (folderId) {
-        setDriveFolder(folderId);
-        const name = await getDriveFileName(folderId);
-        setDriveFolderName(name ?? "Selected folder");
-        toast({ title: "Folder selected", variant: "success" });
-      }
-    } catch {
-      toast({ title: "Folder selection failed", variant: "destructive" });
-    } finally {
-      setPickingFolder(false);
+  /** ArrayBuffer → base64 without blowing the argument-size limit. */
+  const toBase64 = (buf: ArrayBuffer): string => {
+    const bytes = new Uint8Array(buf);
+    let binary = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
     }
+    return btoa(binary);
   };
 
-  const handleCreateFolder = async () => {
-    setCreatingFolder(true);
-    try {
-      const token = await authenticate();
-      if (!token) return;
-
-      const folder = await createDriveFolder("SafarCraft Exports", driveFolder ?? undefined);
-      if (folder) {
-        setDriveFolder(folder.id);
-        setDriveFolderName(folder.name);
-        toast({ title: `Folder "${folder.name}" created`, variant: "success" });
-      } else {
-        toast({ title: "Failed to create folder", variant: "destructive" });
-      }
-    } catch {
-      toast({ title: "Failed to create folder", variant: "destructive" });
-    } finally {
-      setCreatingFolder(false);
+  const requireDrive = async (): Promise<boolean> => {
+    if (!isDriveConfigured()) {
+      toast({
+        title: "Google Drive is not configured",
+        description: "This instance has no Google OAuth client id set up.",
+        variant: "default",
+      });
+      return false;
     }
+    const token = await authenticate();
+    if (!token) {
+      toast({
+        title: "Google Drive sign-in required",
+        description: "Please allow access to continue.",
+        variant: "default",
+      });
+      return false;
+    }
+    return true;
   };
 
   const handleDriveSave = async () => {
     setDriveSaving(true);
     try {
-      const token = await authenticate();
-      if (!token) {
-        toast({ title: "Google Drive sign-in required", description: "Please allow access to save to Drive.", variant: "default" });
+      if (!(await requireDrive())) return;
+
+      const folder = await findOrCreateFolder("SafarCraft");
+      if (!folder) {
+        toast({ title: "Drive folder unavailable", description: "Could not find or create the SafarCraft folder.", variant: "destructive" });
         return;
       }
 
-      // Generate a .docx using the docx library
+      const personName = data.personal.name.replace(/[^a-zA-Z0-9]/g, "_") || "Resume";
+
+      // 1) .docx application package
       const { Document, Packer, Paragraph, TextRun, HeadingLevel } = await import("docx");
       const doc = new Document({
         sections: [{
@@ -143,20 +148,83 @@ export function ExportPanel() {
         }],
       });
       const blob = await Packer.toBlob(doc);
-      const arrayBuf = await blob.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
+      const base64 = toBase64(await blob.arrayBuffer());
 
-      const companyName = data.experience[0]?.company?.replace(/[^a-zA-Z0-9]/g, "_") || "Resume";
-      const result = await saveToDrive(base64, `${companyName}_Application_Package.docx`, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", driveFolder ?? undefined, true);
-      if (result) {
-        toast({ title: "Saved to Google Drive", variant: "success" });
-      } else {
+      const docxName = `${personName}_Application_Package.docx`;
+      const saved = await saveToDrive(
+        base64,
+        docxName,
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        folder.id,
+        true,
+      );
+      if (!saved) {
         toast({ title: "Drive save failed", description: "Check your connection and permissions.", variant: "destructive" });
+        return;
       }
+
+      // 2) Editable JSON draft so the resume can be loaded back into the builder
+      const draft = JSON.stringify({ app: "safarcraft", version: 1, data, template, layout });
+      await saveToDrive(draft, `${personName}_SafarCraft_Draft.json`, "application/json", folder.id, false);
+
+      trackEvent("drive_save", { folder: folder.name });
+      toast({
+        title: "Saved to Google Drive",
+        description: `"${docxName}" and an editable draft are in your "${folder.name}" folder.`,
+        variant: "success",
+      });
     } catch {
       toast({ title: "Drive save failed", variant: "destructive" });
     } finally {
       setDriveSaving(false);
+    }
+  };
+
+  const handleDriveLoad = async () => {
+    setDriveListing(true);
+    try {
+      if (!(await requireDrive())) {
+        setDriveFiles(null);
+        return;
+      }
+      const folder = await findOrCreateFolder("SafarCraft");
+      if (!folder) {
+        toast({ title: "Drive folder unavailable", variant: "destructive" });
+        return;
+      }
+      setDriveFiles(await listFilesInFolder(folder.id, "application/json"));
+    } catch {
+      toast({ title: "Could not list Drive files", variant: "destructive" });
+      setDriveFiles(null);
+    } finally {
+      setDriveListing(false);
+    }
+  };
+
+  const handleImportDraft = async (fileId: string) => {
+    setDriveImporting(fileId);
+    try {
+      const raw = await downloadFileContent(fileId);
+      if (!raw) throw new Error("download failed");
+      const parsed = JSON.parse(raw);
+      if (!parsed?.data?.personal) throw new Error("not a SafarCraft draft");
+      replaceData(parsed.data);
+      if (parsed.template) setTemplate(parsed.template);
+      if (parsed.layout) setLayout(parsed.layout);
+      setDriveFiles(null);
+      toast({
+        title: "Draft loaded from Drive",
+        description: "Your saved resume is back in the builder.",
+        variant: "success",
+      });
+    } catch {
+      toast({
+        title: "Import failed",
+        description: "This file doesn't look like a SafarCraft draft.",
+        variant: "destructive",
+      });
+    } finally {
+      setDriveImporting(null);
     }
   };
 
@@ -304,23 +372,26 @@ export function ExportPanel() {
             <div className="flex-1 min-w-0 space-y-1">
               <span className="font-medium">Google Drive</span>
               <p className="text-xs text-muted-foreground">
-                {driveFolderName
-                  ? `.docx → ${driveFolderName}`
-                  : "Select a folder or create one to save your application package"}
+                Saves to your one "SafarCraft" folder — a .docx package plus an
+                editable draft you can load back anytime.
               </p>
             </div>
             <div className="flex gap-1">
-              <Button variant="ghost" size="sm" disabled={pickingFolder || creatingFolder} onClick={handleSelectFolder} title="Select Drive folder">
-                <FolderOpen className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" disabled={pickingFolder || creatingFolder} onClick={handleCreateFolder} title="Create 'SafarCraft Exports' folder">
-                {creatingFolder ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={driveSaving || driveListing}
+                onClick={handleDriveLoad}
+                title="Load a draft from Drive"
+              >
+                {driveListing ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                 ) : (
-                  <span className="text-xs font-medium">+Folder</span>
+                  <FolderOpen className="h-4 w-4" />
                 )}
+                Load
               </Button>
-              <Button variant="ghost" size="sm" disabled={driveSaving} onClick={handleDriveSave}>
+              <Button variant="ghost" size="sm" disabled={driveSaving || driveListing} onClick={handleDriveSave}>
                 {driveSaving ? (
                   <span className="flex items-center gap-2">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -337,6 +408,49 @@ export function ExportPanel() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Load from Drive dialog */}
+      {driveFiles && (
+        <Dialog open onOpenChange={(open) => !open && setDriveFiles(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Load from Google Drive</DialogTitle>
+            <DialogDescription>
+              Pick a saved draft to load back into the builder.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-72 space-y-2 overflow-y-auto">
+            {driveFiles.length === 0 && (
+              <p className="rounded-md border border-dashed p-4 text-center text-xs text-muted-foreground">
+                No saved drafts in your "SafarCraft" folder yet. Use Save to create one.
+              </p>
+            )}
+            {driveFiles.map((f) => (
+              <button
+                key={f.id}
+                className="flex w-full items-center justify-between gap-2 rounded-md border p-3 text-left transition-colors hover:bg-accent disabled:opacity-60"
+                disabled={driveImporting === f.id}
+                onClick={() => handleImportDraft(f.id)}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{f.name}</p>
+                  {f.modifiedTime && (
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {new Date(f.modifiedTime).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+                {driveImporting === f.id ? (
+                  <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <Upload className="h-4 w-4 shrink-0 text-muted-foreground" />
+                )}
+              </button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+      )}
 
       <p className="text-xs text-muted-foreground text-center">
         All exports are ATS-compliant with selectable text and clickable links

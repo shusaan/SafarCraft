@@ -5,12 +5,12 @@ test.describe("Builder", () => {
     await page.goto("/builder");
   });
 
-  test("should load sample resume on first visit", async ({ page }) => {
-    await expect(page.locator("input[id='name']")).toHaveValue("Alex Johnson");
+  test("should start with an empty resume on first visit", async ({ page }) => {
+    await expect(page.locator("input[id='name']")).toHaveValue("");
   });
 
-  test("should show onboarding checklist", async ({ page }) => {
-    await expect(page.locator("text=Quick Setup")).toBeVisible();
+  test("should not show the quick setup popup", async ({ page }) => {
+    await expect(page.locator("text=Quick Setup")).toHaveCount(0);
   });
 
   test("should have grouped toolbar", async ({ page }) => {
@@ -44,8 +44,8 @@ test.describe("Builder", () => {
     await expect(page.locator("text=Version History")).toBeVisible();
   });
 
-  test("should show resume list dialog", async ({ page }) => {
-    await page.click("[aria-label='Manage resumes']");
-    await expect(page.getByRole("dialog", { name: "My Resumes" })).toBeVisible();
+  test("should navigate home when clicking the SafarCraft logo", async ({ page }) => {
+    await page.click("a[aria-label='SafarCraft home']");
+    await expect(page).toHaveURL(/\/$/);
   });
 });
