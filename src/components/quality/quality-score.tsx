@@ -2,14 +2,41 @@
 
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, FileText } from "lucide-react";
 import { useResumeStore } from "@/stores/resume-store";
 import { calculateQuality, axisColor, axisBg, type AxisScore } from "@/engines/quality/score";
+import type { ResumeData } from "@/types";
 import { cn } from "@/lib/utils";
+
+/** True when the resume has no meaningful content to score. */
+function isResumeEmpty(data: ResumeData): boolean {
+  return (
+    !data.personal.name &&
+    data.experience.length === 0 &&
+    data.education.length === 0 &&
+    data.skills.length === 0
+  );
+}
 
 export function QualityScore() {
   const data = useResumeStore((s) => s.data);
   const result = useMemo(() => calculateQuality(data), [data]);
+
+  if (isResumeEmpty(data)) {
+    return (
+      <Card data-testid="quality-empty-state">
+        <CardHeader>
+          <CardTitle className="text-sm">Resume Quality Score</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-start gap-3">
+          <FileText className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <p className="text-sm text-muted-foreground">
+            Nothing to score yet — add your name, experience, or skills first, then check back here.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
