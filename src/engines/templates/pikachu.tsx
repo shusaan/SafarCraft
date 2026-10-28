@@ -21,6 +21,9 @@ export function Pikachu({ data, layout }: TemplateProps) {
             {[data.personal.linkedin, data.personal.github, data.personal.website].filter(Boolean).join("  ·  ")}
           </p>
         </div>
+        {layout.showPicture && data.personal.photo && (
+          <img src={data.personal.photo} alt="" className="h-16 w-16 shrink-0 self-start rounded-full object-cover" style={{ border: `2px solid ${color}` }} />
+        )}
       </div>
 
       {data.personal.summary && (

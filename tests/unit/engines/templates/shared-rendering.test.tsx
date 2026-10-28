@@ -31,4 +31,32 @@ describe("shared resume document rendering", () => {
     expect(html).toContain("Summary");
     expect(html).toContain("Staff Engineer");
   });
+
+  it("renders the profile photo on templates with photo support", async () => {
+    const photoData = "data:image/png;base64,ZmFrZS1pbWFnZQ==";
+    const data = {
+      ...defaultResumeData,
+      personal: { ...defaultResumeData.personal, name: "Jane Doe", photo: photoData },
+    };
+    const layout = { ...defaultResumeLayout, showPicture: true };
+
+    for (const template of ["leafish", "pikachu", "modern-professional", "bronzor", "onyx", "gengar", "executive"]) {
+      const html = await renderResumeHtml(template, data, layout);
+      expect(html).toContain(photoData);
+    }
+  });
+
+  it("skips the profile photo on the classic-ats template by design", async () => {
+    const photoData = "data:image/png;base64,ZmFrZS1pbWFnZQ==";
+    const data = {
+      ...defaultResumeData,
+      personal: { ...defaultResumeData.personal, name: "Jane Doe", photo: photoData },
+    };
+    const html = await renderResumeHtml("classic-ats", data, {
+      ...defaultResumeLayout,
+      showPicture: true,
+    });
+
+    expect(html).not.toContain(photoData);
+  });
 });
