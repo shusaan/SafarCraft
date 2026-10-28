@@ -19,8 +19,8 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint, typecheck & unit tests
-    timeout-minutes: 10
+    name: Lint, typecheck, tests & build
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -32,18 +32,6 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:run
-
-  build:
-    name: Production build
-    timeout-minutes: 15
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
       - run: npm run build
 
   e2e:
