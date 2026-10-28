@@ -1,4 +1,4 @@
-import type { ResumeData, ATSResult, ATSDeduction, KeywordMatch, ATSAxis } from "@/types";
+import type { ResumeData, ATSResult, ATSDeduction, ATSAxis } from "@/types";
 
 const WEAK_VERBS = [
   "was", "were", "been", "being", "had", "has", "have", "did", "does",
@@ -9,74 +9,62 @@ const WEAK_VERBS = [
 
 const LONG_PARAGRAPH_THRESHOLD = 150;
 
-function extractKeywords(data: ResumeData): string[] {
-  const keywords = new Set<string>();
+/** Repeated per-bullet findings are capped so a long CV cannot tank the score. */
+const MAX_BULLET_PENALTY = 6;
 
-  for (const exp of data.experience) {
-    for (const bullet of exp.bullets) {
-      const words = bullet.toLowerCase().split(/[\s,;.()]+/);
-      for (const word of words) {
-        if (word.length > 2 && !WEAK_VERBS.includes(word)) {
-          keywords.add(word);
-        }
-      }
-    }
-    for (const tech of exp.technologies) {
-      keywords.add(tech.toLowerCase());
-    }
-  }
-
-  for (const cat of data.skills) {
-    for (const skill of cat.skills) {
-      keywords.add(skill.toLowerCase());
-    }
-  }
-
-  for (const proj of data.projects) {
-    for (const tech of proj.technologies) {
-      keywords.add(tech.toLowerCase());
-    }
-  }
-
-  return Array.from(keywords);
-}
-
+/**
+ * Analyzes all bullets at once and aggregates repeated findings into single
+ * deductions — one card per issue with affected counts, instead of one card
+ * per bullet (which flooded the panel with identical "No Metrics" entries).
+ */
 function analyzeBullets(bullets: string[]): ATSDeduction[] {
   const deductions: ATSDeduction[] = [];
+  const total = bullets.filter((b) => b.trim()).length;
+  if (total === 0) return deductions;
+
+  let noMetric = 0;
+  let longParagraphs = 0;
+  const weakVerbs: string[] = [];
 
   for (const bullet of bullets) {
-    const words = bullet.split(/\s+/);
-    const firstWord = words[0]?.toLowerCase();
+    const trimmed = bullet.trim();
+    if (!trimmed) continue;
 
-    if (firstWord && WEAK_VERBS.includes(firstWord)) {
-      deductions.push({
-        category: "Weak Verbs",
-        axis: "impact",
-        points: 2,
-        reason: `Bullet starts with weak verb "${firstWord}". Use stronger action verbs.`,
-        severity: "medium",
-      });
-    }
+    const firstWord = trimmed.split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g, "");
+    if (firstWord && WEAK_VERBS.includes(firstWord)) weakVerbs.push(firstWord);
+    if (trimmed.length > LONG_PARAGRAPH_THRESHOLD) longParagraphs++;
+    if (!/[0-9]/.test(trimmed)) noMetric++;
+  }
 
-    if (bullet.length > LONG_PARAGRAPH_THRESHOLD) {
-      deductions.push({
-        category: "Long Paragraph",
-        axis: "brevity",
-        points: 3,
-        reason: "Bullet is too long (over 150 chars). Break into shorter points.",
-        severity: "medium",
-      });
-    }
+  if (weakVerbs.length > 0) {
+    const examples = [...new Set(weakVerbs)].slice(0, 3).join(", ");
+    deductions.push({
+      category: "Weak Verbs",
+      axis: "impact",
+      points: Math.min(weakVerbs.length * 2, MAX_BULLET_PENALTY),
+      reason: `${weakVerbs.length} of ${total} bullets start with weak verbs (${examples}${weakVerbs.length > 3 ? ", …" : ""}). Lead with strong action verbs instead.`,
+      severity: "medium",
+    });
+  }
 
-    if (!bullet.match(/^\d/) && !bullet.match(/[0-9]/)) {
-      deductions.push({
-        category: "No Metrics",
-        axis: "impact",
-        points: 1,
-        reason: "Bullet lacks measurable achievements. Add numbers, percentages, or quantifiable results.",
-        severity: "low",
-      });
-    }
+  if (longParagraphs > 0) {
+    deductions.push({
+      category: "Long Paragraph",
+      axis: "brevity",
+      points: Math.min(longParagraphs * 3, MAX_BULLET_PENALTY),
+      reason: `${longParagraphs} of ${total} bullets exceed ${LONG_PARAGRAPH_THRESHOLD} characters. Break them into shorter, scannable points.`,
+      severity: "medium",
+    });
+  }
+
+  if (noMetric > 0) {
+    deductions.push({
+      category: "No Metrics",
+      axis: "impact",
+      points: Math.min(noMetric, MAX_BULLET_PENALTY),
+      reason: `${noMetric} of ${total} bullets lack measurable achievements. Add numbers, percentages, or quantifiable results.`,
+      severity: "low",
+    });
   }
 
   return deductions;
@@ -205,7 +193,8 @@ export function calculateATSScore(data: ResumeData): ATSResult {
   const deductions: ATSDeduction[] = [];
   let score = 100;
 
-  const bulletDeductions = data.experience.flatMap((exp) => analyzeBullets(exp.bullets));
+  const allBullets = data.experience.flatMap((exp) => exp.bullets);
+  const bulletDeductions = analyzeBullets(allBullets);
   const sectionDeductions = analyzeSectionOrder(data);
   const formattingDeductions = analyzeFormatting(data);
 
@@ -215,14 +204,6 @@ export function calculateATSScore(data: ResumeData): ATSResult {
   score = Math.max(0, 100 - totalDeductions);
 
   const axes = buildAxes(deductions);
-
-  const keywords = extractKeywords(data);
-  const keywordMatch: KeywordMatch[] = keywords.slice(0, 20).map((kw) => ({
-    keyword: kw,
-    found: true,
-    count: 1,
-    importance: "important",
-  }));
 
   const recommendations: string[] = [];
 
@@ -242,7 +223,7 @@ export function calculateATSScore(data: ResumeData): ATSResult {
     recommendations.push("Try the writing helpers to strengthen bullet points with specific actions and results");
   }
 
-  return { score, axes, deductions, recommendations, keywordMatch };
+  return { score, axes, deductions, recommendations };
 }
 
 export function getATSScoreLabel(score: number): { label: string; color: string } {

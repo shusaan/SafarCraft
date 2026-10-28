@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useResumeStore } from "@/stores/resume-store";
+import { useJDStore } from "@/stores/jd-store";
 import { analyzeJobDescription } from "@/engines/ats/jd-analyzer";
 import { Target, CheckCircle, XCircle, Lightbulb, TrendingUp, Activity } from "lucide-react";
 import type { JDParseResult } from "@/types";
@@ -14,11 +15,23 @@ export function JDAnalyzer() {
   const [jd, setJd] = useState("");
   const [result, setResult] = useState<JDParseResult | null>(null);
   const data = useResumeStore((s) => s.data);
+  const storedJD = useJDStore((s) => s.jdText);
+  const storedResult = useJDStore((s) => s.result);
+  const setAnalysis = useJDStore((s) => s.setAnalysis);
+
+  // Restore the last analyzed JD (from this session or a previous visit)
+  // so the ATS panel keeps its job-specific keyword suggestions.
+  useEffect(() => {
+    if (!jd && storedJD) setJd(storedJD);
+    if (!result && storedResult) setResult(storedResult);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAnalyze = () => {
     if (!jd.trim()) return;
     const analysis = analyzeJobDescription(jd, data);
     setResult(analysis);
+    setAnalysis(jd, analysis);
   };
 
   const scoreColor = (score: number) => {

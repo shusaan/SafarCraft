@@ -48,14 +48,6 @@ export type ATSResult = {
   axes: ATSAxis[];
   deductions: ATSDeduction[];
   recommendations: string[];
-  keywordMatch: KeywordMatch[];
-};
-
-export type KeywordMatch = {
-  keyword: string;
-  found: boolean;
-  count: number;
-  importance: "critical" | "important" | "optional";
 };
 
 export type JDParseResult = {

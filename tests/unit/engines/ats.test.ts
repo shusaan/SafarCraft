@@ -51,6 +51,45 @@ describe("ATS Engine", () => {
     const result = calculateATSScore(data);
     expect(result.deductions.some((d) => d.category === "Weak Verbs")).toBe(true);
   });
+
+  it("groups repeated no-metrics findings into a single capped deduction", () => {
+    const data: ResumeData = {
+      ...defaultResumeData,
+      personal: { ...defaultResumeData.personal, name: "Test", email: "t@t.com", summary: "x".repeat(60) },
+      experience: [{
+        id: "1", company: "C", position: "E", location: "", startDate: "2020", endDate: "2021",
+        current: false,
+        bullets: Array.from({ length: 35 }, () => "Owned the migration of the billing module end to end without any numbers"),
+        technologies: [],
+      }],
+      skills: [{ id: "1", category: "Languages", skills: ["TypeScript"] }],
+    };
+
+    const result = calculateATSScore(data);
+
+    const noMetrics = result.deductions.filter((d) => d.category === "No Metrics");
+    expect(noMetrics).toHaveLength(1);
+    expect(noMetrics[0]!.reason).toContain("35 of 35 bullets");
+    expect(noMetrics[0]!.points).toBeLessThanOrEqual(6);
+    // The score is not tanked by repetition: a single capped -6 beats -35.
+    expect(result.score).toBeGreaterThan(30);
+  });
+
+  it("does not emit no-metrics for bullets that contain numbers", () => {
+    const data: ResumeData = {
+      ...defaultResumeData,
+      personal: { ...defaultResumeData.personal, name: "Test", email: "t@t.com", summary: "x".repeat(60) },
+      experience: [{
+        id: "1", company: "C", position: "E", location: "", startDate: "2020", endDate: "2021",
+        current: false,
+        bullets: ["Reduced latency by 40%", "Shipped to 50k users"],
+        technologies: [],
+      }],
+      skills: [{ id: "1", category: "Languages", skills: ["TypeScript"] }],
+    };
+    const result = calculateATSScore(data);
+    expect(result.deductions.filter((d) => d.category === "No Metrics")).toHaveLength(0);
+  });
 });
 
 describe("JD Analyzer", () => {
