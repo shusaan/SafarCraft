@@ -11,8 +11,8 @@ test.describe("Section Navigation", () => {
   });
 
   // Section nav items are appended with ' (completed)' once filled, so use
-  // the `^=` starts-with selector to match both states regardless of the
-  // auto-bootstrap that loads the sample resume on first visit.
+  // the `^=` starts-with selector to match both states regardless of how
+  // much of the resume the user has filled in.
   test("should navigate to Experience section", async ({ page }) => {
     await page.locator('[aria-label^="Experience"]').click();
     await expect(page.locator("text=Work history in reverse-chronological order")).toBeVisible();
