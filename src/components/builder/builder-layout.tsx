@@ -18,13 +18,11 @@ import { JDAnalyzer } from "@/components/jd-analyzer/jd-analyzer";
 import { PortfolioGenerator } from "@/components/portfolio/portfolio-generator";
 import { VersionHistory } from "./version-history";
 import { VersionComparison } from "./version-comparison";
-import { OnboardingChecklist } from "./onboarding-checklist";
 import { ShareLinkDialog } from "./share-link-dialog";
 import { ShortcutsHelp } from "./shortcuts-help";
 import { WizardWelcomeSheet } from "./wizard-welcome-sheet";
 import { GoalSelector } from "./goal-selector";
 import { BuilderStepper, type StepperStep } from "./builder-stepper";
-import { WelcomeOverlay } from "./welcome-overlay";
 import { ErrorBoundary } from "@/components/shared/error-boundary";
 import { useAutosave } from "@/hooks/use-autosave";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
@@ -610,8 +608,6 @@ export function BuilderLayout() {
       </main>
 
       {/* ── Overlays ── */}
-      <OnboardingChecklist />
-      <WelcomeOverlay />
       <WizardWelcomeSheet />
 
       <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>

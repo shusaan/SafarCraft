@@ -9,8 +9,8 @@ test.describe("Builder", () => {
     await expect(page.locator("input[id='name']")).toHaveValue("");
   });
 
-  test("should show onboarding checklist", async ({ page }) => {
-    await expect(page.locator("text=Quick Setup")).toBeVisible();
+  test("should not show the quick setup popup", async ({ page }) => {
+    await expect(page.locator("text=Quick Setup")).toHaveCount(0);
   });
 
   test("should have grouped toolbar", async ({ page }) => {

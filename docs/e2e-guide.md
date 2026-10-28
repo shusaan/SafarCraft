@@ -169,7 +169,7 @@ tests/
 | Test | What it verifies |
 |------|-----------------|
 | First visit | Builder starts with an empty resume (no sample data) |
-| Onboarding | "Quick Setup" checklist visible |
+| No popups | Quick Setup / tips cards do not appear |
 | Grouped toolbar | Build/Enhance/Output groups |
 | Panel switching | Click Templates shows template selector |
 | Shortcuts help | ? button shows shortcuts dialog |

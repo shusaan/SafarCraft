@@ -27,7 +27,6 @@ type ResumeState = {
   historyIndex: number;
   versions: VersionEntry[];
   resumeGoal: ResumeGoal;
-  hasCompletedOnboarding: boolean;
 
   setResumeGoal: (goal: ResumeGoal) => void;
   updateData: (data: Partial<ResumeData>) => void;
@@ -42,7 +41,6 @@ type ResumeState = {
   markSaved: () => void;
   saveVersion: (label?: string) => void;
   restoreVersion: (versionId: string) => void;
-  completeOnboarding: () => void;
 };
 
 const MAX_HISTORY = 50;
@@ -67,7 +65,6 @@ export const useResumeStore = create<ResumeState>()(
       historyIndex: 0,
       versions: [],
       resumeGoal: "startup" as ResumeGoal,
-      hasCompletedOnboarding: false,
 
       setResumeGoal: (goal) => set({ resumeGoal: goal }),
 
@@ -160,8 +157,6 @@ export const useResumeStore = create<ResumeState>()(
           });
         }
       },
-
-      completeOnboarding: () => set({ hasCompletedOnboarding: true }),
     }),
     {
       name: "careerforge-resume",
@@ -171,7 +166,6 @@ export const useResumeStore = create<ResumeState>()(
         template: state.template,
         versions: state.versions,
         resumeGoal: state.resumeGoal,
-        hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
     },
   ),
