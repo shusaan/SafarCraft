@@ -85,7 +85,7 @@ function check(cond, severity, area, msg, detail = "") {
   // Title & meta
   const title = await page.title();
   console.log("   title: " + title);
-  check(title.toLowerCase().includes("careerforge"), "major", "seo", "Page title missing brand", title);
+  check(title.toLowerCase().includes("safarcraft"), "major", "seo", "Page title missing brand", title);
 
   // H1
   const h1 = await page.locator("h1").first().innerText().catch(() => "");
@@ -93,7 +93,7 @@ function check(cond, severity, area, msg, detail = "") {
   check(h1.length > 10, "major", "marketing", "Hero H1 missing or too short");
 
   // Hero CTA
-  const cta = page.locator("a:has-text('Start building free')").first();
+  const cta = page.locator("a:has-text('Start a new resume')").first();
   check(await cta.isVisible().catch(() => false), "critical", "marketing", "Hero CTA missing");
 
   // GitHub link is hardcoded placeholder
@@ -109,7 +109,7 @@ function check(cond, severity, area, msg, detail = "") {
 
   // Footer copyright year format
   const footerTxt = await page.locator("footer").innerText();
-  check(!footerTxt.includes("2026CareerForge"), "nit", "marketing", "Footer copyright missing space", "Got: '2026CareerForge'");
+  check(!footerTxt.includes("2026SafarCraft"), "nit", "marketing", "Footer copyright missing space", "Got: '2026SafarCraft'");
 
   // Hero heading width (the headline takes 5+ lines on desktop - bad)
   const heroH1Box = await page.locator("h1#hero-heading").boundingBox().catch(() => null);

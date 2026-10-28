@@ -1,4 +1,4 @@
-# CareerForge AI — Task Tracker
+# SafarCraft — Task Tracker
 
 > Use `[ ]` / `[x]` to track progress. Update daily.
 

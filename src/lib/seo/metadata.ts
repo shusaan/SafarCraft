@@ -44,23 +44,19 @@ export function buildMetadata({
       title,
       description,
       url,
-      images: [
-      { url: img, width: 1200, height: 630, alt: title },
-      // Per Next.js conventions, also include the /opengraph-image route so
-      // social platforms can dynamically generate previews from any route.
-      { url: `${siteConfig.url}/opengraph-image`, width: 1200, height: 630, alt: title },
-    ],
+      images: [{ url: img, width: 1200, height: 630, alt: title }],
       locale: siteConfig.locale,
       ...(publishedTime && { publishedTime }),
       ...(modifiedTime && { modifiedTime }),
     },
     twitter: {
       card: "summary_large_image",
-      site: siteConfig.twitterHandle,
-      creator: siteConfig.twitterHandle,
+      ...(siteConfig.twitterHandle
+        ? { site: siteConfig.twitterHandle, creator: siteConfig.twitterHandle }
+        : {}),
       title,
       description,
-      images: [img, `${siteConfig.url}/opengraph-image`],
+      images: [img],
     },
     robots: noIndex
       ? { index: false, follow: false }

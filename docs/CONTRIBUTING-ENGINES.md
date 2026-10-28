@@ -1,6 +1,6 @@
-# Contributing to CareerForge Engines
+# Contributing to SafarCraft Engines
 
-CareerForge's Smart Helpers are data-driven and easy to extend. No LLM knowledge needed — just add rows to arrays.
+SafarCraft's Smart Helpers are data-driven and easy to extend. No LLM knowledge needed — just add rows to arrays.
 
 ## Action Verbs Bank — `src/data/action-verbs.ts`
 

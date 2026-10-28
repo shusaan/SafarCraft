@@ -1,11 +1,11 @@
 {
-  "name": "CareerForge AI – Free ATS Resume Builder",
-  "short_name": "CareerForge",
-  "description": "Open-source, local-first ATS resume builder for software engineers.",
+  "name": "SafarCraft — Free, Private Resume Builder",
+  "short_name": "SafarCraft",
+  "description": "Free, open-source resume and CV builder. Edit locally, review practical ATS guidance, and export PDF, DOCX, or JSON Resume.",
   "start_url": "/builder",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1",
+  "background_color": "#f7f3ea",
+  "theme_color": "#166451",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

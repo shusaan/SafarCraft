@@ -191,7 +191,7 @@ export function importJSONResume(raw: string | object): ImportResult {
       description: p.summary ?? "",
     }));
 
-  if (parsed.awards && parsed.awards.length) warnings.push(`${parsed.awards.length} award(s) not imported — CareerForge doesn't model awards yet`);
+  if (parsed.awards && parsed.awards.length) warnings.push(`${parsed.awards.length} award(s) not imported — SafarCraft doesn't model awards yet`);
 
   const data: ResumeData = {
     personal: {

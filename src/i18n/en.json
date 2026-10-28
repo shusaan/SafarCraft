@@ -1,6 +1,6 @@
 {
-  "app.title": "CareerForge AI",
-  "app.tagline": "Free, local-first ATS resume builder",
+  "app.title": "SafarCraft",
+  "app.tagline": "Free, private resume builder",
   "nav.builder": "Builder",
   "nav.templates": "Templates",
   "nav.github": "GitHub",
@@ -32,7 +32,7 @@
   "how.step3.title": "Export & apply",
   "how.step3.desc": "Download a pixel-perfect PDF or DOCX, or generate a portfolio site — in one click.",
   "oss.title": "Fully open source — MIT Licensed",
-  "oss.desc": "Read the code, self-host it, contribute to it, or fork it. CareerForge AI is built in the open.",
+  "oss.desc": "Read the code, self-host it, contribute to it, or fork it. SafarCraft is built in the open.",
   "oss.bullet1": "No account required",
   "oss.bullet2": "Data stays on your device",
   "oss.bullet3": "No analytics without consent",

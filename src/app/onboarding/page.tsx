@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, FileText, Wand2, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, FileText, Wand2, ShieldCheck, Route } from "lucide-react";
 import { Section } from "@/components/primitives/section";
 import { Container } from "@/components/primitives/container";
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,7 @@ export default function OnboardingPage() {
       <Container size="narrow">
         <div className="text-center">
           <Badge variant="brand" className="mx-auto mb-5 gap-1.5">
-            <Sparkles className="h-3 w-3" />
+            <Route className="h-3 w-3" />
             Welcome — let's build your resume
           </Badge>
           <h1 className="text-balance text-3xl font-semibold tracking-tight md:text-5xl">

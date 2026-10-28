@@ -5,99 +5,86 @@ import {
   ArrowRight,
   CheckCircle2,
   FileText,
-  Sparkles,
-  Wand2,
+  PencilLine,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Container } from "@/components/primitives/container";
 import { trackEvent } from "@/engines/analytics";
+import { BuilderPreview } from "@/components/marketing/builder-preview";
 
 /**
  * Marketing hero — top-of-page conversion section.
  *
- * Layout: badge pill → display headline (one line per phrase on desktop) →
- * supporting paragraph → two CTAs (primary gradient + secondary outline) →
- * trust strip (3 small social-proof statements).
- *
- * No real metrics in this milestone — stats ribbon (Phase 2.5) handles
- * numeric proof. The trust strip uses qualitative statements only.
+ * A product-led hero: direct value statement, clear entry points, and an
+ * illustrative editor preview rather than decorative AI-style artwork.
  */
 export function Hero() {
   return (
-    <section className="relative isolate overflow-hidden bg-gradient-aurora">
-      {/* Subtle background grid */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,theme(colors.border/40)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border/40)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]"
-      />
-
-      <Container className="relative pt-20 pb-24 md:pt-28 md:pb-32">
-        <div className="mx-auto max-w-3xl text-center">
-          {/* Eyebrow / brand pill */}
-          <Badge variant="brand" className="mx-auto mb-6 gap-1.5">
-            <Sparkles className="h-3 w-3" />
-            MIT licensed · 100% free · No signup
-          </Badge>
-
-          {/* Display headline */}
-          <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight md:text-6xl">
-            Build an{" "}
-            <span className="whitespace-nowrap bg-gradient-hero bg-clip-text text-transparent">
-              ATS-friendly
-            </span>{" "}
-            resume in minutes.
-          </h1>
-
-          {/* Supporting paragraph */}
-          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-muted-foreground md:text-lg">
-            A free, open-source resume builder for engineers. Local-first,
-            AI-assisted when you want it, zero signup. Built so you can ship
-            a job application today.
+    <section className="border-b bg-[linear-gradient(115deg,var(--color-surface)_0%,var(--color-background)_58%,var(--color-surface-muted)_100%)]">
+      <Container className="grid items-center gap-12 py-14 md:py-20 lg:grid-cols-[0.86fr_1.14fr] lg:gap-14">
+        <div className="max-w-xl">
+          <p className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+            <span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />
+            Free to use · No account required
           </p>
 
-          {/* Two-track CTA — matches /onboarding entry */}
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <h1 className="text-balance text-4xl font-semibold leading-[1.08] tracking-tight md:text-5xl lg:text-6xl">
+            Your experience, clearly told.
+          </h1>
+
+          <p className="mt-5 max-w-lg text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
+            Build a thoughtful, readable resume with SafarCraft. Your draft stays
+            in your browser, and practical writing and ATS checks help you get it
+            ready to send.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button
               asChild
-              variant="gradient"
-              size="display-md"
+              variant="default"
+              size="lg"
               onClick={() => trackEvent("marketing_cta_click", { location: "hero", cta: "import" })}
             >
               <Link href="/onboarding?path=import">
-                <FileText className="h-5 w-5" />
-                Import my CV
-                <ArrowRight className="h-5 w-5" />
+                <FileText className="h-4 w-4" />
+                Import a resume
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
             <Button
               asChild
-              variant="glow"
-              size="display-md"
+              variant="outline"
+              size="lg"
               onClick={() => trackEvent("marketing_cta_click", { location: "hero", cta: "scratch" })}
             >
               <Link href="/onboarding?path=scratch">
-                <Wand2 className="h-5 w-5" />
-                Start from scratch
+                <PencilLine className="h-4 w-4" />
+                Start a new resume
               </Link>
             </Button>
           </div>
 
-          {/* Trust strip — qualitative (no fake numbers) */}
-          <ul className="mx-auto mt-10 flex max-w-xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <ul aria-label="Trust signals" className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-success" />
-              <span>Your data stays in your browser</span>
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span>Private by default</span>
             </li>
             <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-success" />
-              <span>8 ATS-tested templates</span>
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span>8 resume templates</span>
             </li>
             <li className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-success" />
-              <span>Export PDF, DOCX, JSON Resume</span>
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              <span>PDF, DOCX, and JSON exports</span>
             </li>
           </ul>
+        </div>
+
+        <div className="lg:pl-2">
+          <BuilderPreview />
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            An example of the SafarCraft editor. Sample resume content shown.
+          </p>
         </div>
       </Container>
     </section>

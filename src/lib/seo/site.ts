@@ -2,20 +2,20 @@
  * Central SEO config — single source of truth for site name, description,
  * social handles, and base URL.
  *
- * Override `NEXT_PUBLIC_SITE_URL` in production (e.g. for a custom
- * domain). Falls back to the Vercel preview URL during local dev.
+ * Override `NEXT_PUBLIC_SITE_URL` after the SafarCraft domain is configured.
+ * Keep the existing deployed URL as a fallback until the new domain is live.
  */
 export const siteConfig = {
-  name: "CareerForge AI",
-  shortName: "CareerForge",
-  tagline: "The MIT-licensed resume builder for engineers.",
+  name: "SafarCraft",
+  shortName: "SafarCraft",
+  tagline: "A free, private resume builder for your next step.",
   description:
-    "Free, open-source ATS resume builder for software engineers. Local-first, AI-assisted when you want it, zero signup. Build, optimise and export ATS-friendly resumes in minutes.",
+    "SafarCraft is a free, open-source resume and CV builder. Create and edit resumes in your browser, review practical ATS guidance, and export PDF, DOCX, or JSON Resume without creating an account.",
   url:
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
     "https://careerforge-ai.vercel.app",
-  ogImage: "/og.png",  // static fallback; dynamic per-page OG is generated via /opengraph-image.tsx
-  twitterHandle: "@careerforge", // TODO(real-handles) — placeholder
+  ogImage: "/opengraph-image",
+  twitterHandle: "",
   locale: "en",
 } as const;
 

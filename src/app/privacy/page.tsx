@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "CareerForge AI privacy policy — how we handle your data.",
+  description: "SafarCraft privacy policy — how we handle your data.",
 };
 
 export default function PrivacyPage() {
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-foreground">Data Collection</h2>
           <p className="mt-2">
-            CareerForge AI uses Google Analytics to collect anonymized IP addresses only. We do not collect,
+            SafarCraft uses Google Analytics to collect anonymized IP addresses only. We do not collect,
             store, or share any of your resume text, personal data, or uploaded files on our servers.
           </p>
         </section>

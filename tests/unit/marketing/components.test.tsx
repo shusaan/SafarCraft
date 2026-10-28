@@ -4,11 +4,8 @@ import { Hero } from "@/components/marketing/hero";
 import { SectionHeader } from "@/components/marketing/section-header";
 import { FeaturesGrid } from "@/components/marketing/features-grid";
 import { HowItWorks } from "@/components/marketing/how-it-works";
-import { TwoTrackEntry } from "@/components/marketing/two-track-entry";
 import { PricingTeaser } from "@/components/marketing/pricing-teaser";
-import { SocialProof } from "@/components/marketing/social-proof";
 import { BuiltForEngineers } from "@/components/marketing/built-for-engineers";
-import { StatsRibbon } from "@/components/marketing/stats-ribbon";
 
 describe("SectionHeader", () => {
   it("renders eyebrow, title and description", () => {
@@ -45,14 +42,21 @@ describe("Hero", () => {
     const { container } = render(<Hero />);
     const h1 = container.querySelector("h1");
     expect(h1?.className).toContain("tracking-tight");
-    expect(h1?.textContent).toContain("ATS-friendly");
+    expect(h1?.textContent).toContain("clearly told");
   });
 
   it("trust strip is qualitative (no fake metrics)", () => {
     const { container } = render(<Hero />);
-    expect(container.textContent).toContain("Your data stays in your browser");
-    expect(container.textContent).toContain("8 ATS-tested templates");
-    expect(container.textContent).toContain("Export PDF, DOCX, JSON Resume");
+    expect(container.textContent).toContain("Private by default");
+    expect(container.textContent).toContain("8 resume templates");
+    expect(container.textContent).toContain("PDF, DOCX, and JSON exports");
+  });
+
+  it("shows the editor preview", () => {
+    const { container } = render(<Hero />);
+    expect(
+      container.querySelector('[aria-label="Illustrative resume editor preview"]'),
+    ).toBeTruthy();
   });
 });
 
@@ -63,9 +67,9 @@ describe("FeaturesGrid", () => {
     expect(items.length).toBeGreaterThanOrEqual(6);
   });
 
-  it("features mention ATS-tested and JSON Resume", () => {
+  it("features mention templates and JSON Resume", () => {
     const { container } = render(<FeaturesGrid />);
-    expect(container.textContent).toContain("ATS-tested templates");
+    expect(container.textContent).toContain("Resume templates");
     expect(container.textContent).toContain("JSON Resume");
   });
 });
@@ -77,40 +81,18 @@ describe("HowItWorks", () => {
   });
 });
 
-describe("TwoTrackEntry", () => {
-  it("offers both Import and Scratch paths", () => {
-    const { container } = render(<TwoTrackEntry />);
-    const links = Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href"));
-    expect(links).toContain("/onboarding?path=import");
-    expect(links).toContain("/onboarding?path=scratch");
-  });
-
-  it("marks Import as the popular option", () => {
-    const { container } = render(<TwoTrackEntry />);
-    expect(container.textContent).toContain("Most popular");
-  });
-});
-
 describe("PricingTeaser", () => {
-  it("shows Free tier at $0", () => {
+  it("shows a single free card at $0", () => {
     const { container } = render(<PricingTeaser />);
-    expect(container.textContent).toContain("Free");
+    expect(container.textContent).toContain("Everything is free.");
     expect(container.textContent).toContain("$0");
   });
 
-  it("shows Pro tier as coming soon", () => {
+  it("does not advertise a paid tier", () => {
     const { container } = render(<PricingTeaser />);
-    expect(container.textContent).toContain("Coming soon");
-    expect(container.textContent).toContain("$5");
-  });
-});
-
-describe("SocialProof", () => {
-  it("renders 6 placeholder boxes (TODO real logos)", () => {
-    const { container } = render(<SocialProof />);
-    const items = container.querySelectorAll("li");
-    expect(items.length).toBe(6);
-    expect(container.textContent).toContain("logo 1");
+    expect(container.textContent).not.toContain("$5");
+    expect(container.textContent).not.toContain("Coming soon");
+    expect(container.textContent).not.toContain("Pro");
   });
 });
 
@@ -118,15 +100,7 @@ describe("BuiltForEngineers", () => {
   it("renders code snippet and three feature pills", () => {
     const { container } = render(<BuiltForEngineers />);
     expect(container.querySelector("pre")).toBeTruthy();
-    expect(container.textContent).toContain("calculateAts");
+    expect(container.textContent).toContain("reviewResume");
     expect(container.textContent).toContain("Open source");
-  });
-});
-
-describe("StatsRibbon", () => {
-  it("renders placeholder stats with TODO marker", () => {
-    const { container } = render(<StatsRibbon />);
-    expect(container.textContent).toContain("resumes built");
-    expect(container.querySelector(".sr-only")?.textContent).toContain("TODO");
   });
 });

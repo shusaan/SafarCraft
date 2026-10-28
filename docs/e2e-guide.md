@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers running and writing end-to-end tests for CareerForge AI.
+This guide covers running and writing end-to-end tests for SafarCraft.
 
 ## Setup
 
@@ -159,9 +159,9 @@ tests/
 
 | Test | What it verifies |
 |------|-----------------|
-| Title display | H1 contains "CareerForge AI" |
-| No signup badge | "No signup required" is visible |
-| Navigation | "Start Building" goes to /builder |
+| Title display | H1 contains "clearly told" |
+| Free-use badge | "No account required" is visible |
+| Navigation | "Build a resume" goes to onboarding |
 | Visitor counter | Visitor badge is visible |
 
 ### 2. Builder Tests (`builder.spec.ts`)

@@ -3,14 +3,14 @@ import Link from "next/link";
 import { BLOG_POSTS } from "@/data/blog-posts";
 
 export const metadata: Metadata = {
-  title: "Blog — CareerForge AI",
+  title: "Blog",
   description:
-    "ATS-friendly resume advice, the JSON Resume standard, software engineer resume templates, and the engineering behind CareerForge AI.",
+    "ATS-friendly resume advice, the JSON Resume standard, software engineer resume templates, and the engineering behind SafarCraft.",
   alternates: { canonical: "/blog" },
   openGraph: {
-    title: "CareerForge AI Blog",
+    title: "SafarCraft Blog — Resume advice for engineers",
     description:
-      "ATS-friendly resume advice, the JSON Resume standard, software engineer resume templates, and the engineering behind CareerForge AI.",
+      "ATS-friendly resume advice, the JSON Resume standard, software engineer resume templates, and the engineering behind SafarCraft.",
     type: "website",
     url: "/blog",
   },
@@ -20,10 +20,10 @@ export default function BlogIndexPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
       <header className="mb-10">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">CareerForge AI · Blog</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary">SafarCraft · Blog</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Resume advice for engineers</h1>
         <p className="mt-3 text-muted-foreground">
-          ATS-tested guides, free tools, and the engineering behind CareerForge AI. Updated weekly.
+          Practical, ATS-aware guides and free tools from the SafarCraft project.
         </p>
       </header>
 

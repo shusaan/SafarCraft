@@ -26,7 +26,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle>Create Account</CardTitle>
-          <CardDescription>Join CareerForge AI</CardDescription>
+          <CardDescription>Join SafarCraft</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

@@ -20,9 +20,9 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    title: "ATS-tested templates",
+    title: "Resume templates",
     description:
-      "Eight layouts, each verified against Workday, Greenhouse, and Lever parsers.",
+      "Choose from eight layouts, including straightforward single-column options for readable exports.",
     icon: LayoutTemplate,
     highlight: true,
   },
@@ -33,9 +33,9 @@ const FEATURES: Feature[] = [
     icon: Wand2,
   },
   {
-    title: "5-axis ATS scoring",
+    title: "ATS guidance",
     description:
-      "Real, deterministic scoring across Content, Format, ATS, Brevity, and Impact.",
+      "Review deterministic checks for content, format, brevity, and impact. Use them as guidance, not a hiring guarantee.",
     icon: BoxesIcon,
   },
   {
@@ -53,7 +53,7 @@ const FEATURES: Feature[] = [
   {
     title: "100% local-first",
     description:
-      "Your resume never leaves the browser unless you choose to share or export it.",
+      "Your resume is edited in your browser. It leaves your device only when you choose to share or export it.",
     icon: ShieldCheck,
     highlight: true,
   },
@@ -66,7 +66,7 @@ export function FeaturesGrid() {
         <SectionHeader
           eyebrow="What's inside"
           title="Everything you need to ship a resume today."
-          description="No account, no upsell wall, no watermarks — just the tools engineers actually use."
+          description="No account or watermarks. Just practical tools for building and reviewing your next resume."
         />
 
         <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

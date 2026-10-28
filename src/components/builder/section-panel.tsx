@@ -21,13 +21,13 @@ const sectionConfig: Record<
     label: "Personal Information",
     subtitle: "Your name and contact info — this appears at the top of your resume",
     icon: User,
-    color: "from-violet-500 to-indigo-500",
+    color: "from-emerald-600 to-teal-600",
   },
   experience: {
     label: "Experience",
     subtitle: "Work history in reverse-chronological order",
     icon: Briefcase,
-    color: "from-indigo-500 to-blue-500",
+    color: "from-teal-600 to-emerald-600",
   },
   education: {
     label: "Education",
@@ -51,7 +51,7 @@ const sectionConfig: Record<
     label: "Projects",
     subtitle: "Showcase your best work with links and technologies",
     icon: FolderGit2,
-    color: "from-violet-500 to-purple-500",
+    color: "from-emerald-500 to-teal-500",
   },
   languages: {
     label: "Languages",

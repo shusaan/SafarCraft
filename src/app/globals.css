@@ -6,43 +6,43 @@
   --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* Marketing-tier palette: deeper indigo → vibrant violet → fuchsia accent */
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(222 47% 11%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222 47% 11%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(222 47% 11%);
+  /* SafarCraft palette: warm paper, ink green, deep emerald accent */
+  --color-background: hsl(45 25% 97%);
+  --color-foreground: hsl(170 25% 12%);
+  --color-card: hsl(45 30% 99%);
+  --color-card-foreground: hsl(170 25% 12%);
+  --color-popover: hsl(45 30% 99%);
+  --color-popover-foreground: hsl(170 25% 12%);
 
-  --color-primary: hsl(238 84% 67%);              /* indigo-500 */
-  --color-primary-foreground: hsl(0 0% 100%);
+  --color-primary: hsl(165 64% 24%);              /* deep emerald */
+  --color-primary-foreground: hsl(45 30% 98%);
 
-  --color-secondary: hsl(220 14% 96%);
-  --color-secondary-foreground: hsl(222 47% 11%);
-  --color-muted: hsl(220 14% 96%);
-  --color-muted-foreground: hsl(218 11% 45%);
-  --color-accent: hsl(258 90% 66% / 0.1);        /* violet-500 @ 10% for soft accents */
-  --color-accent-foreground: hsl(258 90% 50%);
-  --color-destructive: hsl(0 72% 51%);
+  --color-secondary: hsl(45 20% 92%);
+  --color-secondary-foreground: hsl(170 25% 12%);
+  --color-muted: hsl(45 20% 93%);
+  --color-muted-foreground: hsl(168 10% 36%);
+  --color-accent: hsl(165 60% 30% / 0.08);        /* emerald @ 8% for soft accents */
+  --color-accent-foreground: hsl(165 64% 22%);
+  --color-destructive: hsl(0 62% 40%);
   --color-destructive-foreground: hsl(0 0% 100%);
-  --color-success: hsl(142 71% 45%);
+  --color-success: hsl(152 60% 34%);
   --color-success-foreground: hsl(0 0% 100%);
-  --color-warning: hsl(38 92% 50%);
+  --color-warning: hsl(38 80% 44%);
   --color-warning-foreground: hsl(0 0% 100%);
-  --color-border: hsl(220 13% 91%);
-  --color-input: hsl(220 13% 91%);
-  --color-ring: hsl(238 84% 67%);
+  --color-border: hsl(45 15% 86%);
+  --color-input: hsl(45 15% 86%);
+  --color-ring: hsl(165 64% 30%);
   --radius: 0.625rem;
 
   /* Surface tokens (semantic) */
-  --color-surface: hsl(220 20% 99%);
-  --color-surface-elevated: hsl(0 0% 100%);
-  --color-surface-muted: hsl(220 14% 96%);
+  --color-surface: hsl(45 22% 96%);
+  --color-surface-elevated: hsl(45 30% 99%);
+  --color-surface-muted: hsl(45 18% 93%);
 
-  /* Hero / brand gradients */
-  --gradient-hero: linear-gradient(135deg, hsl(238 84% 67%) 0%, hsl(258 90% 66%) 50%, hsl(290 84% 60%) 100%);
-  --gradient-soft: linear-gradient(180deg, hsl(220 20% 99%) 0%, hsl(0 0% 100%) 100%);
-  --gradient-aurora: radial-gradient(circle at 50% 0%, hsl(258 90% 66% / 0.15), transparent 60%);
+  /* Brand gradients — journey green with a warm horizon */
+  --gradient-hero: linear-gradient(135deg, hsl(165 64% 22%) 0%, hsl(174 55% 34%) 60%, hsl(38 70% 50%) 140%);
+  --gradient-soft: linear-gradient(180deg, hsl(45 22% 96%) 0%, hsl(45 25% 97%) 100%);
+  --gradient-aurora: radial-gradient(circle at 50% 0%, hsl(165 60% 30% / 0.08), transparent 60%);
 
   /* Type scale tuned for marketing — large display sizes + tighter tracking */
   --text-xs: 0.75rem;
@@ -83,7 +83,7 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  --shadow-glow: 0 0 30px hsl(238 84% 67% / 0.3);
+  --shadow-glow: 0 0 30px hsl(165 64% 30% / 0.25);
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -97,36 +97,36 @@
 }
 
 .dark {
-  --color-background: hsl(222 47% 6%);
-  --color-foreground: hsl(220 14% 96%);
-  --color-card: hsl(222 47% 8%);
-  --color-card-foreground: hsl(220 14% 96%);
-  --color-popover: hsl(222 47% 8%);
-  --color-popover-foreground: hsl(220 14% 96%);
-  --color-primary: hsl(238 84% 67%);
-  --color-primary-foreground: hsl(0 0% 100%);
-  --color-secondary: hsl(222 47% 14%);
-  --color-secondary-foreground: hsl(220 14% 96%);
-  --color-muted: hsl(222 47% 12%);
-  --color-muted-foreground: hsl(218 11% 60%);
-  --color-accent: hsl(258 90% 66% / 0.15);
-  --color-accent-foreground: hsl(258 90% 75%);
-  --color-destructive: hsl(0 62% 35%);
+  --color-background: hsl(170 22% 8%);
+  --color-foreground: hsl(45 20% 92%);
+  --color-card: hsl(170 24% 10%);
+  --color-card-foreground: hsl(45 20% 92%);
+  --color-popover: hsl(170 24% 10%);
+  --color-popover-foreground: hsl(45 20% 92%);
+  --color-primary: hsl(160 55% 42%);
+  --color-primary-foreground: hsl(170 30% 8%);
+  --color-secondary: hsl(170 20% 16%);
+  --color-secondary-foreground: hsl(45 20% 92%);
+  --color-muted: hsl(170 20% 14%);
+  --color-muted-foreground: hsl(168 10% 62%);
+  --color-accent: hsl(160 50% 40% / 0.14);
+  --color-accent-foreground: hsl(160 60% 62%);
+  --color-destructive: hsl(0 55% 42%);
   --color-destructive-foreground: hsl(0 0% 100%);
-  --color-success: hsl(142 71% 45%);
-  --color-success-foreground: hsl(0 0% 100%);
-  --color-warning: hsl(38 92% 50%);
-  --color-warning-foreground: hsl(0 0% 100%);
-  --color-border: hsl(222 47% 16%);
-  --color-input: hsl(222 47% 16%);
-  --color-ring: hsl(238 84% 67%);
-  --color-surface: hsl(222 47% 8%);
-  --color-surface-elevated: hsl(222 47% 10%);
-  --color-surface-muted: hsl(222 47% 14%);
-  --gradient-hero: linear-gradient(135deg, hsl(238 84% 67%) 0%, hsl(258 90% 66%) 50%, hsl(290 84% 60%) 100%);
-  --gradient-soft: linear-gradient(180deg, hsl(222 47% 8%) 0%, hsl(222 47% 6%) 100%);
-  --gradient-aurora: radial-gradient(circle at 50% 0%, hsl(258 90% 66% / 0.2), transparent 60%);
-  --shadow-glow: 0 0 30px hsl(238 84% 67% / 0.4);
+  --color-success: hsl(152 55% 42%);
+  --color-success-foreground: hsl(170 30% 8%);
+  --color-warning: hsl(38 80% 50%);
+  --color-warning-foreground: hsl(170 30% 8%);
+  --color-border: hsl(170 18% 18%);
+  --color-input: hsl(170 18% 18%);
+  --color-ring: hsl(160 55% 42%);
+  --color-surface: hsl(170 22% 10%);
+  --color-surface-elevated: hsl(170 22% 12%);
+  --color-surface-muted: hsl(170 20% 16%);
+  --gradient-hero: linear-gradient(135deg, hsl(160 50% 32%) 0%, hsl(168 45% 40%) 60%, hsl(38 60% 46%) 140%);
+  --gradient-soft: linear-gradient(180deg, hsl(170 22% 9%) 0%, hsl(170 22% 8%) 100%);
+  --gradient-aurora: radial-gradient(circle at 50% 0%, hsl(160 50% 40% / 0.12), transparent 60%);
+  --shadow-glow: 0 0 30px hsl(160 55% 42% / 0.3);
 }
 
 * {
