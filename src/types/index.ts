@@ -78,6 +78,8 @@ export type GitHubProfile = {
   repos: GitHubRepo[];
   totalStars: number;
   totalForks: number;
+  /** Number of the user's repositories that are forks of other projects. */
+  forkedRepos: number;
   languages: Record<string, number>;
   pinnedRepos: GitHubRepo[];
   contributions: number;

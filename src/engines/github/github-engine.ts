@@ -1,12 +1,22 @@
 import type { GitHubProfile, GitHubRepo } from "@/types";
 
+/**
+ * Fetches a GitHub profile for resume generation.
+ *
+ * Only repositories the user actually authored are used — forks carry the
+ * original project's stars and would misrepresent the user's own work in
+ * "Top Repositories", star totals, language stats, and generated content.
+ * Repos the user starred are a separate API and are intentionally never
+ * included.
+ */
 export async function fetchGitHubProfile(username: string): Promise<GitHubProfile> {
   const res = await fetch(`https://api.github.com/users/${username}`);
   if (!res.ok) throw new Error("User not found");
   const user = await res.json();
 
   const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`);
-  const repos: Array<{
+  if (!reposRes.ok) throw new Error("Could not fetch repositories");
+  const allRepos: Array<{
     name: string;
     full_name: string;
     description: string;
@@ -15,8 +25,12 @@ export async function fetchGitHubProfile(username: string): Promise<GitHubProfil
     forks_count: number;
     language: string;
     topics: string[];
+    fork: boolean;
     updated_at: string;
   }> = await reposRes.json();
+
+  const repos = allRepos.filter((r) => !r.fork);
+  const forkedRepos = allRepos.length - repos.length;
 
   const languages: Record<string, number> = {};
   for (const repo of repos) {
@@ -26,7 +40,7 @@ export async function fetchGitHubProfile(username: string): Promise<GitHubProfil
   }
 
   const sorted = [...repos].sort((a, b) => b.stargazers_count - a.stargazers_count);
-  const pinnedRepos: GitHubRepo[] = sorted.slice(0, 6).map(mapRepo);
+  const topRepos: GitHubRepo[] = sorted.slice(0, 6).map(mapRepo);
 
   return {
     username,
@@ -36,8 +50,9 @@ export async function fetchGitHubProfile(username: string): Promise<GitHubProfil
     repos: repos.map(mapRepo),
     totalStars: repos.reduce((s, r) => s + r.stargazers_count, 0),
     totalForks: repos.reduce((s, r) => s + r.forks_count, 0),
+    forkedRepos,
     languages,
-    pinnedRepos,
+    pinnedRepos: topRepos,
     contributions: user.public_repos ?? 0,
   };
 }

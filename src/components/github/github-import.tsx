@@ -127,10 +127,13 @@ export function GitHubImport() {
               <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5" /> {profile.totalStars} stars</span>
               <span className="flex items-center gap-1"><GitFork className="h-3.5 w-3.5" /> {profile.totalForks} forks</span>
               <span className="flex items-center gap-1"><Code2 className="h-3.5 w-3.5" /> {Object.keys(profile.languages).length} languages</span>
+              {profile.forkedRepos > 0 && (
+                <span className="text-muted-foreground">({profile.forkedRepos} forked repos excluded)</span>
+              )}
             </div>
             {profile.pinnedRepos.length > 0 && (
               <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium">Top Repositories</p>
+                <p className="text-sm font-medium">Top Repositories — your own, by stars</p>
                 {profile.pinnedRepos.slice(0, 4).map((repo) => (
                   <div key={repo.name} className="flex items-center justify-between rounded-md bg-muted p-2 text-sm">
                     <span className="font-medium">{repo.name}</span>
