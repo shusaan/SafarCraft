@@ -197,11 +197,18 @@ export function BuilderLayout() {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
+    // "Import a resume" flow: land on Personal Info so the CV file picker
+    // opens. The form itself triggers the picker and strips the flag.
+    if (searchParams.get("onboarding") === "import") {
+      setActivePanel("editor");
+      setActiveSection("personal");
+      return;
+    }
     if (panelParam && allPanels.some((p) => p.id === panelParam)) {
       setActivePanel(panelParam as Panel);
       router.replace("/builder", { scroll: false });
     }
-  }, [panelParam, router]);
+  }, [panelParam, router, searchParams]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
