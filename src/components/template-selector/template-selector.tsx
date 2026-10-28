@@ -18,7 +18,7 @@ export function TemplateSelector() {
   const setLayout = useResumeStore((s) => s.setLayout);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 overflow-y-auto p-6">
       <div>
         <h2 className="text-lg font-semibold">Template</h2>
         <p className="text-sm text-muted-foreground">Choose a layout for your resume — all 8 are free</p>

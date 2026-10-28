@@ -86,7 +86,7 @@ export function GitHubImport() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 overflow-y-auto p-6">
       <div>
         <h2 className="flex items-center gap-2 text-lg font-semibold">
           <GitBranch className="h-5 w-5" />
