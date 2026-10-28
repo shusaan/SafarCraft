@@ -5,6 +5,7 @@ export type AnalyticsEvent =
   | "step_view"
   | "analysis_complete"
   | "export_click"
+  | "drive_save"
   // Marketing site
   | "marketing_cta_click"
   | "marketing_section_view"

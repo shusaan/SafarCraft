@@ -1,17 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useResumeStore } from "@/stores/resume-store";
 import { useToast } from "@/components/ui/toast";
 import { suggestVerbFor, detectCategory, type ActionVerb } from "@/data/action-verbs";
 import { REWRITER_PATTERNS, applyPatterns, detectWeakPatterns } from "@/engines/rewriter/patterns";
 import { needsMetric, suggestMetricHint, detectCategory as detectMetricCategory, type MetricCategory } from "@/engines/rewriter/quantifier";
 import { ACHIEVEMENT_TEMPLATES, pickTopAchievements, type AchievementRole } from "@/engines/rewriter/achievement-templates";
+import { buildAutoImprovements, applyAutoImprovements, isActionable, type AutoImprovement } from "@/engines/rewriter/auto-improve";
 import { checkGrammar } from "@/engines/grammar/checker";
 import { SummaryBuilder } from "@/components/builder/summary-builder";
 import { CoverLetterGenerator } from "@/components/cover-letter/cover-letter";
@@ -19,11 +21,12 @@ import { QualityScore } from "@/components/quality/quality-score";
 import { JDTailorMode } from "@/components/jd-analyzer/jd-tailor-mode";
 import { SnippetLibrary } from "@/components/snippets/snippet-library";
 import { InsightsDashboard } from "@/components/insights/insights-dashboard";
-import { Zap, Wand2, Hash, FileText, ListChecks, CheckCircle2, Award, Target, BookmarkPlus, BarChart3 } from "lucide-react";
+import { Zap, Wand2, Hash, FileText, ListChecks, CheckCircle2, Award, Target, BookmarkPlus, BarChart3, Sparkles, Lightbulb } from "lucide-react";
 
-type Tool = "verbs" | "patterns" | "metrics" | "achievements" | "grammar" | "summary" | "cover-letter" | "quality" | "tailor" | "snippets" | "insights";
+type Tool = "auto" | "verbs" | "patterns" | "metrics" | "achievements" | "grammar" | "summary" | "cover-letter" | "quality" | "tailor" | "snippets" | "insights";
 
 const TOOLS: Array<{ id: Tool; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+  { id: "auto", label: "Auto-Improve", icon: Sparkles },
   { id: "verbs", label: "Verb Swap", icon: Zap },
   { id: "patterns", label: "Bullet Rewrite", icon: Wand2 },
   { id: "metrics", label: "Add Metric", icon: Hash },
@@ -89,6 +92,7 @@ export function QuickActions() {
         ))}
       </div>
 
+      {tool === "auto" && <AutoImprovePanel />}
       {tool === "verbs" && <VerbSwapPanel bullets={allBullets} onApply={applyBullet} />}
       {tool === "patterns" && <PatternsPanel input={input} setInput={setInput} />}
       {tool === "metrics" && <MetricsPanel bullets={allBullets} onApply={applyBullet} />}
@@ -100,6 +104,142 @@ export function QuickActions() {
       {tool === "tailor" && <JDTailorMode />}
       {tool === "snippets" && <SnippetLibrary />}
       {tool === "insights" && <InsightsDashboard />}
+    </div>
+  );
+}
+
+function AutoImprovePanel() {
+  const data = useResumeStore((s) => s.data);
+  const updateData = useResumeStore((s) => s.updateData);
+  const { toast } = useToast();
+  const improvements = useMemo(() => buildAutoImprovements(data), [data]);
+  const actionable = useMemo(() => improvements.filter(isActionable), [improvements]);
+  const advisory = improvements.length - actionable.length;
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setSelected(new Set(actionable.map((i) => i.id)));
+  }, [actionable]);
+
+  const toggle = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const applySelected = () => {
+    const chosen = improvements.filter((i) => selected.has(i.id));
+    if (chosen.length === 0) return;
+    const next = applyAutoImprovements(data, chosen);
+    updateData({ experience: next.experience });
+    toast({
+      title: `Applied ${chosen.length} rewrite${chosen.length === 1 ? "" : "s"}`,
+      variant: "success",
+    });
+  };
+
+  if (improvements.length === 0) {
+    const emptyResume =
+      !data.personal.name && data.experience.length === 0 && data.skills.length === 0;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Auto-Improve</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
+            <CheckCircle2 className="h-4 w-4" />
+            {emptyResume ? "Add some resume content first, then run Auto-Improve." : "Nothing to improve — your resume looks clean."}
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Scans every experience bullet and your summary for weak openers, missing
+            metrics, and style issues — you review everything before it applies.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">
+          Auto-Improve — {improvements.length} finding{improvements.length === 1 ? "" : "s"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="space-y-2.5">
+          {improvements.map((item) => (
+            <ImprovementRow
+              key={item.id}
+              item={item}
+              checked={selected.has(item.id)}
+              onToggle={() => toggle(item.id)}
+            />
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+          <p className="text-xs text-muted-foreground">
+            {selected.size} of {actionable.length} rewrite{actionable.length === 1 ? "" : "s"} selected ·{" "}
+            {advisory} hint{advisory === 1 ? "" : "s"} to review manually
+          </p>
+          <Button size="sm" disabled={selected.size === 0} onClick={applySelected}>
+            <Wand2 className="mr-1.5 h-3.5 w-3.5" />
+            Apply selected
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ImprovementRow({
+  item,
+  checked,
+  onToggle,
+}: {
+  item: AutoImprovement;
+  checked: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="rounded-md border p-3">
+      <div className="mb-1.5 flex items-center gap-2">
+        <Badge variant={isActionable(item) ? "secondary" : "outline"}>{item.label}</Badge>
+        {isActionable(item) && (
+          <label className="ml-auto flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+            <Checkbox
+              checked={checked}
+              onCheckedChange={onToggle}
+              aria-label={`Apply rewrite: ${item.original.slice(0, 40)}`}
+            />
+            Apply
+          </label>
+        )}
+      </div>
+
+      {item.target === "experience" && (
+        <div className="space-y-1 text-sm">
+          {isActionable(item) ? (
+            <>
+              <p className="text-muted-foreground line-through decoration-muted-foreground/40">
+                {item.original}
+              </p>
+              <p className="font-medium text-green-700 dark:text-green-400">{item.suggested}</p>
+            </>
+          ) : (
+            <p>{item.original}</p>
+          )}
+        </div>
+      )}
+
+      <p className="mt-1.5 flex items-start gap-1.5 text-xs text-muted-foreground">
+        <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" aria-hidden="true" />
+        {item.hint}
+      </p>
     </div>
   );
 }
