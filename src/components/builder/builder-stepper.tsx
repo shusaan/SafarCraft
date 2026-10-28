@@ -85,7 +85,7 @@ export function BuilderStepper({
               >
                 <span
                   className={cn(
-                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold transition-colors",
+                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors",
                     isCurrent
                       ? "bg-primary text-primary-foreground"
                       : isCompleted
@@ -112,7 +112,7 @@ export function BuilderStepper({
         })}
         </ol>
         <div
-          className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground"
+          className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground"
           role="progressbar"
           aria-valuenow={completedCount}
           aria-valuemin={0}
@@ -121,7 +121,7 @@ export function BuilderStepper({
         >
           {pct}%
         </div>
-        <span className="hidden shrink-0 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium text-success sm:inline">
+        <span className="hidden shrink-0 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success sm:inline">
           100% free
         </span>
       </div>

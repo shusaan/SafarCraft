@@ -435,7 +435,7 @@ export function ExportPanel() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{f.name}</p>
                   {f.modifiedTime && (
-                    <p className="mt-0.5 text-[10px] text-muted-foreground">
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
                       {new Date(f.modifiedTime).toLocaleString()}
                     </p>
                   )}

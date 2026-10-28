@@ -99,7 +99,7 @@ export function WizardWelcomeSheet() {
           </Button>
         </div>
 
-        <p className="mt-3 text-[10px] text-muted-foreground/70">
+        <p className="mt-3 text-xs text-muted-foreground/70">
           Auto-closes in 6s · ESC or click outside also dismisses.
         </p>
       </div>

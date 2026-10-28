@@ -449,7 +449,7 @@ function PreviewRow({ label, ok, count, suffix }: { label: string; ok?: boolean;
       <span className={filled ? "" : "text-muted-foreground"}>
         {label}
         {typeof count === "number" ? (
-          <span className="ml-1 font-mono text-[10px] text-muted-foreground">
+          <span className="ml-1 font-mono text-[11px] text-muted-foreground">
             {count} {suffix ?? ""}
           </span>
         ) : null}

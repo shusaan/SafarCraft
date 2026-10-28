@@ -65,7 +65,7 @@ export function ShareLinkDialog({ open, onOpenChange }: { open: boolean; onOpenC
                 <ExternalLink className="h-3.5 w-3.5" />
               </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               URL size: {sizeKB} KB · self-contained — no server stores your data
             </p>
           </div>

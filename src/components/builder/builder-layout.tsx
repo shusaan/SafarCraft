@@ -496,7 +496,7 @@ export function BuilderLayout() {
 
             {panelGroups.map((group) => (
               <div key={group.label} className="mb-5">
-                <p className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <p className="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   {group.label}
                 </p>
                 <div className="space-y-0.5">
@@ -533,7 +533,7 @@ export function BuilderLayout() {
               {renderPanel()}
             </PanelWrapper>
           </ErrorBoundary>
-          <p className="border-t px-6 py-2 text-[10px] text-muted-foreground/60 leading-relaxed">
+          <p className="border-t px-6 py-2 text-xs text-muted-foreground/60 leading-relaxed">
             We only collect anonymized IP addresses via Google Analytics to improve user experience.
             We do not store or share your resume text or personal data on our servers.
           </p>

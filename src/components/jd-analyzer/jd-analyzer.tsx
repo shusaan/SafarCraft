@@ -151,7 +151,7 @@ export function JDAnalyzer() {
                         style={{ opacity: 0.5 + intensity * 0.5 }}
                       >
                         {keyword}
-                        <span className="text-[10px] opacity-60">x{count}</span>
+                        <span className="text-[11px] opacity-60">x{count}</span>
                       </span>
                     );
                   })}

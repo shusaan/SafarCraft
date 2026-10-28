@@ -32,7 +32,7 @@ export function GoalSelector() {
         </SelectContent>
       </Select>
       {current && (
-        <p className="hidden sm:block text-[10px] text-muted-foreground/60 italic" aria-live="polite">
+        <p className="hidden sm:block text-xs text-muted-foreground/60 italic" aria-live="polite">
           {current.hint}
         </p>
       )}

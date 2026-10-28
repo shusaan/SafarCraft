@@ -195,7 +195,7 @@ export function WizardShell({ children, initialStep }: WizardShellProps) {
                 {i < stepIndex ? (
                   <Check className="h-3 w-3" />
                 ) : (
-                  <span className="inline-flex h-3 w-3 items-center justify-center rounded-full bg-current/10 text-[10px]">
+                  <span className="inline-flex h-3 w-3 items-center justify-center rounded-full bg-current/10 text-[11px]">
                     {i + 1}
                   </span>
                 )}

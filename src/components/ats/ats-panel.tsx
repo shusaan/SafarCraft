@@ -24,7 +24,7 @@ function VendorValidationSection({ data }: { data: ResumeData }) {
         <ShieldCheck className="h-4 w-4 text-primary" />
         Tested Against Real ATS Parsers
       </h3>
-      <p className="text-[10px] text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         How the same resume would parse inside 3 popular applicant tracking systems.
       </p>
       <div className="grid gap-2 sm:grid-cols-3">
@@ -56,7 +56,7 @@ function VendorValidationSection({ data }: { data: ResumeData }) {
                                    "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100",
                 )}>{r.score}</span>
               </div>
-              <p className="mt-0.5 text-[10px] leading-snug text-muted-foreground">{VENDOR_DESCRIPTIONS[r.vendor]}</p>
+              <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{VENDOR_DESCRIPTIONS[r.vendor]}</p>
               <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuenow={r.score} aria-valuemin={0} aria-valuemax={100}>
                 <div className={cn("h-full rounded-full transition-all", bar)} style={{ width: `${r.score}%` }} />
               </div>
@@ -258,7 +258,7 @@ export function ATSPanel() {
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium">{axis.label}</p>
-                    <p className="text-[10px] text-muted-foreground">{axis.description}</p>
+                    <p className="text-xs text-muted-foreground">{axis.description}</p>
                   </div>
                   <span
                     className={cn(

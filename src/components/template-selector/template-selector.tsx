@@ -43,11 +43,11 @@ export function TemplateSelector() {
                 </Badge>
               )}
               <p className="text-center text-sm font-semibold">{getTemplateName(id)}</p>
-              <p className="mt-1 text-center text-[10px] leading-snug text-muted-foreground">
+              <p className="mt-1 text-center text-xs leading-snug text-muted-foreground">
                 {getTemplateDescription(id)}
               </p>
               {isSelected && (
-                <div className="mt-1.5 flex items-center justify-center gap-1 text-[10px] font-medium text-primary">
+                <div className="mt-1.5 flex items-center justify-center gap-1 text-[11px] font-medium text-primary">
                   <Sparkles className="h-3 w-3" />
                   Selected
                 </div>
