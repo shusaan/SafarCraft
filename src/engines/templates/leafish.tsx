@@ -7,9 +7,14 @@ export function Leafish({ data, layout }: TemplateProps) {
   const color = layout.primaryColor;
 
   const Header = (
-    <div className="mb-3 flex items-baseline justify-between border-b-2 pb-2" style={{ borderColor: color }}>
-      <h1 className="text-lg font-bold tracking-tight" style={{ color }}>{data.personal.name || "Your Name"}</h1>
-      <div className="text-right text-[10px] leading-tight text-muted-foreground">
+    <div className="mb-3 flex items-center justify-between gap-3 border-b-2 pb-2" style={{ borderColor: color }}>
+      <div className="flex min-w-0 items-center gap-2.5">
+        {layout.showPicture && data.personal.photo && (
+          <img src={data.personal.photo} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover" style={{ border: `2px solid ${color}` }} />
+        )}
+        <h1 className="truncate text-lg font-bold tracking-tight" style={{ color }}>{data.personal.name || "Your Name"}</h1>
+      </div>
+      <div className="shrink-0 text-right text-[10px] leading-tight text-muted-foreground">
         <div>{[data.personal.email, data.personal.phone].filter(Boolean).join(" · ")}</div>
         <div>{data.personal.location}</div>
         <div className="opacity-80">{[data.personal.linkedin, data.personal.github].filter(Boolean).join(" · ")}</div>

@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useEffect, useState } from "react";
+import Link from "next/link";
 import { useResumeStore } from "@/stores/resume-store";
+import { useJDStore } from "@/stores/jd-store";
 import { calculateATSScore, getATSScoreLabel } from "@/engines/ats/ats-engine";
 import { validateAgainstVendors, VENDOR_LABELS, VENDOR_DESCRIPTIONS } from "@/engines/ats/vendor-validation";
 import { Badge } from "@/components/ui/badge";
@@ -93,11 +95,7 @@ function VendorValidationSection({ data }: { data: ResumeData }) {
   );
 }
 
-const SUGGESTED_KEYWORDS = [
-  "react", "typescript", "javascript", "python", "node.js", "aws",
-  "docker", "kubernetes", "sql", "git", "ci/cd", "rest api",
-  "agile", "microservices", "mongodb", "redis", "graphql", "terraform",
-];
+const SUGGESTED_CATEGORY = "From Job Description";
 
 function ScoreRing({ score }: { score: number }) {
   const progress = Math.min(Math.max(score, 0), 100);
@@ -149,14 +147,10 @@ function getScoreMessage(score: number): string {
   return "Significant issues — let's fix the basics first.";
 }
 
-function findMissingKeywords(skills: string[], techs: string[]): string[] {
-  const existing = new Set([...skills, ...techs].map((s) => s.toLowerCase()));
-  return SUGGESTED_KEYWORDS.filter((kw) => !existing.has(kw));
-}
-
 export function ATSPanel() {
   const data = useResumeStore((s) => s.data);
   const updateSkills = useResumeStore((s) => s.updateSkills);
+  const jdResult = useJDStore((s) => s.result);
   const result = useMemo(() => calculateATSScore(data), [data]);
   const { label, color } = getATSScoreLabel(result.score);
 
@@ -164,17 +158,8 @@ export function ATSPanel() {
     trackEvent("analysis_complete", { score: result.score });
   }, [result.score]);
 
-  const allTechs = useMemo(() => {
-    const set = new Set<string>();
-    data.experience.forEach((e) => e.technologies.forEach((t) => set.add(t)));
-    data.projects.forEach((p) => p.technologies.forEach((t) => set.add(t)));
-    return Array.from(set);
-  }, [data]);
-
-  const missingKeywords = useMemo(() => {
-    const skillNames = data.skills.flatMap((c) => c.skills);
-    return findMissingKeywords(skillNames, allTechs);
-  }, [data.skills, allTechs]);
+  // Real, job-specific keywords from the last analyzed job description.
+  const missingKeywords = jdResult?.missingSkills ?? [];
 
   const strengths = useMemo(() => {
     const items: string[] = [];
@@ -194,23 +179,23 @@ export function ATSPanel() {
   const lowDeductions = result.deductions.filter((d) => d.severity === "low");
 
   const handleAddKeyword = (keyword: string) => {
-    const existing = data.skills.find((c) => c.category === "Suggested");
+    const existing = data.skills.find((c) => c.category === SUGGESTED_CATEGORY);
     if (existing) {
       if (!existing.skills.includes(keyword)) {
         updateSkills(data.skills.map((c) => c.id === existing.id ? { ...c, skills: [...c.skills, keyword] } : c));
       }
     } else {
-      updateSkills([...data.skills, { id: generateId(), category: "Suggested", skills: [keyword] }]);
+      updateSkills([...data.skills, { id: generateId(), category: SUGGESTED_CATEGORY, skills: [keyword] }]);
     }
   };
 
   const handleAddAllKeywords = () => {
-    const existing = data.skills.find((c) => c.category === "Suggested");
+    const existing = data.skills.find((c) => c.category === SUGGESTED_CATEGORY);
     const newSkills = missingKeywords.filter((kw) => !existing?.skills.includes(kw));
     if (existing) {
       updateSkills(data.skills.map((c) => c.id === existing.id ? { ...c, skills: [...c.skills, ...newSkills] } : c));
     } else {
-      updateSkills([...data.skills, { id: generateId(), category: "Suggested", skills: newSkills }]);
+      updateSkills([...data.skills, { id: generateId(), category: SUGGESTED_CATEGORY, skills: newSkills }]);
     }
   };
 
@@ -315,8 +300,8 @@ export function ATSPanel() {
         </div>
       )}
 
-      {/* Missing Keywords */}
-      {missingKeywords.length > 0 && (
+      {/* Missing Keywords — from the last analyzed job description */}
+      {missingKeywords.length > 0 ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <h3 className="flex items-center gap-2 text-sm font-semibold">
@@ -331,6 +316,9 @@ export function ATSPanel() {
               Add All
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground">
+            From your target job description — add the ones you actually have.
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {missingKeywords.map((kw) => (
               <Badge
@@ -344,6 +332,28 @@ export function ATSPanel() {
               </Badge>
             ))}
           </div>
+        </div>
+      ) : jdResult ? (
+        <div className="flex items-center gap-2 rounded-xl border bg-green-50 p-3 text-sm text-green-700 dark:bg-green-950/20 dark:text-green-400">
+          <CheckCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+          Every keyword from your job description is already in your resume.
+        </div>
+      ) : (
+        <div className="space-y-2 rounded-xl border border-dashed bg-muted/30 p-4">
+          <h3 className="flex items-center gap-2 text-sm font-semibold">
+            <Target className="h-4 w-4 text-primary" />
+            Keyword matching
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Paste a job description to see exactly which keywords your resume is
+            missing for that role — no generic guessing.
+          </p>
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Link href="/builder?panel=jd">
+              Open the JD Analyzer
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
         </div>
       )}
 

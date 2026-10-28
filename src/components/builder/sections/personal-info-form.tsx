@@ -68,6 +68,7 @@ export function PersonalInfoForm() {
   const personal = useResumeStore((s) => s.data.personal);
   const updatePersonal = useResumeStore((s) => s.updatePersonal);
   const updateData = useResumeStore((s) => s.updateData);
+  const setLayout = useResumeStore((s) => s.setLayout);
   const undo = useResumeStore((s) => s.undo);
 
   const onDrop = useCallback(
@@ -77,11 +78,13 @@ export function PersonalInfoForm() {
         const reader = new FileReader();
         reader.onload = () => {
           updatePersonal({ photo: reader.result as string });
+          // Make the photo visible on the resume immediately after upload.
+          setLayout({ showPicture: true });
         };
         reader.readAsDataURL(file);
       }
     },
-    [updatePersonal],
+    [updatePersonal, setLayout],
   );
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -387,6 +390,10 @@ export function PersonalInfoForm() {
         <div className="flex-1 space-y-1">
           <p className="text-sm font-medium">Profile Photo</p>
           <p className="text-xs text-muted-foreground">Click to upload or drag and drop (PNG, JPG, WEBP, max 5MB)</p>
+          <p className="text-[11px] text-muted-foreground/70">
+            Shows on templates with photo support — upload turns it on automatically.
+            Classic ATS intentionally skips photos for maximum parser compatibility.
+          </p>
           <Button type="button" variant="outline" size="sm" className="mt-1 sm:hidden" onClick={() => document.querySelector<HTMLElement>('[data-testid="photo-file-input"]')?.click()}>
             Browse Files
           </Button>

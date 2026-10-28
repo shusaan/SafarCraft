@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
@@ -18,17 +22,3 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
           package-name: careerforge-ai
-      - uses: actions/checkout@v7
-        if: ${{ steps.release.outputs.release_created }}
-      - uses: actions/setup-node@v7
-        if: ${{ steps.release.outputs.release_created }}
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build
-      - uses: softprops/action-gh-release@v3
-        if: ${{ steps.release.outputs.release_created }}
-        with:
-          files: |
-            .next/**

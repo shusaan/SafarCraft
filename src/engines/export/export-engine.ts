@@ -2,26 +2,7 @@ import type { ResumeData, ResumeLayout, PaperSize } from "@/types";
 import { exportDOCX } from "./providers/docx";
 import { exportMarkdown } from "./providers/markdown";
 import { exportJSONResume } from "./providers/json-resume";
-
-async function exportPDFFromApi(
-  data: ResumeData,
-  layout: ResumeLayout,
-  template: string,
-  paperSize: PaperSize,
-): Promise<Blob> {
-  const response = await fetch("/api/export/pdf", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data, layout, template, paperSize }),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || "PDF export failed");
-  }
-
-  return await response.blob();
-}
+import { printResumeToPDF } from "./providers/pdf-print";
 
 export type ExportFormat = "pdf" | "docx" | "markdown" | "json";
 
@@ -50,8 +31,10 @@ export async function exportResume(
 
   switch (format) {
     case "pdf":
-      blob = await exportPDFFromApi(data, layout, template, paperSize);
-      break;
+      // Client-side print flow — opens the browser's "Save as PDF" dialog.
+      // No blob download; works on serverless hosts without Chromium.
+      await printResumeToPDF(data, layout, template, paperSize);
+      return;
     case "docx":
       blob = await exportDOCX(data);
       break;

@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { generateContributionBullets, generateSkillsFromGitHub, generateProjectsFromGitHub } from "@/engines/github/github-engine";
+import { describe, it, expect, vi } from "vitest";
+import { fetchGitHubProfile, generateContributionBullets, generateSkillsFromGitHub, generateProjectsFromGitHub } from "@/engines/github/github-engine";
 import type { GitHubProfile } from "@/types";
 
 const mockProfile: GitHubProfile = {
@@ -23,6 +23,7 @@ const mockProfile: GitHubProfile = {
   ],
   totalStars: 100,
   totalForks: 20,
+  forkedRepos: 0,
   languages: { TypeScript: 3, Python: 2 },
   pinnedRepos: [],
   contributions: 50,
@@ -43,5 +44,43 @@ describe("GitHub Engine", () => {
   it("generates projects from pinned repos", () => {
     const projects = generateProjectsFromGitHub(mockProfile);
     expect(projects).toBeDefined();
+  });
+
+  it("excludes forked repos from top list, stars, and stats", async () => {
+    const repo = (over: Partial<Record<string, unknown>> = {}) => ({
+      name: "repo",
+      full_name: "testuser/repo",
+      description: "",
+      html_url: "https://github.com/testuser/repo",
+      stargazers_count: 0,
+      forks_count: 0,
+      language: "TypeScript",
+      topics: [],
+      fork: false,
+      updated_at: "2024-01-01",
+      ...over,
+    });
+
+    const own = repo({ name: "own-project", stargazers_count: 30 });
+    const famousFork = repo({ name: "forked-famous", stargazers_count: 100_000, fork: true });
+
+    globalThis.fetch = vi.fn().mockImplementation((url: string) =>
+      Promise.resolve({
+        ok: true,
+        json: async () =>
+          String(url).includes("/repos?")
+            ? [own, famousFork]
+            : { name: "Test User", bio: "", avatar_url: "", public_repos: 2 },
+      }),
+    ) as unknown as typeof fetch;
+
+    const profile = await fetchGitHubProfile("testuser");
+
+    expect(profile.repos).toHaveLength(1);
+    expect(profile.repos[0]!.name).toBe("own-project");
+    expect(profile.pinnedRepos.map((r) => r.name)).toEqual(["own-project"]);
+    expect(profile.totalStars).toBe(30);
+    expect(profile.forkedRepos).toBe(1);
+    expect(profile.languages).toEqual({ TypeScript: 1 });
   });
 });

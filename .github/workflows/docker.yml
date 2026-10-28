@@ -1,11 +1,16 @@
 name: Docker build & push
 
+# The image is only for self-hosters — the production app deploys on
+# Vercel directly from source. Build once per release (release-please
+# cuts the v* tag) or manually from the Actions tab.
 on:
   push:
-    branches: [main]
     tags: ["v*"]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   IMAGE_NAME: careerforge-ai
@@ -15,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v7
 
@@ -28,7 +34,6 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest,enable={{is_default_branch}}

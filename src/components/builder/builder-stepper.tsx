@@ -63,56 +63,64 @@ export function BuilderStepper({
 
   return (
     <nav aria-label="Resume builder progress" className="border-b bg-background">
-      <div className="flex items-center justify-center gap-2 px-4 py-2 max-w-4xl mx-auto">
-        <ol className="flex items-center justify-center gap-0 flex-1">
-        {steps.map((step, i) => {
-          const isCompleted = completed.has(step.id);
-          const isCurrent = current === step.id;
+      <div className="mx-auto flex max-w-4xl items-center justify-center gap-2 px-4 py-2">
+        <div className="relative flex flex-1 items-center">
+          {/* Continuous progress track that fills behind the step chips */}
+          <div
+            className="absolute inset-x-3 top-1/2 h-1 -translate-y-1/2 overflow-hidden rounded-full bg-muted"
+            aria-hidden="true"
+          >
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-700 ease-out"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
 
-          return (
-            <li key={step.id} className="flex items-center flex-1 min-w-0">
-              <button
-                onClick={() => onNavigate(step.id)}
-                className={cn(
-                  "flex items-center gap-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded px-1.5 py-1 min-w-0",
-                  isCurrent
-                    ? "text-primary"
-                    : isCompleted
-                      ? "text-muted-foreground hover:text-foreground"
-                      : "text-muted-foreground/40 hover:text-muted-foreground/70",
-                )}
-                aria-current={isCurrent ? "step" : undefined}
-              >
-                <span
-                  className={cn(
-                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors",
-                    isCurrent
-                      ? "bg-primary text-primary-foreground"
-                      : isCompleted
-                        ? "bg-primary/15 text-primary"
-                        : "bg-muted text-muted-foreground/40",
+          <ol className="relative flex flex-1 items-center">
+            {steps.map((step, i) => {
+              const isCompleted = completed.has(step.id);
+              const isCurrent = current === step.id;
+
+              return (
+                <li key={step.id} className="flex min-w-0 flex-1 items-center">
+                  <button
+                    onClick={() => onNavigate(step.id)}
+                    className={cn(
+                      "flex min-w-0 items-center gap-1.5 rounded px-1.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      isCurrent
+                        ? "text-primary"
+                        : isCompleted
+                          ? "text-muted-foreground hover:text-foreground"
+                          : "text-muted-foreground/40 hover:text-muted-foreground/70",
+                    )}
+                    aria-current={isCurrent ? "step" : undefined}
+                  >
+                    <span
+                      className={cn(
+                        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold transition-colors",
+                        isCurrent
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : isCompleted
+                            ? "border-primary/40 bg-background text-primary"
+                            : "border-border bg-background text-muted-foreground/40",
+                      )}
+                      aria-hidden="true"
+                    >
+                      {isCompleted ? <Check className="h-3 w-3" /> : i + 1}
+                    </span>
+                    <span className="hidden truncate sm:inline">{step.label}</span>
+                  </button>
+                  {i < steps.length - 1 && (
+                    <div className="mx-1 h-px flex-1" aria-hidden="true" />
                   )}
-                  aria-hidden="true"
-                >
-                  {isCompleted ? <Check className="h-3 w-3" /> : i + 1}
-                </span>
-                <span className="hidden sm:inline truncate">{step.label}</span>
-              </button>
-              {i < steps.length - 1 && (
-                <div
-                  className={cn(
-                    "mx-1 h-px flex-1 transition-colors",
-                    isCompleted ? "bg-primary/30" : "bg-border",
-                  )}
-                  aria-hidden="true"
-                />
-              )}
-            </li>
-          );
-        })}
-        </ol>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
         <div
-          className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground"
+          className="shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold tabular-nums text-primary"
           role="progressbar"
           aria-valuenow={completedCount}
           aria-valuemin={0}
