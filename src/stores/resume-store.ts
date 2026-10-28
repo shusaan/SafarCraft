@@ -3,8 +3,6 @@ import { persist } from "zustand/middleware";
 import type { ResumeData, ResumeLayout } from "@/types";
 export type ResumeGoal = "startup" | "faang" | "government" | "academia";
 import { defaultResumeData, defaultResumeLayout } from "@/types";
-import { sampleResumeData, sampleResumeLayout } from "@/data/sample-resume";
-import { generateId } from "@/lib/utils";
 
 type HistoryEntry = {
   data: ResumeData;
@@ -21,8 +19,6 @@ type VersionEntry = {
 };
 
 type ResumeState = {
-  resumes: Array<{ id: string; title: string; data: ResumeData }>;
-  activeResumeId: string | null;
   data: ResumeData;
   layout: ResumeLayout;
   template: string;
@@ -33,9 +29,7 @@ type ResumeState = {
   resumeGoal: ResumeGoal;
   hasCompletedOnboarding: boolean;
 
-  setResumes: (resumes: Array<{ id: string; title: string; data: ResumeData }>) => void;
   setResumeGoal: (goal: ResumeGoal) => void;
-  setActiveResume: (id: string) => void;
   updateData: (data: Partial<ResumeData>) => void;
   replaceData: (data: ResumeData) => void;
   updatePersonal: (personal: Partial<ResumeData["personal"]>) => void;
@@ -65,8 +59,6 @@ const pushHistory = (state: ResumeState): Partial<ResumeState> => {
 export const useResumeStore = create<ResumeState>()(
   persist(
     (set, get) => ({
-      resumes: [],
-      activeResumeId: null,
       data: defaultResumeData,
       layout: defaultResumeLayout,
       template: "classic-ats",
@@ -77,15 +69,7 @@ export const useResumeStore = create<ResumeState>()(
       resumeGoal: "startup" as ResumeGoal,
       hasCompletedOnboarding: false,
 
-      setResumes: (resumes) => set({ resumes }),
       setResumeGoal: (goal) => set({ resumeGoal: goal }),
-
-      setActiveResume: (id) => {
-        const resume = get().resumes.find((r) => r.id === id);
-        if (resume) {
-          set({ activeResumeId: id, data: resume.data, isDirty: false });
-        }
-      },
 
       updateData: (partial) => {
         set((state) => {
@@ -182,8 +166,6 @@ export const useResumeStore = create<ResumeState>()(
     {
       name: "careerforge-resume",
       partialize: (state) => ({
-        resumes: state.resumes,
-        activeResumeId: state.activeResumeId,
         data: state.data,
         layout: state.layout,
         template: state.template,
@@ -191,54 +173,6 @@ export const useResumeStore = create<ResumeState>()(
         resumeGoal: state.resumeGoal,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
       }),
-      onRehydrateStorage: () => () => {
-        // Persist has finished rehydration. Run the first-visit bootstrap here
-        // (load the sample resume + register it in resumes[]) so the
-        // "Manage Resumes" dialog and resume switcher have an entry.
-        const bootstrap = () => {
-          const cur = useResumeStore.getState();
-          const patch: Record<string, unknown> = {};
-          // Load the sample data on first visit (empty data, no resumes).
-          if (!cur.data?.personal?.name && cur.data?.personal) {
-            patch.data = sampleResumeData;
-            patch.layout = sampleResumeLayout;
-            patch.history = [{ data: sampleResumeData, timestamp: Date.now() }];
-            patch.historyIndex = 0;
-          }
-          if (cur.resumes.length === 0 && !cur.activeResumeId) {
-            const id = generateId();
-            const finalData = (patch.data as typeof cur.data) ?? cur.data;
-            patch.resumes = [{
-              id,
-              title: finalData?.personal?.name
-                ? `${finalData.personal.name} – Resume`
-                : "Untitled Resume",
-              data: finalData ?? defaultResumeData,
-            }];
-            patch.activeResumeId = id;
-          } else if (cur.activeResumeId && !cur.resumes.find((r) => r.id === cur.activeResumeId)) {
-            patch.resumes = [{
-              id: cur.activeResumeId,
-              title: cur.data?.personal?.name
-                ? `${cur.data.personal.name} – Resume`
-                : "Untitled Resume",
-              data: cur.data ?? defaultResumeData,
-            }, ...cur.resumes];
-          }
-          if (Object.keys(patch).length > 0) {
-            useResumeStore.setState(patch as Partial<ResumeState>);
-          }
-        };
-        // Defer to a real task so hydration has fully settled before we mutate.
-        if (typeof window !== "undefined") {
-          window.setTimeout(bootstrap, 0);
-        } else {
-          bootstrap();
-        }
-      },
     },
   ),
 );
-
-export const SAMPLE_DATA = sampleResumeData;
-export const SAMPLE_LAYOUT = sampleResumeLayout;

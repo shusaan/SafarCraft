@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useResumeStore } from "@/stores/resume-store";
@@ -8,7 +9,6 @@ import { useUIStore } from "@/stores/ui-store";
 import { SectionSidebar, type SectionId } from "./section-sidebar";
 import { SectionPanel } from "./section-panel";
 import { ResumePreview } from "./resume-preview";
-import { ResumeList } from "./resume-list";
 import { TemplateSelector } from "@/components/template-selector/template-selector";
 import { ATSPanel } from "@/components/ats/ats-panel";
 import { QuickActions } from "@/components/builder/quick-actions";
@@ -143,7 +143,6 @@ export function BuilderLayout() {
   const [activeSection,     setActiveSection]     = useState<SectionId>("personal");
   const [sectionOrder,      setSectionOrder]       = useState<SectionId[]>(defaultOrder);
   const [showPreview,       setShowPreview]        = useState(true);
-  const [showResumeList,    setShowResumeList]     = useState(false);
   const [showVersionHistory,setShowVersionHistory] = useState(false);
   const [showShortcuts,     setShowShortcuts]      = useState(false);
   const [showShareLink,     setShowShareLink]      = useState(false);
@@ -304,16 +303,16 @@ export function BuilderLayout() {
           </Button>
 
           {/* Logo */}
-          <button
+          <Link
+            href="/"
             className="flex items-center gap-2 rounded-lg px-2 py-1 transition-colors hover:bg-accent"
-            onClick={() => setShowResumeList(true)}
-            aria-label="Manage resumes"
+            aria-label="SafarCraft home"
           >
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary" aria-hidden="true">
               <Route className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
             <span className="hidden text-sm font-semibold sm:inline">SafarCraft</span>
-          </button>
+          </Link>
 
           <div className="mx-2 h-4 w-px bg-border hidden sm:block" aria-hidden="true" />
 
@@ -607,13 +606,6 @@ export function BuilderLayout() {
       <OnboardingChecklist />
       <WelcomeOverlay />
       <WizardWelcomeSheet />
-
-      <Dialog open={showResumeList} onOpenChange={setShowResumeList}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>My Resumes</DialogTitle></DialogHeader>
-          <ResumeList onClose={() => setShowResumeList(false)} />
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={showVersionHistory} onOpenChange={setShowVersionHistory}>
         <DialogContent className="max-w-md">
