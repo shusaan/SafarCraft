@@ -390,7 +390,7 @@ export function PersonalInfoForm() {
         <div className="flex-1 space-y-1">
           <p className="text-sm font-medium">Profile Photo</p>
           <p className="text-xs text-muted-foreground">Click to upload or drag and drop (PNG, JPG, WEBP, max 5MB)</p>
-          <p className="text-[11px] text-muted-foreground/70">
+          <p className="text-[11px] text-muted-foreground">
             Shows on templates with photo support — upload turns it on automatically.
             Classic ATS intentionally skips photos for maximum parser compatibility.
           </p>

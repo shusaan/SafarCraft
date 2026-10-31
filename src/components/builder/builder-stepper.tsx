@@ -129,7 +129,7 @@ export function BuilderStepper({
         >
           {pct}%
         </div>
-        <span className="hidden shrink-0 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success sm:inline">
+        <span className="hidden shrink-0 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-medium text-emerald-800 dark:text-emerald-200 sm:inline">
           100% free
         </span>
       </div>

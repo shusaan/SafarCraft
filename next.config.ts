@@ -15,6 +15,16 @@ const nextConfig: NextConfig = {
     "@tailwindcss/postcss",
     "@tailwindcss/node",
   ],
+  // Consolidate SEO signals on the canonical host. The legacy deployment URL
+  // still resolves, so send it to the current canonical host with a 308.
+  redirects: async () => [
+    {
+      source: "/:path*",
+      has: [{ type: "host", value: "careerforge-ai.vercel.app" }],
+      destination: "https://safar-craft.vercel.app/:path*",
+      permanent: true,
+    },
+  ],
   headers: async () => [
     {
       source: "/(.*)",

@@ -22,8 +22,12 @@ SafarCraft is a free, open-source resume and CV builder. The editor runs in the 
 ## Pages
 
 - [Home](${siteConfig.url}/): Marketing landing — what SafarCraft is, how it works, features, and the open-source note.
+- [Free CV maker](${siteConfig.url}/free-cv-maker): Why SafarCraft is free, what the CV builder includes, and how to make a CV without a paywall.
+- [CV templates](${siteConfig.url}/cv-templates): Free CV templates with guidance on ATS-safe layout choices.
+- [Templates](${siteConfig.url}/templates): All eight free templates, from Classic ATS to Executive.
+- [ATS CV checker](${siteConfig.url}/ats-cv-checker): Free, local ATS guidance across content, format, ATS, brevity, and impact.
+- [Alternatives](${siteConfig.url}/alternatives): Neutral comparisons with Zety, Novoresume, Canva, and Resume.io.
 - [Builder](${siteConfig.url}/builder): The main resume editor. Edit sections, review ATS guidance, tailor to a job description, manage snippets and version history.
-- [Templates](${siteConfig.url}/builder?panel=templates): Template picker. 8 free templates.
 - [Onboarding / Import](${siteConfig.url}/onboarding?path=import): Choose a PDF or DOCX and parse it into the editor on-device.
 - [Onboarding / Wizard](${siteConfig.url}/onboarding?path=scratch): 5-step guided resume builder.
 - [Blog](${siteConfig.url}/blog): ATS-aware resume advice, JSON Resume guides, and engineering career guides.

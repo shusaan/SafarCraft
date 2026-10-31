@@ -207,3 +207,21 @@ export function breadcrumbLd(items: BreadcrumbItem[]): { __html: string } {
     })),
   });
 }
+
+interface FaqItem {
+  q: string;
+  a: string;
+}
+
+/** Standalone FAQPage schema for marketing and tool landing pages. */
+export function faqLd(faqs: FaqItem[]): { __html: string } {
+  return jsonScript({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((qa) => ({
+      "@type": "Question",
+      name: qa.q,
+      acceptedAnswer: { "@type": "Answer", text: qa.a },
+    })),
+  });
+}

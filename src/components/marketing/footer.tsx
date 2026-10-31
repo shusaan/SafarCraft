@@ -7,14 +7,18 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string
   {
     title: "Product",
     links: [
+      { label: "Free CV Maker", href: "/free-cv-maker" },
       { label: "Builder", href: "/builder" },
-      { label: "Templates", href: "/builder?panel=templates" },
-      { label: "Blog", href: "/blog" },
+      { label: "Templates", href: "/templates" },
+      { label: "ATS Checker", href: "/ats-cv-checker" },
     ],
   },
   {
     title: "Resources",
     links: [
+      { label: "Blog", href: "/blog" },
+      { label: "CV templates guide", href: "/cv-templates" },
+      { label: "Alternatives", href: "/alternatives" },
       { label: "ATS tips", href: "/blog/ats-friendly-resume-format-2026" },
       { label: "JSON Resume", href: "/blog/json-resume-standard-explained" },
       { label: "Contributing", href: REPO_CONTRIBUTING_URL },
@@ -46,7 +50,7 @@ export function MarketingFooter() {
               A free, open-source resume builder. Private by default — your
               resume is edited and stored in your browser.
             </p>
-            <p className="mt-2 max-w-sm text-xs text-muted-foreground/80">
+            <p className="mt-2 max-w-sm text-xs text-muted-foreground">
               Safar (سفر) means “journey” in Urdu. SafarCraft helps you craft
               the next step of yours.
             </p>

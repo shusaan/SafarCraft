@@ -533,7 +533,7 @@ export function BuilderLayout() {
               {renderPanel()}
             </PanelWrapper>
           </ErrorBoundary>
-          <p className="border-t px-6 py-2 text-xs text-muted-foreground/60 leading-relaxed">
+          <p className="border-t px-6 py-2 text-xs text-muted-foreground leading-relaxed">
             We only collect anonymized IP addresses via Google Analytics to improve user experience.
             We do not store or share your resume text or personal data on our servers.
           </p>
@@ -563,6 +563,9 @@ export function BuilderLayout() {
               role="separator"
               aria-orientation="vertical"
               aria-label="Drag to resize preview"
+              aria-valuemin={300}
+              aria-valuemax={900}
+              aria-valuenow={previewWidth}
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "ArrowLeft")  setPreviewWidth((w) => Math.max(300, w - 20));

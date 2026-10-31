@@ -29,13 +29,13 @@ export function Hero() {
           </p>
 
           <h1 className="text-balance text-4xl font-semibold leading-[1.08] tracking-tight md:text-5xl lg:text-6xl">
-            Your experience, clearly told.
+            Free CV maker. Your experience, clearly told.
           </h1>
 
           <p className="mt-5 max-w-lg text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
-            Build a thoughtful, readable resume with SafarCraft. Your draft stays
-            in your browser, and practical writing and ATS checks help you get it
-            ready to send.
+            Build a free CV or resume with SafarCraft. Your draft stays in your
+            browser, and practical writing and ATS checks help you get it ready
+            to send — no account, no watermark, no paywall.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">

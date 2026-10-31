@@ -12,7 +12,7 @@ export function BuilderPreview() {
           <div className="h-2.5 w-2.5 rounded-full text-[#EAB308]"><svg viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg></div>
           <div className="h-2.5 w-2.5 rounded-full text-[#22C55E]"><svg viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg></div>
         </div>
-        <div className="mx-auto flex-1 max-w-[220px] rounded-md bg-background/80 px-3 py-1 text-center text-[10px] text-muted-foreground/70 font-mono">
+        <div className="mx-auto flex-1 max-w-[220px] rounded-md bg-background/80 px-3 py-1 text-center text-[10px] text-muted-foreground font-mono">
           safarcraft / resume editor
         </div>
         <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[9px] font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
@@ -25,7 +25,7 @@ export function BuilderPreview() {
       <div className="grid grid-cols-[140px_1fr_180px] max-md:grid-cols-[1fr]">
         {/* Section sidebar */}
         <aside className="border-r bg-muted/10 p-3 max-md:hidden">
-          <p className="mb-2 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+          <p className="mb-2 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
             Sections
           </p>
           <ul className="space-y-1 text-[11px]">
@@ -110,7 +110,7 @@ export function BuilderPreview() {
         {/* Live preview */}
         <aside className="border-l bg-white p-3 text-[9px] text-zinc-800 max-md:hidden">
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-[8px] font-semibold uppercase tracking-wider text-zinc-400">
+            <p className="text-[8px] font-semibold uppercase tracking-wider text-zinc-500">
               Live preview
             </p>
             <span className="rounded bg-zinc-100 px-1 text-[8px] font-medium text-zinc-600">

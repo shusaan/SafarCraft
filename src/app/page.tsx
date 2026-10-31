@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GitBranch, Route } from "lucide-react";
+import { GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Hero } from "@/components/marketing/hero";
 import { HowItWorks } from "@/components/marketing/how-it-works";
@@ -7,20 +7,20 @@ import { FeaturesGrid } from "@/components/marketing/features-grid";
 import { BuiltForEngineers } from "@/components/marketing/built-for-engineers";
 import { PricingTeaser } from "@/components/marketing/pricing-teaser";
 import { MarketingFooter } from "@/components/marketing/footer";
+import { MarketingHeader } from "@/components/marketing/marketing-header";
 import { Section } from "@/components/primitives/section";
 import { Container } from "@/components/primitives/container";
 import { REPO_URL } from "@/lib/external-urls";
-import { ContinueDraft } from "@/components/marketing/continue-draft";
 import { buildMetadata } from "@/lib/seo/metadata";
 import type { Metadata } from "next";
 
-const HOME_TITLE = "SafarCraft — Free, private resume builder";
+const HOME_TITLE = "SafarCraft — Free CV Maker & Resume Builder";
 
 export const metadata: Metadata = {
   ...buildMetadata({
     title: HOME_TITLE,
     description:
-      "Build a resume or CV with SafarCraft, a free, private, open-source resume builder. Edit locally, review ATS guidance, and export without creating an account.",
+      "Build a free CV or resume with SafarCraft, a private, open-source CV maker. Edit locally, review ATS guidance, and export PDF, DOCX, or JSON Resume without creating an account.",
     path: "/",
   }),
   // Absolute title: the homepage carries the brand directly.
@@ -30,44 +30,9 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* ── Sticky navbar ── */}
-      <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <Container className="flex h-14 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Route className="h-4 w-4" />
-            </span>
-            SafarCraft
-          </Link>
+      <MarketingHeader />
 
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Main navigation">
-            <Link href="/builder">
-              <Button variant="ghost" size="sm">Builder</Button>
-            </Link>
-            <Link href="/builder?panel=templates">
-              <Button variant="ghost" size="sm">Templates</Button>
-            </Link>
-            <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
-              <Button variant="ghost" size="sm" className="gap-1.5">
-                <GitBranch className="h-3.5 w-3.5" />
-                GitHub
-              </Button>
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <ContinueDraft />
-            <Button asChild size="sm" className="gap-1.5">
-              <Link href="/onboarding?path=import">
-                Build a resume
-                <span aria-hidden>→</span>
-              </Link>
-            </Button>
-          </div>
-        </Container>
-      </header>
-
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <Hero />
         <HowItWorks />
         <FeaturesGrid />
