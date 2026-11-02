@@ -23,18 +23,18 @@ export const BLOG_POSTS: BlogPost[] = [
     readingMinutes: 7,
     tags: ["ats", "resume-format", "job-search"],
     content: `
-Most "ATS-friendly resume" advice is generic. Based on publicly documented parser behaviour from the
-applicant tracking systems many tech employers use, here's what actually matters.
+Most "ATS-friendly resume" advice is generic. Based on common parser behaviour across the applicant
+tracking systems many tech employers use, here's what generally matters.
 
 ## 1. Use the YYYY-MM date format
 
-Workday rejects anything that isn't ISO-style. If your resume says "May 2021 – Aug 2023", Greenhouse parses it,
-Workday silently truncates it, and Lever puts it in the wrong order. Always use 2021-05 – 2023-08.
+Many parsers prefer ISO-style dates. If your resume says "May 2021 – Aug 2023", some systems parse it correctly and
+others misread or reorder it. Use 2021-05 – 2023-08 unless you have a reason not to.
 
 ## 2. One column wins
 
-Two-column layouts look designerly but Workday reads them in a zigzag. Keep it single-column unless you can verify
-your template against the actual ATS — and most candidates can't.
+Two-column layouts look designerly, but some parsers read them out of order. Keep it single-column unless you can
+verify your template against the actual ATS — and most candidates can't.
 
 ## 3. Skip the icons
 
@@ -43,7 +43,7 @@ Use plain ASCII bullets.
 
 ## 4. Quantify or be cut
 
-Lever's content scoring literally drops bullets without a number. Aim for one number per bullet.
+Some systems rank quantified bullets more highly than unquantified ones. Aim for one number per bullet where you can.
 
 ## 5. Match the JD, not the role
 
@@ -68,7 +68,7 @@ Every application you send should reorder the same skills to match the job descr
   },
   {
     slug: "software-engineer-resume-template",
-    title: "A Free Software Engineer Resume Template That Beats 95% of Submissions",
+    title: "A Free Software Engineer Resume Template That Gets Read",
     description:
       "Engineers don't need fancy designs — they need a layout that highlights impact and ships in 15 minutes. Here's the template.",
     date: "2026-09-08",

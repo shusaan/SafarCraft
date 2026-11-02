@@ -25,7 +25,7 @@ test.describe("Accessibility", () => {
     await page.goto("/builder");
     await expect(page.locator("[aria-label='Undo']")).toBeVisible();
     await expect(page.locator("[aria-label='Redo']")).toBeVisible();
-    await expect(page.locator("[aria-label='Toggle preview']")).toBeVisible();
+    await expect(page.getByRole("button", { name: /(Hide|Show) preview/ }).first()).toBeVisible();
   });
 
   test("keyboard shortcuts dialog is accessible", async ({ page }) => {

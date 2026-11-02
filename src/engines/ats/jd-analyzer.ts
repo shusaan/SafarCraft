@@ -1,75 +1,53 @@
-import type { JDParseResult } from "@/types";
-import type { ResumeData } from "@/types";
-
-const TECH_KEYWORDS = [
-  "react", "angular", "vue", "node", "typescript", "javascript", "python", "java",
-  "go", "rust", "c++", "sql", "postgresql", "mysql", "mongodb", "redis", "docker",
-  "kubernetes", "aws", "gcp", "azure", "terraform", "ansible", "ci/cd", "git",
-  "linux", "rest", "graphql", "microservices", "serverless", "agile", "scrum",
-  "machine learning", "ai", "data", "api", "frontend", "backend", "fullstack",
-  "devops", "sre", "cloud", "security", "testing", "monitoring", "observability",
-];
+import type { JDParseResult, ResumeData } from "@/types";
+import { analyzeJobMatch } from "./ats-engine";
+import { extractJdKeywords } from "./keywords";
 
 export function analyzeJobDescription(jd: string, resume: ResumeData): JDParseResult {
-  const lowerJD = jd.toLowerCase();
+  const sets = extractJdKeywords(jd);
+  const match = analyzeJobMatch(jd, resume);
 
-  const jdSkills = TECH_KEYWORDS.filter((kw) => lowerJD.includes(kw));
-  const allResumeText = [
-    ...resume.experience.flatMap((e) => [e.position, e.company, ...e.bullets, ...e.technologies]),
-    ...resume.education.flatMap((e) => [e.degree, e.field, e.institution]),
-    ...resume.skills.flatMap((c) => [c.category, ...c.skills]),
-    ...resume.projects.flatMap((p) => [p.name, p.description, ...p.technologies]),
-    ...resume.certifications.flatMap((c) => [c.name, c.issuer]),
-    ...resume.languages.map((l) => l.language),
-    resume.personal.summary,
-  ]
-    .join(" ")
-    .toLowerCase();
-
-  const skillsInResume = jdSkills.filter((skill) => allResumeText.includes(skill));
-  const missingSkills = jdSkills.filter((skill) => !allResumeText.includes(skill));
-
-  const experienceLevels = ["junior", "mid-level", "senior", "staff", "principal", "lead"];
-  const experienceLevel = experienceLevels.find((level) => lowerJD.includes(level)) ?? "Not specified";
+  const matchedSkills = match?.matchedKeywords ?? [];
+  const missingSkills = match?.missingKeywords ?? [];
+  const matchScore = match?.score ?? 0;
+  const experienceLevel = sets.seniority;
 
   const responsibilities: string[] = [];
-  const lines = jd.split("\n");
-  for (const line of lines) {
+  for (const line of jd.split("\n")) {
     const trimmed = line.trim().replace(/^[-*•]\s*/, "");
     if (trimmed.length > 20 && trimmed.length < 200 && !trimmed.startsWith("http")) {
       responsibilities.push(trimmed);
     }
   }
 
-  const matchScore = jdSkills.length > 0
-    ? Math.round((skillsInResume.length / jdSkills.length) * 100)
-    : 0;
-
-  const keywordHeatmap: Record<string, number> = {};
-  for (const skill of jdSkills) {
-    keywordHeatmap[skill] = (lowerJD.match(new RegExp(skill, "g")) ?? []).length;
-  }
-
   const suggestions: string[] = [];
   if (missingSkills.length > 0) {
-    suggestions.push(`Add missing skills: ${missingSkills.slice(0, 8).join(", ")}`);
+    suggestions.push(`Add missing keywords you can honestly claim: ${missingSkills.slice(0, 8).join(", ")}`);
   }
-  if (experienceLevel !== "Not specified") {
-    suggestions.push(`Tailor experience level to "${experienceLevel}" role`);
+  if (experienceLevel !== "not specified") {
+    suggestions.push(`Tailor the summary and recent roles to a "${experienceLevel}" level role.`);
   }
-  if (matchScore < 50) {
-    suggestions.push("Consider adding more relevant technologies from the job description");
+  if (matchScore < 50 && sets.all.length > 0) {
+    suggestions.push("Rewrite the summary and top bullets around the JD's required outcomes, not just its tools.");
+  }
+  if (sets.all.length === 0) {
+    suggestions.push("No recognizable skills were found. Paste the full job description, including requirements.");
   }
 
   return {
-    skills: skillsInResume,
-    technologies: skillsInResume,
-    jdSkills,
+    skills: matchedSkills,
+    technologies: matchedSkills,
+    jdSkills: sets.all,
     responsibilities: responsibilities.slice(0, 10),
     experienceLevel,
     matchScore,
     missingSkills,
     suggestions,
-    keywordHeatmap,
+    keywordHeatmap: sets.heatmap,
+    requiredSkills: sets.required,
+    preferredSkills: sets.preferred,
+    requiredCoverage: match?.requiredCoverage,
+    preferredCoverage: match?.preferredCoverage,
+    skillsOverlap: match?.skillsOverlap,
+    seniorityFit: match?.seniorityFit,
   };
 }

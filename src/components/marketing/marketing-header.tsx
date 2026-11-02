@@ -57,7 +57,7 @@ export function MarketingHeader() {
         <div className="flex items-center gap-2">
           <ContinueDraft />
           <Button asChild size="sm" className="hidden gap-1.5 sm:inline-flex">
-            <Link href="/onboarding?path=import">
+            <Link href="/onboarding">
               Build a resume
               <span aria-hidden>→</span>
             </Link>
@@ -103,7 +103,7 @@ export function MarketingHeader() {
                 GitHub
               </a>
               <Button asChild className="mt-2">
-                <Link href="/onboarding?path=import" onClick={() => setOpen(false)}>
+                <Link href="/onboarding" onClick={() => setOpen(false)}>
                   Build a resume
                   <span aria-hidden>→</span>
                 </Link>

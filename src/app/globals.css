@@ -129,6 +129,36 @@
   --shadow-glow: 0 0 30px hsl(160 55% 42% / 0.3);
 }
 
+/* Template previews and exported pages always render on a white page, even
+   when the app is in dark mode. Scoping the light tokens here keeps the real
+   template components faithful without duplicating their styles. */
+.resume-light {
+  color-scheme: light;
+  --color-background: hsl(45 25% 97%);
+  --color-foreground: hsl(170 25% 12%);
+  --color-card: hsl(45 30% 99%);
+  --color-card-foreground: hsl(170 25% 12%);
+  --color-popover: hsl(45 30% 99%);
+  --color-popover-foreground: hsl(170 25% 12%);
+  --color-primary: hsl(165 64% 24%);
+  --color-primary-foreground: hsl(45 30% 98%);
+  --color-secondary: hsl(45 20% 92%);
+  --color-secondary-foreground: hsl(170 25% 12%);
+  --color-muted: hsl(45 20% 93%);
+  --color-muted-foreground: hsl(168 10% 36%);
+  --color-accent: hsl(165 60% 30% / 0.08);
+  --color-accent-foreground: hsl(165 64% 22%);
+  --color-destructive: hsl(0 62% 40%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-success: hsl(152 60% 34%);
+  --color-success-foreground: hsl(0 0% 100%);
+  --color-warning: hsl(38 80% 44%);
+  --color-warning-foreground: hsl(0 0% 100%);
+  --color-border: hsl(45 15% 86%);
+  --color-input: hsl(45 15% 86%);
+  --color-ring: hsl(165 64% 30%);
+}
+
 * {
   border-color: var(--color-border);
 }

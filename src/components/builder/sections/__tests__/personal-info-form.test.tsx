@@ -108,16 +108,18 @@ describe("PersonalInfoForm — import flow", () => {
     expect(screen.getByText(/Import Existing CV/i)).toBeInTheDocument();
   });
 
-  it("auto-opens the OS file picker when arriving from the import flow", () => {
+  it("highlights the Import Existing CV card when arriving from the import flow", async () => {
     mockSearchParams = new URLSearchParams("onboarding=import");
-    const clickSpy = vi
-      .spyOn(HTMLInputElement.prototype, "click")
-      .mockImplementation(() => {});
+    const clickSpy = vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(() => {});
 
     renderWithProviders(<PersonalInfoForm />);
 
-    expect(clickSpy).toHaveBeenCalledTimes(1);
-    expect(replaceMock).toHaveBeenCalledWith("/builder");
+    await waitFor(() => {
+      const card = screen.getByText(/Import Existing CV/i).closest("div[class*='border-dashed']");
+      expect(card?.className).toContain("ring-2");
+    });
+    expect(replaceMock).toHaveBeenCalledWith("/builder", { scroll: false });
+    expect(clickSpy).not.toHaveBeenCalled();
 
     clickSpy.mockRestore();
   });

@@ -57,7 +57,7 @@ export default function HomePage() {
               </p>
               <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
                 <Button asChild variant="gradient" size="lg">
-                  <Link href="/onboarding?path=scratch">
+                  <Link href="/onboarding">
                     Start for free
                   </Link>
                 </Button>

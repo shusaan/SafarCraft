@@ -45,7 +45,7 @@ export function Hero() {
               size="lg"
               onClick={() => trackEvent("marketing_cta_click", { location: "hero", cta: "import" })}
             >
-              <Link href="/onboarding?path=import">
+              <Link href="/builder?onboarding=import">
                 <FileText className="h-4 w-4" />
                 Import a resume
                 <ArrowRight className="h-4 w-4" />
@@ -57,7 +57,7 @@ export function Hero() {
               size="lg"
               onClick={() => trackEvent("marketing_cta_click", { location: "hero", cta: "scratch" })}
             >
-              <Link href="/onboarding?path=scratch">
+              <Link href="/onboarding/wizard">
                 <PencilLine className="h-4 w-4" />
                 Start a new resume
               </Link>
