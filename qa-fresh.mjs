@@ -125,8 +125,7 @@ function check(cond, severity, area, msg, detail = "") {
 
   /* ── 2. Navigate to builder ──────────────────────────────────── */
   console.log("\n[2] Navigate to /builder");
-  await page.click("a:has-text('Start free')");
-  await page.waitForURL(/\/builder/);
+  await page.goto(BASE_URL + "/builder", { waitUntil: "networkidle" });
   await page.waitForLoadState("networkidle");
   await settle(page, 1800);
   await shot(page, "03-builder-fresh");
@@ -193,16 +192,15 @@ function check(cond, severity, area, msg, detail = "") {
   await settle(page, 700);
   await shot(page, "06-ats");
 
-  // README promises 5-axis breakdown (Content, Format, ATS, Brevity, Impact)
-  const axes = ["Content", "Format", "Brevity", "Impact"];
+  // Readiness breakdown uses the current five axes.
+  const axes = ["Contact", "Experience", "Impact", "Skills", "Format"];
   for (const a of axes) {
     const has = await page.locator(`text=${a}`).first().isVisible({ timeout: 200 }).catch(() => false);
-    check(has, "major", "ats", `5-axis '${a}' breakdown missing — README promises it`);
+    check(has, "major", "ats", `Readiness axis '${a}' missing`);
   }
 
-  // Missing keywords shown
-  const mk = await page.locator("text=Missing Keywords").first().isVisible({ timeout: 300 }).catch(() => false);
-  check(mk, "minor", "ats", "Missing Keywords section missing");
+  const readiness = await page.getByRole("heading", { name: "Resume readiness" }).isVisible({ timeout: 300 }).catch(() => false);
+  check(readiness, "minor", "ats", "Resume readiness section missing");
 
   /* ── 7. Templates ─────────────────────────────────────────────── */
   console.log("\n[7] Templates");

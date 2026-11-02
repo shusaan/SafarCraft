@@ -47,7 +47,7 @@ export function PricingTeaser() {
               size="lg"
               className="mt-8 w-full"
             >
-              <Link href="/onboarding?path=scratch">
+              <Link href="/onboarding">
                 Start building — free
                 <ArrowRight className="h-4 w-4" />
               </Link>

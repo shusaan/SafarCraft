@@ -49,31 +49,31 @@ describe("calculateQuality", () => {
     expect(result.overall).toBeLessThanOrEqual(100);
   });
 
-  it("returns 5 axes", () => {
+  it("returns the five readiness axes", () => {
     const result = calculateQuality(baseData);
     expect(result.axes.length).toBe(5);
-    expect(result.axes.map((a) => a.key)).toEqual(["content", "format", "ats", "brevity", "impact"]);
+    expect(result.axes.map((a) => a.key)).toEqual(["contact", "experience", "impact", "skills", "format"]);
   });
 
   it("a complete resume scores high", () => {
     const result = calculateQuality(baseData);
-    expect(result.overall).toBeGreaterThanOrEqual(80);
+    expect(result.overall).toBeGreaterThanOrEqual(90);
   });
 
-  it("penalises missing name", () => {
+  it("penalises missing name on the contact axis", () => {
     const result = calculateQuality({ ...baseData, personal: { ...baseData.personal, name: "" } });
-    const content = result.axes.find((a) => a.key === "content")!;
-    expect(content.fixes).toContain("Add your name");
-    expect(content.score).toBeLessThan(100);
+    const contact = result.axes.find((a) => a.key === "contact")!;
+    expect(contact.fixes.some((f) => f.toLowerCase().includes("full name"))).toBe(true);
+    expect(contact.score).toBeLessThan(100);
   });
 
-  it("penalises missing summary", () => {
+  it("penalises missing summary on the experience axis", () => {
     const result = calculateQuality({ ...baseData, personal: { ...baseData.personal, summary: "" } });
-    const content = result.axes.find((a) => a.key === "content")!;
-    expect(content.fixes.some((f) => f.toLowerCase().includes("summary"))).toBe(true);
+    const experience = result.axes.find((a) => a.key === "experience")!;
+    expect(experience.fixes.some((f) => f.toLowerCase().includes("summary"))).toBe(true);
   });
 
-  it("penalises weak verbs in impact axis", () => {
+  it("penalises weak verbs in the impact axis", () => {
     const result = calculateQuality({
       ...baseData,
       experience: [
@@ -84,7 +84,7 @@ describe("calculateQuality", () => {
       ],
     });
     const impact = result.axes.find((a) => a.key === "impact")!;
-    expect(impact.fixes.some((f) => f.includes("weak verb"))).toBe(true);
+    expect(impact.fixes.some((f) => f.toLowerCase().includes("action verb"))).toBe(true);
   });
 
   it("rewards quantified bullets", () => {
@@ -98,29 +98,29 @@ describe("calculateQuality", () => {
     expect(a).toBeGreaterThan(b);
   });
 
-  it("penalises too many bullets in brevity", () => {
-    const many = Array.from({ length: 30 }, (_, i) => `Bullet ${i}`).join("\n");
-    const data = { ...baseData, experience: [{ ...baseData.experience[0]!, bullets: many.split("\n") }] };
+  it("penalises too many bullets in the format axis", () => {
+    const bullets = Array.from({ length: 31 }, (_, i) => `Shipped improvement ${i} to 10 users`);
+    const data = { ...baseData, experience: [{ ...baseData.experience[0]!, bullets }] };
     const result = calculateQuality(data);
-    const brevity = result.axes.find((a) => a.key === "brevity")!;
-    expect(brevity.score).toBeLessThan(100);
+    const format = result.axes.find((a) => a.key === "format")!;
+    expect(format.score).toBeLessThan(100);
   });
 
-  it("penalises missing dates in format", () => {
+  it("penalises missing dates on the experience axis", () => {
     const result = calculateQuality({
       ...baseData,
       experience: [{ ...baseData.experience[0]!, startDate: "", endDate: "", current: false }],
     });
-    const format = result.axes.find((a) => a.key === "format")!;
-    expect(format.fixes.some((f) => f.toLowerCase().includes("dates"))).toBe(true);
+    const experience = result.axes.find((a) => a.key === "experience")!;
+    expect(experience.fixes.some((f) => f.toLowerCase().includes("start date"))).toBe(true);
   });
 
-  it("penalises missing contact methods in ATS", () => {
+  it("penalises missing contact methods on the contact axis", () => {
     const result = calculateQuality({
       ...baseData,
       personal: { ...baseData.personal, email: "", phone: "", linkedin: "", github: "" },
     });
-    const ats = result.axes.find((a) => a.key === "ats")!;
-    expect(ats.fixes.length).toBeGreaterThan(0);
+    const contact = result.axes.find((a) => a.key === "contact")!;
+    expect(contact.fixes.length).toBeGreaterThan(0);
   });
 });

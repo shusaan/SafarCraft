@@ -104,8 +104,7 @@ async function settle(page, ms = 500) { await page.waitForTimeout(ms); }
 
   /* ─────────────────────────────────────────── */
   section("2) Navigate to /builder");
-  await page.click("a:has-text('Start free')");
-  await page.waitForURL(/\/builder/);
+  await page.goto(BASE_URL + "/builder", { waitUntil: "networkidle" });
   await page.waitForLoadState("networkidle");
   await settle(page, 1500); // wait for hydration
   await shot(page, "03-builder-fresh");
@@ -195,17 +194,22 @@ async function settle(page, ms = 500) { await page.waitForTimeout(ms); }
   await settle(page, 1000);
   await shot(page, "11-ats");
 
-  // Look for the 5-axis scoring
-  const axes = ["Content", "Format", "ATS", "Brevity", "Impact"];
-  const axesFound = await page.locator(":text('Content')").count();
-  if (axesFound === 0) logIssue("major", "ats", "5-axis breakdown missing");
+  // Look for the five readiness axes.
+  const axes = ["Contact", "Experience", "Impact", "Skills", "Format"];
+  const axesFound = await page.locator(":text('Resume readiness')").count();
+  if (axesFound === 0) logIssue("major", "ats", "Readiness breakdown missing");
+  for (const axis of axes) {
+    if (!(await page.locator(`:text('${axis}')`).first().isVisible({ timeout: 500 }).catch(() => false))) {
+      logIssue("minor", "ats", `Readiness axis '${axis}' not visible`);
+    }
+  }
 
   // Look for deductions / recommendations
   if (!(await page.locator(":text('Suggestions')").first().isVisible({ timeout: 500 }).catch(() => false))) {
     logIssue("minor", "ats", "No suggestions section visible");
   }
-  if (!(await page.locator(":text('Missing Keywords')").first().isVisible({ timeout: 500 }).catch(() => false))) {
-    logIssue("minor", "ats", "No missing keywords section visible");
+  if (!(await page.locator(":text('Job description match')").first().isVisible({ timeout: 500 }).catch(() => false))) {
+    logIssue("minor", "ats", "No job-description match section visible");
   }
 
   await shot(page, "12-ats-full", true);

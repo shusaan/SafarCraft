@@ -17,7 +17,7 @@ export function BuilderPreview() {
         </div>
         <div className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[9px] font-semibold text-green-700 dark:bg-green-900/40 dark:text-green-300">
           <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-          5-point review
+          ATS guidance
         </div>
       </div>
 

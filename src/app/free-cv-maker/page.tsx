@@ -80,13 +80,13 @@ export default function FreeCvMakerPage() {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg">
-                  <Link href="/onboarding?path=scratch">
+                  <Link href="/onboarding/wizard">
                     Start a free CV
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link href="/onboarding?path=import">
+                  <Link href="/builder?onboarding=import">
                     <FileText className="h-4 w-4" />
                     Import my CV
                   </Link>

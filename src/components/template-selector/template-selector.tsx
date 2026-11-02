@@ -1,13 +1,13 @@
 "use client";
 
 import { useResumeStore } from "@/stores/resume-store";
-import { templateRegistry, getTemplateName, getTemplateDescription, TEMPLATE_CATEGORIES } from "@/engines/templates/registry";
+import { templateRegistry, getTemplateName, getTemplateDescription } from "@/engines/templates/registry";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, Crown } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { TemplatePreview } from "@/components/marketing/template-preview";
 
 const templateIds = Object.keys(templateRegistry) as Array<keyof typeof templateRegistry>;
 
@@ -26,29 +26,33 @@ export function TemplateSelector() {
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {templateIds.map((id) => {
-          const isPro = TEMPLATE_CATEGORIES[id] === "pro";
           const isSelected = template === id;
           return (
             <Card
               key={id}
-              className={`group relative cursor-pointer p-3 transition-all hover:ring-2 hover:ring-primary ${
+              role="button"
+              tabIndex={0}
+              aria-pressed={isSelected}
+              aria-label={`Use the ${getTemplateName(id)} template`}
+              className={`group relative cursor-pointer p-2.5 transition-all hover:ring-2 hover:ring-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                 isSelected ? "ring-2 ring-primary" : ""
               }`}
               onClick={() => setTemplate(id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  setTemplate(id);
+                }
+              }}
             >
-              {isPro && (
-                <Badge variant="secondary" className="absolute right-1.5 top-1.5 gap-0.5 px-1.5 py-0 text-[9px]">
-                  <Crown className="h-2.5 w-2.5" />
-                  Pro
-                </Badge>
-              )}
+              <TemplatePreview id={id} compact className="mb-2" />
               <p className="text-center text-sm font-semibold">{getTemplateName(id)}</p>
               <p className="mt-1 text-center text-xs leading-snug text-muted-foreground">
                 {getTemplateDescription(id)}
               </p>
               {isSelected && (
                 <div className="mt-1.5 flex items-center justify-center gap-1 text-[11px] font-medium text-primary">
-                  <Sparkles className="h-3 w-3" />
+                  <Sparkles className="h-3 w-3" aria-hidden="true" />
                   Selected
                 </div>
               )}

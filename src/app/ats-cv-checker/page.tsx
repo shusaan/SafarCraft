@@ -20,7 +20,7 @@ const FAQS = [
   },
   {
     q: "What does the checker look at?",
-    a: "SafarCraft reviews five axes: content, format, ATS compatibility, brevity, and impact. Each deduction includes a short explanation so you can decide what to change.",
+    a: "SafarCraft reviews five readiness axes: contact, experience, impact, skills, and format. When you add a job description, it also calculates a separate job-match score for required and preferred keywords. Each deduction includes an explanation and a concrete fix.",
   },
   {
     q: "Does SafarCraft upload my CV to check it?",
@@ -31,7 +31,7 @@ const FAQS = [
 export const metadata: Metadata = buildMetadata({
   title: "Free ATS CV Checker — Review Your CV Locally",
   description:
-    "Check your CV against practical ATS guidance for free. Review content, format, keywords, brevity, and impact in your browser — no upload and no account.",
+    "Check your CV against practical ATS guidance for free. Review contact, experience, impact, skills, format, and job-description match in your browser — no upload and no account.",
   path: "/ats-cv-checker",
 });
 
@@ -60,7 +60,7 @@ export default function AtsCvCheckerPage() {
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
                 Open your CV in the SafarCraft builder and review practical ATS
-                guidance across content, format, keywords, brevity, and impact. No
+                guidance across contact, experience, impact, skills, and format — plus a job-specific match when you add a description. No
                 upload, no account, and no vague score without an explanation.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -81,7 +81,7 @@ export default function AtsCvCheckerPage() {
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Five review axes</span>
+                  <span>Five readiness axes</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="h-4 w-4 text-primary" />

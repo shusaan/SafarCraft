@@ -11,21 +11,16 @@ test.describe("ATS Panel", () => {
   });
 
   test("should show score message", async ({ page }) => {
-    const scoreMessage = page.getByText(/Excellent — your|Good foundation|Needs improvement|Significant issues/);
+    const scoreMessage = page.getByText(/Strong match|Competitive|Needs targeting|High risk|Strong foundation|Solid|Needs work/);
     await expect(scoreMessage).toBeVisible();
   });
 
-  test("should show deductions if any", async ({ page }) => {
-    const deductions = page.locator("text=Deductions");
-    if (await deductions.isVisible()) {
-      await expect(deductions).toBeVisible();
-    }
+  test("should show readiness suggestions", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "Suggestions" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Resume readiness" })).toBeVisible();
   });
 
-  test("should show recommendations", async ({ page }) => {
-    const recommendations = page.locator("text=Recommendations");
-    if (await recommendations.isVisible()) {
-      await expect(recommendations).toBeVisible();
-    }
+  test("should show the export parse check", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: "Export parse check" })).toBeVisible();
   });
 });
