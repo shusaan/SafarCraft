@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/shusaan/SafarCraft/compare/v1.1.0...v1.2.0) (2026-11-03)
+
+
+### Features
+
+* improve template discovery, onboarding, and ATS scoring ([55ff854](https://github.com/shusaan/SafarCraft/commit/55ff854c6830523b07548fc9a525b062f608efa5))
+* **seo:** consolidate canonical domain and target free CV search ([898a377](https://github.com/shusaan/SafarCraft/commit/898a377776809bc97a5016268f46e613705fee06))
+
 ## [1.1.0](https://github.com/shusaan/SafarCraft/compare/v1.0.0...v1.1.0) (2026-10-28)
 
 
