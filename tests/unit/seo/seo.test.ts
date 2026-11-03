@@ -1,12 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { siteConfig } from "@/lib/seo/site";
 import { buildMetadata } from "@/lib/seo/metadata";
-import {
-  organizationLd,
-  articleLd,
-  personLd,
-  breadcrumbLd,
-} from "@/lib/seo/jsonld";
+import { organizationLd, articleLd, personLd, breadcrumbLd, faqLd } from "@/lib/seo/jsonld";
+import { HOME_FAQS } from "@/data/home-faqs";
 
 describe("siteConfig", () => {
   it("has a stable URL and name", () => {
@@ -64,7 +60,9 @@ describe("JSON-LD builders", () => {
     expect(types).toContain("Organization");
     expect(types).toContain("WebApplication");
     expect(types).toContain("BreadcrumbList");
-    const org = graph.find((n) => (n as { "@type": string })["@type"] === "Organization") as { sameAs?: string[] };
+    const org = graph.find((n) => (n as { "@type": string })["@type"] === "Organization") as {
+      sameAs?: string[];
+    };
     expect(org.sameAs).toContain("https://github.com/test");
   });
 
@@ -90,7 +88,9 @@ describe("JSON-LD builders", () => {
       path: "/blog/x",
       datePublished: "2026-01-01",
     });
-    const types = (asJson(a) as { "@graph": Array<{ "@type": string }> })["@graph"].map((n) => n["@type"]);
+    const types = (asJson(a) as { "@graph": Array<{ "@type": string }> })["@graph"].map(
+      (n) => n["@type"],
+    );
     expect(types).not.toContain("FAQPage");
   });
 
@@ -118,5 +118,15 @@ describe("JSON-LD builders", () => {
       ]),
     ) as { itemListElement: Array<{ position: number }> };
     expect(json.itemListElement.map((i) => i.position)).toEqual([1, 2, 3]);
+  });
+
+  it("home FAQ schema includes every question", () => {
+    const json = asJson(faqLd(HOME_FAQS)) as {
+      "@type": string;
+      mainEntity: Array<{ name: string }>;
+    };
+    expect(json["@type"]).toBe("FAQPage");
+    expect(json.mainEntity).toHaveLength(HOME_FAQS.length);
+    expect(json.mainEntity[0]?.name).toBe(HOME_FAQS[0]?.q);
   });
 });

@@ -9,22 +9,14 @@ import { BuiltForEngineers } from "@/components/marketing/built-for-engineers";
 
 describe("SectionHeader", () => {
   it("renders eyebrow, title and description", () => {
-    render(
-      <SectionHeader
-        eyebrow="Hello"
-        title="World"
-        description="A nice greeting."
-      />,
-    );
+    render(<SectionHeader eyebrow="Hello" title="World" description="A nice greeting." />);
     expect(screen.getByText("Hello")).toBeTruthy();
     expect(screen.getByText("World")).toBeTruthy();
     expect(screen.getByText("A nice greeting.")).toBeTruthy();
   });
 
   it("centers content when align=center", () => {
-    const { container } = render(
-      <SectionHeader title="C" align="center" />,
-    );
+    const { container } = render(<SectionHeader title="C" align="center" />);
     expect((container.firstChild as HTMLElement).className).toContain("mx-auto text-center");
   });
 });
@@ -42,6 +34,7 @@ describe("Hero", () => {
     const { container } = render(<Hero />);
     const h1 = container.querySelector("h1");
     expect(h1?.className).toContain("tracking-tight");
+    expect(h1?.textContent).toContain("Free CV maker and resume builder");
     expect(h1?.textContent).toContain("clearly told");
   });
 
