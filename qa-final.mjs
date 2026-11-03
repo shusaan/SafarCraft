@@ -42,8 +42,7 @@ function issue(s, a, m, d="") { REPORT.push({ s, a, m, d }); console.log("  " + 
   if (placeholderLinks > 0) issue("minor", "marketing", "GitHub URL is placeholder", "Found " + placeholderLinks + " links to yourusername");
 
   console.log("\n=== B) BUILDER — initial state ===");
-  await page.click("a:has-text('Start free')");
-  await page.waitForURL(/\/builder/);
+  await page.goto(BASE_URL + "/builder", { waitUntil: "networkidle" });
   await page.waitForLoadState("networkidle");
   await page.waitForTimeout(1500);
   await shot("builder-initial");

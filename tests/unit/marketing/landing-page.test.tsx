@@ -39,21 +39,21 @@ describe("HomePage (landing)", () => {
     expect(screen.queryByText(/Coming soon/)).toBeNull();
   });
 
-  it("navbar CTA routes to /onboarding?path=import", () => {
+  it("navbar CTA routes to the generic onboarding chooser", () => {
     render(<HomePage />);
     const cta = screen.getAllByRole("link").find(
       (a) => a.textContent?.trim().startsWith("Build a resume"),
     );
-    expect(cta?.getAttribute("href")).toBe("/onboarding?path=import");
+    expect(cta?.getAttribute("href")).toBe("/onboarding");
   });
 
-  it("all CTAs route to /onboarding (not to /builder directly)", () => {
+  it("uses intent-specific destinations without duplicating the chooser", () => {
     render(<HomePage />);
     const links = Array.from(document.querySelectorAll("a")).map(
       (a) => a.getAttribute("href"),
     );
-    // We expect /onboarding paths from the marketing surfaces
-    expect(links).toContain("/onboarding?path=import");
-    expect(links).toContain("/onboarding?path=scratch");
+    expect(links).toContain("/builder?onboarding=import");
+    expect(links).toContain("/onboarding/wizard");
+    expect(links).toContain("/onboarding");
   });
 });

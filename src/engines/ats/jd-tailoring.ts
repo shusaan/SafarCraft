@@ -2,6 +2,7 @@
 // the JD's keywords, and suggests additional bullets drawn from curated
 // per-domain patterns + the candidate's existing technology tags.
 import type { ResumeData, ExperienceEntry } from "@/types";
+import { extractJdKeywords } from "./keywords";
 
 type TechDomain = "frontend" | "backend" | "data" | "devops" | "mobile" | "general";
 
@@ -192,12 +193,7 @@ function suggestSummary(
 }
 
 export function planTailoring(jd: string, data: ResumeData): TailoringPlan {
-  const lowerJD = jd.toLowerCase();
-
-  const jdKeywords = new Set<string>();
-  for (const kws of Object.values(DOMAIN_KEYWORDS)) {
-    for (const k of kws) if (lowerJD.includes(k.toLowerCase())) jdKeywords.add(k);
-  }
+  const jdKws = extractJdKeywords(jd).all;
 
   const allResumeText = [
     data.personal.summary ?? "",
@@ -206,7 +202,6 @@ export function planTailoring(jd: string, data: ResumeData): TailoringPlan {
     ...data.projects.flatMap((p) => [p.name, p.description, ...p.technologies]),
   ].join(" ").toLowerCase();
 
-  const jdKws = Array.from(jdKeywords);
   const resumeKeywords = jdKws.filter((k) => allResumeText.includes(k.toLowerCase()));
   const missingKeywords = jdKws.filter((k) => !allResumeText.includes(k.toLowerCase()));
 

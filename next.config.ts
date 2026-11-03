@@ -15,6 +15,30 @@ const nextConfig: NextConfig = {
     "@tailwindcss/postcss",
     "@tailwindcss/node",
   ],
+  // Consolidate SEO signals on the canonical host. The legacy deployment URL
+  // still resolves, so send it to the current canonical host with a 308.
+  redirects: async () => [
+    // Legacy onboarding branch links. Intent-specific CTAs now link directly to
+    // their destination; these keep old bookmarks and external links working.
+    {
+      source: "/onboarding",
+      has: [{ type: "query", key: "path", value: "import" }],
+      destination: "/builder?onboarding=import",
+      permanent: false,
+    },
+    {
+      source: "/onboarding",
+      has: [{ type: "query", key: "path", value: "scratch" }],
+      destination: "/onboarding/wizard",
+      permanent: false,
+    },
+    {
+      source: "/:path*",
+      has: [{ type: "host", value: "careerforge-ai.vercel.app" }],
+      destination: "https://safar-craft.vercel.app/:path*",
+      permanent: true,
+    },
+  ],
   headers: async () => [
     {
       source: "/(.*)",

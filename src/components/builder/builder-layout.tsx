@@ -10,6 +10,7 @@ import { SectionSidebar, type SectionId } from "./section-sidebar";
 import { SectionPanel } from "./section-panel";
 import { ResumePreview } from "./resume-preview";
 import { TemplateSelector } from "@/components/template-selector/template-selector";
+import { templateRegistry, type TemplateId } from "@/engines/templates/registry";
 import { ATSPanel } from "@/components/ats/ats-panel";
 import { QuickActions } from "@/components/builder/quick-actions";
 import { GitHubImport } from "@/components/github/github-import";
@@ -137,6 +138,7 @@ export function BuilderLayout() {
   const searchParams = useSearchParams();
   const router       = useRouter();
   const panelParam   = searchParams.get("panel");
+  const templateParam = searchParams.get("template");
 
   const [activeSection,     setActiveSection]     = useState<SectionId>("personal");
   const [sectionOrder,      setSectionOrder]       = useState<SectionId[]>(defaultOrder);
@@ -168,6 +170,7 @@ export function BuilderLayout() {
     return () => mq.removeEventListener("change", onChange);
   }, [setIsMobile]);
 
+  const setTemplate = useResumeStore((s) => s.setTemplate);
   const isDirty    = useResumeStore((s) => s.isDirty);
   const undo       = useResumeStore((s) => s.undo);
   const redo       = useResumeStore((s) => s.redo);
@@ -195,18 +198,27 @@ export function BuilderLayout() {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
-    // "Import a resume" flow: land on Personal Info so the CV file picker
-    // opens. The form itself triggers the picker and strips the flag.
+    // "Import a resume" flow: land on Personal Info so the Import Existing CV
+    // card is visible. The form itself highlights the card and strips the flag.
     if (searchParams.get("onboarding") === "import") {
       setActivePanel("editor");
       setActiveSection("personal");
       return;
     }
+
+    let shouldCleanUrl = false;
+    if (templateParam && templateParam in templateRegistry) {
+      setTemplate(templateParam as TemplateId);
+      shouldCleanUrl = true;
+    }
     if (panelParam && allPanels.some((p) => p.id === panelParam)) {
       setActivePanel(panelParam as Panel);
+      shouldCleanUrl = true;
+    }
+    if (shouldCleanUrl) {
       router.replace("/builder", { scroll: false });
     }
-  }, [panelParam, router, searchParams]);
+  }, [panelParam, router, searchParams, setTemplate, templateParam]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -292,6 +304,7 @@ export function BuilderLayout() {
         className="flex items-center justify-between border-b bg-background/95 px-3 py-1.5 backdrop-blur supports-[backdrop-filter]:bg-background/80"
         role="banner"
       >
+        <h1 className="sr-only">Resume builder</h1>
         {/* Left — logo + nav */}
         <div className="flex items-center gap-2">
           {/* Mobile hamburger */}
@@ -453,7 +466,9 @@ export function BuilderLayout() {
       </header>
 
       {/* ── Goal Selector ── */}
-      <GoalSelector />
+      <section aria-label="Resume goal">
+        <GoalSelector />
+      </section>
 
       {/* ── Stepper ── */}
       <BuilderStepper
@@ -533,7 +548,7 @@ export function BuilderLayout() {
               {renderPanel()}
             </PanelWrapper>
           </ErrorBoundary>
-          <p className="border-t px-6 py-2 text-xs text-muted-foreground/60 leading-relaxed">
+          <p className="border-t px-6 py-2 text-xs text-muted-foreground leading-relaxed">
             We only collect anonymized IP addresses via Google Analytics to improve user experience.
             We do not store or share your resume text or personal data on our servers.
           </p>
@@ -563,6 +578,9 @@ export function BuilderLayout() {
               role="separator"
               aria-orientation="vertical"
               aria-label="Drag to resize preview"
+              aria-valuemin={300}
+              aria-valuemax={900}
+              aria-valuenow={previewWidth}
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === "ArrowLeft")  setPreviewWidth((w) => Math.max(300, w - 20));

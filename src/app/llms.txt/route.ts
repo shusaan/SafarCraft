@@ -22,10 +22,14 @@ SafarCraft is a free, open-source resume and CV builder. The editor runs in the 
 ## Pages
 
 - [Home](${siteConfig.url}/): Marketing landing — what SafarCraft is, how it works, features, and the open-source note.
+- [Free CV maker](${siteConfig.url}/free-cv-maker): Why SafarCraft is free, what the CV builder includes, and how to make a CV without a paywall.
+- [CV templates](${siteConfig.url}/cv-templates): Free CV templates with guidance on ATS-safe layout choices.
+- [Templates](${siteConfig.url}/templates): All eight free templates, from Classic ATS to Executive.
+- [ATS CV checker](${siteConfig.url}/ats-cv-checker): Free, local ATS readiness guidance across contact, experience, impact, skills, and format, plus a separate job-description match score.
+- [Alternatives](${siteConfig.url}/alternatives): Neutral comparisons with Zety, Novoresume, Canva, and Resume.io.
 - [Builder](${siteConfig.url}/builder): The main resume editor. Edit sections, review ATS guidance, tailor to a job description, manage snippets and version history.
-- [Templates](${siteConfig.url}/builder?panel=templates): Template picker. 8 free templates.
-- [Onboarding / Import](${siteConfig.url}/onboarding?path=import): Choose a PDF or DOCX and parse it into the editor on-device.
-- [Onboarding / Wizard](${siteConfig.url}/onboarding?path=scratch): 5-step guided resume builder.
+- [Import a resume](${siteConfig.url}/builder?onboarding=import): Choose a PDF or DOCX and parse it into the editor on-device.
+- [Guided wizard](${siteConfig.url}/onboarding/wizard): 5-step guided resume builder.
 - [Blog](${siteConfig.url}/blog): ATS-aware resume advice, JSON Resume guides, and engineering career guides.
 - [Public resume](${siteConfig.url}/r/[id]): Self-contained URL-safe shareable resume view (e.g. /r/abc123).
 
@@ -47,7 +51,7 @@ ${blogIndex}
 
 - SafarCraft is a privacy-first, local-first resume builder. The default build makes zero outbound requests for resume data.
 - Resume parsing is done entirely on-device using pdfjs-dist + mammoth (PDF / DOCX). Nothing is uploaded unless the user explicitly publishes a share link.
-- The ATS guidance is deterministic (5 axes: Content, Format, ATS, Brevity, Impact) and fully documented in src/engines/ats/. It is advice to review, not a hiring guarantee.
+- The ATS guidance is deterministic (5 readiness axes: Contact, Experience, Impact, Skills, Format) plus a JD-aware match score. It is advice to review, not a hiring guarantee.
 - The JD-tailoring engine is curated-pattern (no LLM call) and works offline.
 - Exports: PDF (client-side via print), DOCX, JSON Resume (open standard), and Markdown.
 - Everything is free under the MIT license. There is no paid tier, no "Pro" upsell, and no account required.

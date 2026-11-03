@@ -166,6 +166,7 @@ export function SectionSidebar({
               width: `${(Object.values(completionMap).filter(Boolean).length / sections.length) * 100}%`,
             }}
             role="progressbar"
+            aria-label="Resume completion"
             aria-valuenow={Object.values(completionMap).filter(Boolean).length}
             aria-valuemin={0}
             aria-valuemax={sections.length}

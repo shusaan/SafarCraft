@@ -1,6 +1,6 @@
 "use client";
 
-// Step 5 — Review & Export. Template picker (8 ATS-tested templates) +
+// Step 5 — Review & Export. Template picker (8 free resume templates) +
 // a final review of all sections the user filled in. After "Build it",
 // they land on /builder?welcome=1&seed=wizard (handled by the wizard shell).
 

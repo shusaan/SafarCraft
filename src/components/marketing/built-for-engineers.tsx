@@ -19,8 +19,8 @@ export function BuiltForEngineers() {
           description="Build and review your resume in the browser. Your content stays on your device unless you choose to share or export it."
           />
 
-          <div className="rounded-2xl border bg-zinc-950 p-6 font-mono text-sm text-zinc-300 shadow-lg shadow-zinc-950/20">
-            <div className="flex items-center gap-2 border-b border-zinc-800 pb-3 text-xs text-zinc-500">
+          <div className="min-w-0 rounded-2xl border bg-zinc-950 p-6 font-mono text-sm text-zinc-300 shadow-lg shadow-zinc-950/20">
+            <div className="flex items-center gap-2 border-b border-zinc-800 pb-3 text-xs text-zinc-400">
               <Code2 className="h-3.5 w-3.5" />
               <span>safarcraft / resume-checks.ts</span>
             </div>
@@ -33,14 +33,14 @@ export function BuiltForEngineers() {
                 <span className="text-zinc-300">resume</span>
                 <span className="text-zinc-400">)</span>
                 <span className="text-zinc-400">;</span>{"\n"}
-                <span className="text-zinc-500">{"// Clear checks, processed in your browser"}</span>
+                <span className="text-zinc-400">{"// Clear checks, processed in your browser"}</span>
                 {"\n\n"}
                 <span className="text-emerald-400">return</span>{" "}
                 <span className="text-sky-300">review</span>
                 <span className="text-zinc-400">.</span>
                 <span className="text-amber-300">suggestions</span>
                 <span className="text-zinc-400">;</span>{" "}
-                <span className="text-zinc-500">{"// review, edit, decide"}</span>
+                <span className="text-zinc-400">{"// review, edit, decide"}</span>
               </code>
             </pre>
           </div>

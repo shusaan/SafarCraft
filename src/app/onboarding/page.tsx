@@ -16,7 +16,8 @@ import { trackEvent } from "@/engines/analytics";
  *
  * Two large CTAs — "Import existing CV" and "Start from scratch" — with
  * a brief explanation of each. Forks to:
- *   - /onboarding?path=import → /builder (drops into Personal Info with
+ * Legacy /onboarding?path=… URLs are redirected in next.config.ts:
+ *   - /onboarding?path=import → /builder?onboarding=import (drops into Personal Info with
  *     the existing Import flow primed)
  *   - /onboarding?path=scratch → /onboarding/wizard (5-step guided builder)
  *
@@ -76,7 +77,7 @@ export default function OnboardingPage() {
             bullets={[
               "Step-by-step guidance",
               "Autosaves as you type",
-              "8 ATS-tested templates",
+              "8 free resume templates",
             ]}
             cta="Start the wizard"
             onClick={() => {
