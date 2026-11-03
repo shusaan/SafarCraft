@@ -28,26 +28,51 @@ export type PaperSize = "letter" | "a4" | "legal";
 
 export type ColumnLayout = "one" | "two";
 
+export type ATSAxisId = "contact" | "experience" | "impact" | "skills" | "format";
+
 export type ATSDeduction = {
+  id: string;
   category: string;
-  axis: "content" | "format" | "ats" | "brevity" | "impact";
+  axis: ATSAxisId;
   points: number;
   reason: string;
+  evidence?: string;
+  fix: string;
   severity: "high" | "medium" | "low";
 };
 
 export type ATSAxis = {
-  id: "content" | "format" | "ats" | "brevity" | "impact";
+  id: ATSAxisId;
   label: string;
   description: string;
   score: number;
+  weight: number;
+};
+
+export type ATSJobMatch = {
+  score: number;
+  requiredCoverage: number;
+  preferredCoverage: number;
+  skillsOverlap: number;
+  seniorityFit: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+  requiredKeywords: string[];
+  preferredKeywords: string[];
+  seniority: string;
+  evidence: Array<{ keyword: string; found: boolean; required: boolean }>;
 };
 
 export type ATSResult = {
+  /** Targeted score when a JD is present, otherwise general readiness. */
   score: number;
+  readinessScore: number;
+  jobMatch: ATSJobMatch | null;
   axes: ATSAxis[];
   deductions: ATSDeduction[];
   recommendations: string[];
+  strengths: string[];
+  label: { label: string; color: string };
 };
 
 export type JDParseResult = {
@@ -60,6 +85,12 @@ export type JDParseResult = {
   missingSkills: string[];
   suggestions: string[];
   keywordHeatmap: Record<string, number>;
+  requiredSkills?: string[];
+  preferredSkills?: string[];
+  requiredCoverage?: number;
+  preferredCoverage?: number;
+  skillsOverlap?: number;
+  seniorityFit?: number;
 };
 
 export type GitHubProfile = {

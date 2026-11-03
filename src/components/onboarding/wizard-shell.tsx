@@ -59,7 +59,7 @@ export const WIZARD_STEPS: WizardStepDef[] = [
     id: "review",
     label: "Review & Export",
     title: "Pick a template and ship it",
-    description: "Choose from 8 ATS-tested templates. You'll land in the builder where you can keep editing.",
+    description: "Choose from 8 free resume templates. You'll land in the builder where you can keep editing.",
     required: true,
   },
 ];

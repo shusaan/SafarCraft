@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 function PreviewSkeleton() {
   return (
-    <div className="animate-pulse space-y-3 p-8" aria-label="Loading preview" aria-busy="true">
+    <div className="animate-pulse space-y-3 p-8" role="status" aria-label="Loading preview" aria-busy="true">
       <div className="mx-auto mb-6 space-y-2 text-center">
         <div className="mx-auto h-5 w-48 rounded bg-muted" />
         <div className="mx-auto h-3 w-72 rounded bg-muted/70" />

@@ -22,7 +22,10 @@ export function GoalSelector() {
       <Target className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
       <Label className="text-xs font-medium text-muted-foreground shrink-0">Applying to:</Label>
       <Select value={resumeGoal} onValueChange={(v) => setResumeGoal(v as ResumeGoal)}>
-        <SelectTrigger className="h-7 w-40 text-xs border-0 bg-transparent shadow-none focus-visible:ring-1 focus-visible:ring-ring px-1">
+        <SelectTrigger
+          aria-label="Career goal"
+          className="h-7 w-40 text-xs border-0 bg-transparent shadow-none focus-visible:ring-1 focus-visible:ring-ring px-1"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -32,7 +35,7 @@ export function GoalSelector() {
         </SelectContent>
       </Select>
       {current && (
-        <p className="hidden sm:block text-xs text-muted-foreground/60 italic" aria-live="polite">
+        <p className="hidden sm:block text-xs text-muted-foreground italic" aria-live="polite">
           {current.hint}
         </p>
       )}

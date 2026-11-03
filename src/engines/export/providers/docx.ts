@@ -20,7 +20,16 @@ export async function exportDOCX(data: ResumeData): Promise<Blob> {
     }),
   );
 
-  const contact = [data.personal.email, data.personal.phone, data.personal.location].filter(Boolean).join(" | ");
+  const contact = [
+    data.personal.email,
+    data.personal.phone,
+    data.personal.location,
+    data.personal.linkedin,
+    data.personal.github,
+    data.personal.website,
+  ]
+    .filter(Boolean)
+    .join(" | ");
   if (contact) {
     sections.push(
       new Paragraph({
@@ -96,6 +105,86 @@ export async function exportDOCX(data: ResumeData): Promise<Blob> {
           spacing: { after: 60 },
         }),
       );
+    }
+  }
+
+  if (data.projects.length > 0) {
+    sections.push(
+      new Paragraph({ children: [new TextRun({ text: "PROJECTS", bold: true, size: 24 })], heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }),
+    );
+    for (const project of data.projects) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: project.name, bold: true, size: 22 }),
+            project.role ? new TextRun({ text: ` — ${project.role}`, size: 20, color: "666666" }) : new TextRun({ text: "" }),
+          ],
+          spacing: { before: 100 },
+        }),
+      );
+      if (project.description) {
+        sections.push(new Paragraph({ children: [new TextRun({ text: project.description, size: 20 })] }));
+      }
+      for (const highlight of project.highlights.filter(Boolean)) {
+        sections.push(new Paragraph({ children: [new TextRun({ text: `• ${highlight}`, size: 20 })], indent: { left: 400 } }));
+      }
+      if (project.technologies.length > 0) {
+        sections.push(
+          new Paragraph({ children: [new TextRun({ text: project.technologies.join(", "), size: 18, color: "666666" })] }),
+        );
+      }
+    }
+  }
+
+  if (data.certifications.length > 0) {
+    sections.push(
+      new Paragraph({ children: [new TextRun({ text: "CERTIFICATIONS", bold: true, size: 24 })], heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }),
+    );
+    for (const certification of data.certifications) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: certification.name, bold: true, size: 20 }),
+            new TextRun({ text: ` — ${certification.issuer}${certification.date ? ` (${certification.date})` : ""}`, size: 20 }),
+          ],
+          spacing: { after: 60 },
+        }),
+      );
+    }
+  }
+
+  if (data.languages.length > 0) {
+    sections.push(
+      new Paragraph({ children: [new TextRun({ text: "LANGUAGES", bold: true, size: 24 })], heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }),
+    );
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: data.languages.map((language) => `${language.language} (${language.proficiency})`).join(", "),
+            size: 20,
+          }),
+        ],
+      }),
+    );
+  }
+
+  if (data.publications.length > 0) {
+    sections.push(
+      new Paragraph({ children: [new TextRun({ text: "PUBLICATIONS", bold: true, size: 24 })], heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }),
+    );
+    for (const publication of data.publications) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: publication.title, bold: true, size: 20 }),
+            new TextRun({ text: ` — ${publication.publisher}${publication.date ? ` (${publication.date})` : ""}`, size: 20 }),
+          ],
+        }),
+      );
+      if (publication.description) {
+        sections.push(new Paragraph({ children: [new TextRun({ text: publication.description, size: 20, color: "666666" })] }));
+      }
     }
   }
 

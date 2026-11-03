@@ -26,22 +26,24 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: "SafarCraft — Free, Private Resume Builder",
+    default: "SafarCraft — Free CV Maker & Resume Builder",
     template: "%s | SafarCraft",
   },
   description:
-    "Create and edit a resume or CV in your browser with SafarCraft. Free, open source, private by default, and no account required.",
+    "Build a free CV or resume in your browser with SafarCraft. No signup, no watermark, no paywall — edit locally, review ATS guidance, and export PDF, DOCX, or JSON Resume.",
   keywords: [
     "free CV maker",
-    "ATS resume checker",
+    "free CV builder",
+    "CV maker no signup",
     "free resume builder",
+    "ATS CV checker",
+    "ATS resume checker",
+    "cv template free",
     "private resume builder",
     "resume builder no signup",
-    "ATS resume",
     "open source resume",
     "software engineer resume",
     "SafarCraft",
-    "free CV generator",
     "local-first",
     "privacy-first",
   ],
@@ -50,16 +52,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "SafarCraft",
-    title: "SafarCraft — Free, Private Resume Builder",
+    title: "SafarCraft — Free CV Maker & Resume Builder",
     description:
-      "Create and edit a resume or CV in your browser. Free, open source, private by default, and no account required.",
-    images: [{ url: `${siteConfig.url}${siteConfig.ogImage}`, width: 1200, height: 630, alt: "SafarCraft — Free, private resume builder" }],
+      "Build a free CV or resume in your browser. No signup, no paywall, private by default.",
+    images: [{ url: `${siteConfig.url}${siteConfig.ogImage}`, width: 1200, height: 630, alt: "SafarCraft — Free CV maker and resume builder" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SafarCraft — Free, Private Resume Builder",
+    title: "SafarCraft — Free CV Maker & Resume Builder",
     description:
-      "Create and edit a resume or CV in your browser. Free, open source, private by default, and no account required.",
+      "Build a free CV or resume in your browser. No signup, no paywall, private by default.",
     images: [`${siteConfig.url}${siteConfig.ogImage}`],
   },
   robots: {
@@ -104,11 +106,8 @@ export default function RootLayout({
           </ToastProviderWrapper>
         </ThemeProvider>
 
-        {/* Google Identity Services (Drive OAuth) */}
-        <Script
-          src="https://accounts.google.com/gsi/client"
-          strategy="beforeInteractive"
-        />
+        {/* Google Identity Services is loaded on demand by the Drive export
+            flow (src/engines/export/drive.ts) instead of on every page. */}
 
         {/* Google Analytics (anonymized) — only when NEXT_PUBLIC_GA_ID is set */}
         {GA_ID ? (

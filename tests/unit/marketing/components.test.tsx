@@ -30,12 +30,12 @@ describe("SectionHeader", () => {
 });
 
 describe("Hero", () => {
-  it("renders two CTAs routing to /onboarding", () => {
+  it("renders two intent-specific CTAs", () => {
     const { container } = render(<Hero />);
     const links = container.querySelectorAll("a");
     const hrefs = Array.from(links).map((a) => a.getAttribute("href"));
-    expect(hrefs).toContain("/onboarding?path=import");
-    expect(hrefs).toContain("/onboarding?path=scratch");
+    expect(hrefs).toContain("/builder?onboarding=import");
+    expect(hrefs).toContain("/onboarding/wizard");
   });
 
   it("headline uses display tracking-tight", () => {

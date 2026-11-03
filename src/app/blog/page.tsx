@@ -1,29 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BLOG_POSTS } from "@/data/blog-posts";
+import { buildMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Blog",
+export const metadata: Metadata = buildMetadata({
+  title: "CV & Resume Advice for Engineers",
   description:
-    "ATS-friendly resume advice, the JSON Resume standard, software engineer resume templates, and the engineering behind SafarCraft.",
-  alternates: { canonical: "/blog" },
-  openGraph: {
-    title: "SafarCraft Blog — Resume advice for engineers",
-    description:
-      "ATS-friendly resume advice, the JSON Resume standard, software engineer resume templates, and the engineering behind SafarCraft.",
-    type: "website",
-    url: "/blog",
-  },
-};
+    "Practical CV and resume advice: ATS-friendly formats, free templates, the JSON Resume standard, and the engineering behind SafarCraft.",
+  path: "/blog",
+});
 
 export default function BlogIndexPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
       <header className="mb-10">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">SafarCraft · Blog</p>
-        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">Resume advice for engineers</h1>
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">CV &amp; resume advice for engineers</h1>
         <p className="mt-3 text-muted-foreground">
-          Practical, ATS-aware guides and free tools from the SafarCraft project.
+          Practical, ATS-aware guides, free CV templates, and tools from the SafarCraft project.
         </p>
       </header>
 

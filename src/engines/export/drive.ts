@@ -3,8 +3,41 @@
 // drive.file scope: SafarCraft can only see and edit the files it created
 // itself. All files live in one dedicated "SafarCraft" folder (find-or-create).
 
+const GIS_SRC = "https://accounts.google.com/gsi/client";
+
 let tokenClient: google.accounts.oauth2.TokenClient | null = null;
 let accessToken: string | null = null;
+let gisPromise: Promise<void> | null = null;
+
+/**
+ * Lazily load Google Identity Services. The script used to be a blocking
+ * `beforeInteractive` script in the root layout, which cost every visitor a
+ * third-party request even when Drive was never used. Load it only when the
+ * user actually starts the Drive flow.
+ */
+function loadGis(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (typeof google !== "undefined" && google.accounts?.oauth2) return Promise.resolve();
+  if (gisPromise) return gisPromise;
+
+  gisPromise = new Promise<void>((resolve) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${GIS_SRC}"]`);
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => resolve());
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = GIS_SRC;
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", () => resolve());
+    script.addEventListener("error", () => resolve());
+    document.head.appendChild(script);
+  });
+
+  return gisPromise;
+}
 
 function getClientId(): string | null {
   if (typeof window === "undefined") return null;
@@ -22,6 +55,9 @@ export async function authenticate(): Promise<string | null> {
 
   const clientId = getClientId();
   if (!clientId) return null;
+
+  await loadGis();
+  if (typeof google === "undefined" || !google.accounts?.oauth2) return null;
 
   return new Promise((resolve) => {
     try {

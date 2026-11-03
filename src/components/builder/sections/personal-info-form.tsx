@@ -102,20 +102,20 @@ export function PersonalInfoForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const importTriggeredRef = useRef(false);
+  const [highlightImport, setHighlightImport] = useState(false);
 
-  // Arriving from "Import a resume" (hero/onboarding): open the native OS
-  // file picker right away so the user can pick a .pdf/.docx from their
-  // laptop or any location, then strip the flag so reloads don't re-trigger.
+  // Arriving from "Import a resume" (hero/onboarding): land on the builder with
+  // the Import Existing CV card highlighted. We deliberately do NOT auto-click
+  // the hidden file input — browsers commonly block programmatic pickers after
+  // a client-side navigation.
   useEffect(() => {
-    if (importTriggeredRef.current) return;
     if (searchParams.get("onboarding") !== "import") return;
-    importTriggeredRef.current = true;
-    fileInputRef.current?.click();
+    setHighlightImport(true);
     const next = new URLSearchParams(searchParams.toString());
     next.delete("onboarding");
+    next.delete("path");
     const qs = next.toString();
-    router.replace(`${pathname}${qs ? `?${qs}` : ""}`);
+    router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
   }, [searchParams, router, pathname]);
 
   const applyParsed = useCallback((parsed: ParsedCVLike) => {
@@ -288,7 +288,11 @@ export function PersonalInfoForm() {
   return (
     <div className="space-y-6">
       {/* Import CV */}
-      <div className="rounded-lg border border-dashed p-4">
+      <div
+        className={`rounded-lg border border-dashed p-4 transition-shadow ${
+          highlightImport ? "ring-2 ring-primary ring-offset-2" : ""
+        }`}
+      >
         <div className="flex items-center gap-3">
           <div className="rounded-lg bg-muted p-2">
             <Upload className="h-5 w-5 text-muted-foreground" />
@@ -390,7 +394,7 @@ export function PersonalInfoForm() {
         <div className="flex-1 space-y-1">
           <p className="text-sm font-medium">Profile Photo</p>
           <p className="text-xs text-muted-foreground">Click to upload or drag and drop (PNG, JPG, WEBP, max 5MB)</p>
-          <p className="text-[11px] text-muted-foreground/70">
+          <p className="text-[11px] text-muted-foreground">
             Shows on templates with photo support — upload turns it on automatically.
             Classic ATS intentionally skips photos for maximum parser compatibility.
           </p>
