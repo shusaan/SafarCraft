@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/shusaan/SafarCraft/compare/v1.2.0...v1.3.0) (2026-11-03)
+
+
+### Features
+
+* **seo:** fix homepage schema and strengthen search targeting ([2c650d0](https://github.com/shusaan/SafarCraft/commit/2c650d0eb1cb431908f43d45d9667f9c159c1425))
+* **seo:** fix homepage schema and strengthen search targeting ([944cfb6](https://github.com/shusaan/SafarCraft/commit/944cfb6f4158ad21664b51f7138f1e9c1bf5d026))
+
 ## [1.2.0](https://github.com/shusaan/SafarCraft/compare/v1.1.0...v1.2.0) (2026-11-03)
 
 
