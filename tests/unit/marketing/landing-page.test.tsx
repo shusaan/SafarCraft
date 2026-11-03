@@ -25,9 +25,10 @@ describe("HomePage (landing)", () => {
     expect(screen.getByText("Resources")).toBeTruthy();
     expect(screen.getByText("Legal")).toBeTruthy();
 
-    // Navbar links (these duplicate footer link text)
+    // Navbar links (Builder is duplicated in the footer)
     expect(screen.getAllByText("Builder").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getAllByText("Templates").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText("Templates").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Resume Templates").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("GitHub").length).toBeGreaterThanOrEqual(1);
   });
 
@@ -41,17 +42,15 @@ describe("HomePage (landing)", () => {
 
   it("navbar CTA routes to the generic onboarding chooser", () => {
     render(<HomePage />);
-    const cta = screen.getAllByRole("link").find(
-      (a) => a.textContent?.trim().startsWith("Build a resume"),
-    );
+    const cta = screen
+      .getAllByRole("link")
+      .find((a) => a.textContent?.trim().startsWith("Build a resume"));
     expect(cta?.getAttribute("href")).toBe("/onboarding");
   });
 
   it("uses intent-specific destinations without duplicating the chooser", () => {
     render(<HomePage />);
-    const links = Array.from(document.querySelectorAll("a")).map(
-      (a) => a.getAttribute("href"),
-    );
+    const links = Array.from(document.querySelectorAll("a")).map((a) => a.getAttribute("href"));
     expect(links).toContain("/builder?onboarding=import");
     expect(links).toContain("/onboarding/wizard");
     expect(links).toContain("/onboarding");

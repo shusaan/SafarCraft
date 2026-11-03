@@ -10,6 +10,7 @@ import { REPO_URL } from "@/lib/external-urls";
 import { siteConfig } from "@/lib/seo/site";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID?.trim() || "";
+const GOOGLE_SITE_VERIFICATION = process.env.GOOGLE_SITE_VERIFICATION?.trim() || "";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,7 +56,14 @@ export const metadata: Metadata = {
     title: "SafarCraft — Free CV Maker & Resume Builder",
     description:
       "Build a free CV or resume in your browser. No signup, no paywall, private by default.",
-    images: [{ url: `${siteConfig.url}${siteConfig.ogImage}`, width: 1200, height: 630, alt: "SafarCraft — Free CV maker and resume builder" }],
+    images: [
+      {
+        url: `${siteConfig.url}${siteConfig.ogImage}`,
+        width: 1200,
+        height: 630,
+        alt: "SafarCraft — Free CV maker and resume builder",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -68,16 +76,13 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  verification: GOOGLE_SITE_VERIFICATION ? { google: GOOGLE_SITE_VERIFICATION } : undefined,
 };
 
 // Schema.org JSON-LD is now emitted in <head> via organisationLd()
 // (see Phase 5). The legacy inline jsonLd constant was removed.
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -85,18 +90,16 @@ export default function RootLayout({
         <meta name="theme-color" content="#166451" />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationLd({ sameAs: [REPO_URL] })),
-          }}
+          dangerouslySetInnerHTML={organizationLd({ sameAs: [REPO_URL] })}
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} bg-background min-h-screen font-sans antialiased`}
       >
         <ThemeProvider>
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg focus:outline-none"
+            className="focus:bg-primary focus:text-primary-foreground sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:px-4 focus:py-2 focus:shadow-lg focus:outline-none"
           >
             Skip to main content
           </a>
