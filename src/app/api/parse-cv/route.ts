@@ -65,7 +65,15 @@ export async function POST(request: NextRequest) {
 
     // ── Step 2: Parse into structured data ───────────────────────────────
     const quality = rawText.length > 500 ? "high" : "low";
-    const { parsed } = await parseCV(rawText, { layout, numPages, quality });
+    const { parsed, lowConfidence } = await parseCV(rawText, { layout, numPages, quality });
+
+    // Placeholder templates and flattened/scanned documents parse into noise.
+    // Ask the user to paste their text instead of importing garbage.
+    if (lowConfidence) {
+      return NextResponse.json({
+        error: "We couldn't reliably read this file — it looks like an unfilled template, a scanned image, or an unsupported layout. Please paste your CV text using the 'Create from Scratch' tab.",
+      }, { status: 422 });
+    }
 
     return NextResponse.json({ parsed });
 

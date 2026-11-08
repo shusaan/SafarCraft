@@ -4,36 +4,67 @@ import path from "node:path";
 import { extractPDFText } from "@/engines/cv/pdf-extractor";
 import { parseCVFallback } from "@/engines/cv/cv-parser";
 
-// Fixtures that ship with the repo so CI can exercise the parser.
-// `tests/fixtures/husn-devops-cv.pdf` is a real-world 2-page CV that
-// caught several parser regressions (split sections, mixed Y-buckets,
-// glued cert headers, etc.).
-const fixtures = [
-  path.resolve(__dirname, "..", "fixtures", "husn-devops-cv.pdf"),
-];
-const haveFixtures = fixtures.every((p) => existsSync(p));
+// These PDFs are local-only fixtures (`tests/fixtures/*.pdf` is git-ignored).
+// CI and fresh clones will not have them, so the whole suite is skipped there.
+const FIXTURES_DIR = path.resolve(__dirname, "..", "fixtures");
+const SAMPLES = {
+  husn: path.join(FIXTURES_DIR, "husn-devops-cv.pdf"),
+  template: path.join(FIXTURES_DIR, "cv1.pdf"),
+  academic: path.join(FIXTURES_DIR, "cv2.pdf"),
+};
 
-describe.skipIf(!haveFixtures)("Real PDF CV samples (in-repo fixtures)", () => {
-  for (const path of fixtures) {
-    const name = path.split(/[/\\]/).pop()!;
+async function parseFixture(filePath: string) {
+  const buf = readFileSync(filePath);
+  const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  const extracted = await extractPDFText(ab as ArrayBuffer);
+  const result = parseCVFallback(extracted.text);
+  return { ...result, extracted };
+}
 
-    it(`parses ${name} end-to-end`, async () => {
-      const buf = readFileSync(path);
-      const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-      const extracted = await extractPDFText(ab);
-      const result = parseCVFallback(extracted.text);
+const available = Object.fromEntries(
+  Object.entries(SAMPLES).filter(([, p]) => existsSync(p)),
+) as Partial<typeof SAMPLES>;
 
-      // ---- Universal sanity (every CV should satisfy) ----
-      expect(result.parsed.name.length).toBeGreaterThan(0);
-      expect(result.parsed.name).not.toMatch(/\d{1,2}\/\d{1,2}\/\d/); // no date leak
-      expect(result.parsed.email).toMatch(/@/);
-      expect(result.parsed.experience.length).toBeGreaterThan(0);
-      expect(result.parsed.skillGroups.length).toBeGreaterThan(0);
-      expect(result.parsed.education.length).toBeGreaterThan(0);
-      // pdf-extractor's Y-sort fix: dates must land in the experience section.
-      expect(result.parsed.experience[0]?.startDate).toMatch(/^\d{4}-\d{2}$/);
-      expect(result.parsed.experience[0]?.endDate).toMatch(/^\d{4}-\d{2}$/);
-    });
-  }
+describe.skipIf(Object.keys(available).length === 0)("Real PDF CV samples (local fixtures)", () => {
+  it.skipIf(!available.husn)("parses the two-column real-world CV", async () => {
+    const { parsed, lowConfidence, extracted } = await parseFixture(SAMPLES.husn!);
+
+    expect(extracted.layout).toBe("two-column");
+    expect(extracted.splitX).not.toBeNull();
+
+    expect(parsed.name.length).toBeGreaterThan(0);
+    expect(parsed.name).not.toMatch(/\d{1,2}[/-]\d{1,2}[/-]\d/);
+    expect(parsed.email).toMatch(/@/);
+
+    // Exactly the roles listed in the document — no phantom company rows.
+    expect(parsed.experience).toHaveLength(7);
+    expect(parsed.experience.every((e) => e.company.length > 0)).toBe(true);
+    expect(parsed.experience[0]?.startDate).toMatch(/^\d{4}-\d{2}$/);
+    expect(parsed.experience[0]?.endDate).toMatch(/^\d{4}-\d{2}$/);
+
+    expect(parsed.skillGroups.length).toBeGreaterThanOrEqual(5);
+    expect(parsed.skillGroups.flatMap((g) => g.skills)).toContain("Kubernetes");
+    expect(parsed.education.length).toBeGreaterThanOrEqual(1);
+    expect(lowConfidence).toBe(false);
+  });
+
+  it.skipIf(!available.template)("flags an unfilled template as low confidence", async () => {
+    const { parsed, lowConfidence } = await parseFixture(SAMPLES.template!);
+
+    expect(parsed.name).toMatch(/forename|surname/i);
+    expect(lowConfidence).toBe(true);
+  });
+
+  it.skipIf(!available.academic)("parses a multi-page academic CV", async () => {
+    const { parsed, lowConfidence } = await parseFixture(SAMPLES.academic!);
+
+    // The name must not have the "PERSONAL PROFILE" header glued onto it.
+    expect(parsed.name).toBe("Khawaja Tariq Mahmood");
+    expect(parsed.email).toMatch(/@/);
+    expect(parsed.phone.replace(/\D/g, "").length).toBeGreaterThanOrEqual(7);
+
+    expect(parsed.education.length).toBeGreaterThanOrEqual(3);
+    expect(parsed.education[0]?.degree.length).toBeGreaterThan(0);
+    expect(lowConfidence).toBe(false);
+  });
 });
-

@@ -262,131 +262,43 @@ jane@example.com
 
 import { extractPDFText } from "@/engines/cv/pdf-extractor";
 import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 
-// Sample CV PDFs are local-only fixtures (developer machine path). When absent
-// (CI, fresh clone, etc.) we skip these tests — they're meant to catch
-// regressions in the local PDF parser, not gate the build.
-const SAMPLE_PDFS = [
-  "/tmp/opencode/cv-samples/pdfs/cv1-single-column.html.pdf",
-  "/tmp/opencode/cv-samples/pdfs/cv2-two-column-sidebar.html.pdf",
-  "/tmp/opencode/cv-samples/pdfs/cv3-modern-compact.html.pdf",
-];
-const haveSamplePdfs = SAMPLE_PDFS.every((p) => existsSync(p));
+// `tests/fixtures/*.pdf` are local-only (git-ignored). When absent (CI, fresh
+// clone) these tests are skipped — they guard the local PDF pipeline.
+const FIXTURES = path.resolve(__dirname, "..", "..", "fixtures");
+const SAMPLE_PDFS = {
+  twoColumn: path.join(FIXTURES, "husn-devops-cv.pdf"),
+  template: path.join(FIXTURES, "cv1.pdf"),
+  academic: path.join(FIXTURES, "cv2.pdf"),
+};
+const haveSamplePdfs = Object.values(SAMPLE_PDFS).every((p) => existsSync(p));
 
-describe.skipIf(!haveSamplePdfs)("PDF extraction — real sample CVs", () => {
-  it("strips Chrome date/URL header and footer noise", async () => {
-    const buf = readFileSync(SAMPLE_PDFS[0]!);
-    const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    const result = await extractPDFText(ab);
-    expect(result.text).not.toMatch(/^\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}/m);
-    expect(result.text).not.toMatch(/^fi\s*le:\/\//m);
-  });
-
-  it("detects two-column layout for sidebar CV", async () => {
-    const buf = readFileSync(SAMPLE_PDFS[1]!);
+describe.skipIf(!haveSamplePdfs)("PDF extraction — local fixture CVs", () => {
+  it("detects a two-column layout and a split boundary", async () => {
+    const buf = readFileSync(SAMPLE_PDFS.twoColumn);
     const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
     const result = await extractPDFText(ab);
     expect(result.layout).toBe("two-column");
     expect(result.splitX).not.toBeNull();
   });
-});
 
-// ─── End-to-end parse for each sample PDF ───────────────────────────────────
-
-describe.skipIf(!haveSamplePdfs)("End-to-end parse on real sample CVs", () => {
-  for (const path of SAMPLE_PDFS) {
-    const name = path.split("/").pop()!;
-
-    it(`extracts meaningful data from ${name}`, async () => {
-      const buf = readFileSync(path);
+  it("does not invent a two-column split for single-column documents", async () => {
+    for (const file of [SAMPLE_PDFS.template, SAMPLE_PDFS.academic]) {
+      const buf = readFileSync(file);
       const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-      const { text } = await extractPDFText(ab);
-      const { parsed } = parseCVFallback(text);
-
-      expect(parsed.name.length).toBeGreaterThan(0);
-      // Name must NOT contain the browser date header.
-      expect(parsed.name).not.toMatch(/\d{1,2}\/\d{1,2}\/\d/);
-      expect(parsed.email).toMatch(/@/);
-      expect(parsed.experience.length).toBeGreaterThanOrEqual(2);
-      expect(parsed.skillGroups.length).toBeGreaterThan(0);
-      expect(parsed.education.length).toBeGreaterThan(0);
-    });
-  }
-
-  it("extracts the modern-compact CV (letter-spaced headers, single-line header)", async () => {
-    const buf = readFileSync(SAMPLE_PDFS[2]!);
-    const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    const { text } = await extractPDFText(ab);
-    const { parsed } = parseCVFallback(text);
-
-    // Letter-spaced headers (`E X P E R I E N C E`) must still be detected.
-    expect(parsed.experience.length).toBe(3);
-
-    // Single-line "Engineering Manager — Stripe Jan 2022 - Present" must
-    // split correctly into position, company, dates.
-    const stripeJob = parsed.experience.find((e) => e.company === "Stripe");
-    expect(stripeJob).toBeDefined();
-    expect(stripeJob?.position).toBe("Engineering Manager");
-    expect(stripeJob?.location).toContain("Seattle");
-    expect(stripeJob?.startDate).toBe("2022-01");
-    expect(stripeJob?.endDate).toBe("Present");
-    expect(stripeJob?.current).toBe(true);
-    expect(stripeJob?.bullets.length).toBeGreaterThanOrEqual(2);
-
-    // Compact skill grid (two categories per line) must split into 4 groups.
-    expect(parsed.skillGroups.length).toBe(4);
-    const cats = parsed.skillGroups.map((g) => g.category);
-    expect(cats).toContain("Languages");
-    expect(cats).toContain("Backend");
-    expect(cats).toContain("Infra");
-    expect(cats).toContain("Data");
-
-    // Education: single-line "B.S. Computer Science - Carnegie Mellon University 2011 - 2015"
-    expect(parsed.education.length).toBe(1);
-    const edu = parsed.education[0]!;
-    expect(edu.degree).toBe("B.S. Computer Science");
-    expect(edu.institution).toContain("Carnegie Mellon");
+      const result = await extractPDFText(ab);
+      expect(result.layout).toBe("single");
+      expect(result.splitX).toBeNull();
+    }
   });
 
-  it("extracts the two-column sidebar CV", async () => {
-    const buf = readFileSync(SAMPLE_PDFS[1]!);
+  it("produces text without chrome date/URL headers", async () => {
+    const buf = readFileSync(SAMPLE_PDFS.twoColumn);
     const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    const { text } = await extractPDFText(ab);
-    const { parsed } = parseCVFallback(text);
-
-    // Two-line first name should join to "Maria Garcia".
-    expect(parsed.name).toBe("Maria Garcia");
-
-    // All 3 experience entries, each with correct company.
-    expect(parsed.experience.length).toBe(3);
-    const companies = parsed.experience.map((e) => e.company);
-    expect(companies).toContain("Klarna");
-    expect(companies).toContain("Cabify");
-    expect(companies).toContain("Glovo");
-
-    // 2 education entries with degree and institution separated.
-    expect(parsed.education.length).toBe(2);
-    expect(parsed.education[0]?.degree.toLowerCase()).toMatch(/msc/);
-    expect(parsed.education[0]?.institution).toContain("Politecnica");
-    expect(parsed.education[1]?.degree.toLowerCase()).toMatch(/bsc/);
-  });
-
-  it("extracts the single-column standard CV", async () => {
-    const buf = readFileSync(SAMPLE_PDFS[0]!);
-    const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
-    const { text } = await extractPDFText(ab);
-    const { parsed } = parseCVFallback(text);
-
-    expect(parsed.name).toBe("John Smith");
-    expect(parsed.experience.length).toBe(3);
-
-    // First experience: position line + company/location/dates line pattern.
-    const techCorp = parsed.experience[0]!;
-    expect(techCorp.company).toBe("Tech Corp");
-    expect(techCorp.position).toBe("Senior Software Engineer");
-    expect(techCorp.location).toContain("San Francisco");
-    expect(techCorp.endDate).toBe("Present");
-    expect(techCorp.bullets.length).toBe(3);
+    const result = await extractPDFText(ab);
+    expect(result.text).not.toMatch(/^\d{1,2}\/\d{1,2}\/\d{2,4},?\s+\d{1,2}:\d{2}/m);
+    expect(result.text).not.toMatch(/^fi\s*le:\/\//m);
   });
 });
 
@@ -514,5 +426,151 @@ MIT
     expect(result.parsed.education.length).toBe(1);
     expect(result.parsed.education[0]?.degree.toLowerCase()).toContain("msc");
     expect(result.parsed.education[0]?.institution).toBe("MIT");
+  });
+});
+
+// ─── Regression tests for parser hardening ─────────────────────────────────
+
+describe("parseCVFallback — date and layout hardening", () => {
+  it("normalises academic term dates", () => {
+    const text = `Jane Doe
+jane@example.com
+(555) 123-4567
+
+EXPERIENCE
+Lecturer
+State University
+Fall 2014 - Spring 2016
+- Taught algebra`;
+    const result = parseCVFallback(text);
+    expect(result.parsed.experience[0]?.startDate).toBe("2014-09");
+    expect(result.parsed.experience[0]?.endDate).toBe("2016-03");
+  });
+
+  it("treats 'To date' and 'Ongoing' as present", () => {
+    for (const marker of ["To date", "Till date", "Ongoing", "Now"]) {
+      const text = `Jane Doe
+jane@example.com
+(555) 123-4567
+
+EXPERIENCE
+Engineer
+Acme
+Jan 2020 - ${marker}
+- Built things`;
+      const result = parseCVFallback(text);
+      expect(result.parsed.experience[0]?.endDate).toBe("Present");
+      expect(result.parsed.experience[0]?.current).toBe(true);
+    }
+  });
+
+  it("assembles labelled experience entries", () => {
+    const text = `Jane Doe
+jane@example.com
+(555) 123-4567
+
+WORKING EXPERIENCE
+Institute: State University
+Job Title: Lecturer
+Duration: Fall 2014 - To date
+Teaching
+- Algebra
+- Calculus`;
+    const result = parseCVFallback(text);
+    expect(result.parsed.experience).toHaveLength(1);
+    const job = result.parsed.experience[0]!;
+    expect(job.position).toBe("Lecturer");
+    expect(job.company).toBe("State University");
+    expect(job.startDate).toBe("2014-09");
+    expect(job.endDate).toBe("Present");
+    expect(job.bullets.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("parses filled-marker skill categories with wrapped items", () => {
+    const text = `Jane Doe
+jane@example.com
+(555) 123-4567
+
+SKILLS
+● Languages
+○ Python, Go
+● Infrastructure
+○ Docker,
+Kubernetes`;
+    const result = parseCVFallback(text);
+    expect(result.parsed.skillGroups).toHaveLength(2);
+    expect(result.parsed.skillGroups[0]?.category).toBe("Languages");
+    expect(result.parsed.skillGroups[0]?.skills).toEqual(["Python", "Go"]);
+    expect(result.parsed.skillGroups[1]?.category).toBe("Infrastructure");
+    expect(result.parsed.skillGroups[1]?.skills).toEqual(["Docker", "Kubernetes"]);
+  });
+
+  it("back-fills the employer onto stacked roles at one company", () => {
+    const text = `Jane Doe
+jane@example.com
+(555) 123-4567
+
+EXPERIENCE
+Senior Architect Jan 2022 - Sep 2022
+DevOps Architect Jan 2020 - Jan 2022
+Acme Ltd
+- Designed systems
+DevOps Engineer Jan 2018 - Dec 2019
+Acme Ltd
+- Automated deploys`;
+    const result = parseCVFallback(text);
+    expect(result.parsed.experience).toHaveLength(3);
+    const companies = result.parsed.experience.map((e) => e.company);
+    expect(companies).toEqual(["Acme Ltd", "Acme Ltd", "Acme Ltd"]);
+  });
+});
+
+describe("parseCVFallback — confidence gate and labelled contacts", () => {
+  it("flags placeholder templates as low confidence", () => {
+    const text = `Forename SURNAME
+Job title
+Company name
+Please use 3-4 bullets maximum`;
+    const result = parseCVFallback(text);
+    expect(result.lowConfidence).toBe(true);
+  });
+
+  it("does not flag a normal CV as low confidence", () => {
+    const result = parseCVFallback(SAMPLE_RESUME);
+    expect(result.lowConfidence).toBe(false);
+  });
+
+  it("reads labelled contact fields from the header", () => {
+    const text = `John Smith
+PERSONAL DETAILS
+Name: John Smith
+Email: john@example.com
+Mobile: +1 555 123 4567
+Home Address: 1 Main Street`;
+    const result = parseCVFallback(text);
+    expect(result.parsed.name).toBe("John Smith");
+    expect(result.parsed.email).toBe("john@example.com");
+    expect(result.parsed.phone.replace(/\D/g, "")).toContain("5551234567");
+    expect(result.parsed.location).toBe("1 Main Street");
+    expect(result.lowConfidence).toBe(false);
+  });
+});
+
+describe("parseCVFallback — certifications", () => {
+  it("joins wrapped credential names and drops category headings", () => {
+    const text = `Jane Doe
+jane@example.com
+(555) 123-4567
+
+CERTIFICATIONS
+● Cloud & Kubernetes
+○ AWS Solutions Architect -
+Associate
+○ CKA - Kubernetes Administrator`;
+    const result = parseCVFallback(text);
+    const names = result.parsed.certifications.map((c) => c.name);
+    expect(names).toContain("AWS Solutions Architect - Associate");
+    expect(names).toContain("CKA - Kubernetes Administrator");
+    expect(names).not.toContain("Cloud & Kubernetes");
   });
 });

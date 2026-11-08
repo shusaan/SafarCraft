@@ -73,6 +73,12 @@ export interface ParsedCV {
 
 export interface ParseResult {
   parsed: ParsedCV;
+  /**
+   * True when the source document looks like an unfilled template, a scanned
+   * image, or a layout this parser cannot trust. Callers should surface a
+   * "please paste your CV text" prompt instead of importing the result.
+   */
+  lowConfidence?: boolean;
 }
 
 export interface ParseCVOptions {
@@ -125,11 +131,17 @@ const JOB_TITLE_KEYWORDS = [
   "Officer", "Executive", "Coordinator", "Administrator",
   "Scientist", "Researcher", "Writer", "Editor", "Producer",
   "Consultant", "Strategist", "Advisor", "Architect",
+  "Teacher", "Lecturer", "Professor", "Instructor", "Tutor", "Faculty",
 ];
 
 const MONTH_MAP: Record<string, string> = {
   jan:"01", feb:"02", mar:"03", apr:"04", may:"05", jun:"06",
   jul:"07", aug:"08", sep:"09", oct:"10", nov:"11", dec:"12",
+};
+
+// Academic / seasonal date wording (e.g. "Fall 2014", "Spring 2020").
+const SEASON_MAP: Record<string, string> = {
+  spring: "03", summer: "06", fall: "09", autumn: "09", winter: "12",
 };
 
 function toYYYYMM(raw: string): string {
@@ -139,6 +151,11 @@ function toYYYYMM(raw: string): string {
   // "2022-01" or "2022/01"
   const slash = raw.match(/^(\d{4})[/-](\d{2})$/);
   if (slash) return `${slash[1]}-${slash[2]}`;
+  // "Fall 2014", "Spring Semester 2020"
+  const season = raw.match(/(spring|summer|fall|autumn|winter)[a-z]*[\s,.-]+(\d{4})/i);
+  if (season) {
+    return `${season[2]}-${SEASON_MAP[season[1]!.toLowerCase()] ?? "01"}`;
+  }
   // "Jan 2022" or "January 2022"
   const month = raw.match(/([a-z]{3})[a-z]*[\s,.-]+(\d{4})/i);
   if (month) {
@@ -150,15 +167,28 @@ function toYYYYMM(raw: string): string {
   return year ? `${year[1]}-01` : raw;
 }
 
+/** True when a raw date token marks an ongoing role ("Present", "Current",
+ *  "To date", "Till date", "Ongoing", "Now"). */
+function isPresentMarker(raw: string): boolean {
+  return /\b(?:present|current|to\s+date|till\s+date|ongoing|now)\b/i.test(raw);
+}
+
 const SECTION_HEADERS = [
   "SUMMARY", "PROFILE", "OBJECTIVE", "ABOUT", "PROFESSIONAL SUMMARY",
-  "EXPERIENCE", "WORK EXPERIENCE", "PROFESSIONAL EXPERIENCE", "EMPLOYMENT HISTORY", "EMPLOYMENT", "WORK HISTORY",
-  "EDUCATION", "ACADEMIC", "ACADEMIC BACKGROUND", "EDUCATIONAL BACKGROUND",
+  "PERSONAL PROFILE", "PERSONAL DETAILS", "PERSONAL INFORMATION", "PROFESSIONAL PROFILE",
+  "CAREER SUMMARY", "CAREER OBJECTIVE", "CAREER OBJECTIVES", "CAREER PROFILE",
+  "EXPERIENCE", "WORK EXPERIENCE", "WORKING EXPERIENCE", "PROFESSIONAL EXPERIENCE", "EMPLOYMENT HISTORY", "EMPLOYMENT", "WORK HISTORY",
+  "TEACHING EXPERIENCE", "RESEARCH EXPERIENCE", "INDUSTRIAL EXPERIENCE",
+  "EDUCATION", "ACADEMIC", "ACADEMIC BACKGROUND", "EDUCATIONAL BACKGROUND", "ACADEMIC INFORMATION",
+  "ACADEMIC QUALIFICATIONS", "EDUCATIONAL QUALIFICATION", "EDUCATIONAL QUALIFICATIONS", "QUALIFICATIONS",
   "SKILLS", "TECHNICAL SKILLS", "SKILLS & TECHNOLOGIES", "CORE COMPETENCIES", "KEY SKILLS", "COMPETENCIES",
+  "PROFESSIONAL SKILLS", "TECHNICAL PROFICIENCIES", "AREAS OF EXPERTISE", "COMPUTER SKILLS", "IT SKILLS",
   "PROJECTS", "PERSONAL PROJECTS", "SIDE PROJECTS", "KEY PROJECTS",
-  "CERTIFICATIONS", "CERTIFICATES", "CREDENTIALS", "LICENSES",
+  "CERTIFICATIONS", "CERTIFICATES", "CREDENTIALS", "LICENSES", "TRAINING", "TRAININGS", "COURSES",
   "LANGUAGES", "LANGUAGE SKILLS",
-  "AWARDS", "HONORS", "PUBLICATIONS", "VOLUNTEER", "VOLUNTEERING", "INTERESTS", "REFERENCES", "HOBBIES",
+  "AWARDS", "HONORS", "PUBLICATIONS", "PUBLICATION", "RESEARCH PUBLICATION", "RESEARCH PUBLICATIONS",
+  "RESEARCH", "ACHIEVEMENTS", "VOLUNTEER", "VOLUNTEERING",
+  "INTERESTS", "REFERENCES", "HOBBIES",
   "CONTACT", "CONTACTS", "GET IN TOUCH",
 ] as const;
 
@@ -177,6 +207,9 @@ const SECTION_RE = new RegExp(
 function matchSectionHeader(line: string): string | null {
   const stripped = line.replace(/[:|\-–—]/g, "").replace(/\s+/g, "").toUpperCase();
   if (!stripped) return null;
+  // Bullet-led content ("• Languages", "● Cloud Platforms") is a skill item or
+  // category, never a section boundary.
+  if (BULLET_RE.test(line.trim())) return null;
   for (const header of SECTION_HEADERS) {
     if (stripped === header.replace(/\s+/g, "").toUpperCase()) {
       return header.toUpperCase();
@@ -209,6 +242,15 @@ function splitSections(lines: string[]): Record<string, string[]> {
     // "timely manner. CERTIFICATIONS"), split the line at the boundary.
     // Conservative split: only when the trailing word is exactly a known
     // header, and the prefix is non-empty.
+    // Full-line header takes precedence over the glued-trailer split: a line
+    // like "PERSONAL PROFILE" must not be parsed as "PERSONAL" + "PROFILE".
+    const standaloneFull = matchSectionHeader(trimmed);
+    if (standaloneFull) {
+      current = standaloneFull;
+      if (!sections[current]) sections[current] = [];
+      continue;
+    }
+
     let prefixPart = trimmed;
     let trailerHeader: string | null = null;
     const lastWordMatch = trimmed.match(/^(.*?)\b([A-Z]{3,20})$/);
@@ -271,22 +313,43 @@ export function parseCVFallback(rawText: string, _options?: ParseCVOptions): Par
   const lines = cleanedText.split("\n").map((l) => l.trim()).filter(Boolean);
   const sections = splitSections(lines);
 
-  const name     = parseName(lines);
-  const email    = rawText.match(EMAIL_RE)?.[0] ?? "";
-  const phone    = extractPhone(rawText);
-  const location = parseLocation(getSection(sections, "HEADER").join(" "), rawText);
+  const labelled = parseLabelledFields(cleanedText);
+
+  const name     = parseName(lines) || labelled.name;
+  const email    = rawText.match(EMAIL_RE)?.[0] ?? labelled.email;
+  const phone    = extractPhone(rawText) || labelled.phone;
+  const location = parseLocation(getSection(sections, "HEADER").join(" "), rawText) || labelled.location;
   const { linkedin, github, website } = parseURLs(rawText);
-  const summary  = getSection(sections, "SUMMARY", "PROFILE", "OBJECTIVE", "ABOUT").join(" ").trim();
+  const summary  = getSection(
+    sections,
+    "SUMMARY", "PROFILE", "OBJECTIVE", "ABOUT", "PROFESSIONAL SUMMARY",
+    "CAREER SUMMARY", "CAREER OBJECTIVE", "CAREER OBJECTIVES", "CAREER PROFILE", "PROFESSIONAL PROFILE",
+  ).join(" ").trim();
 
   const skillGroups = parseSkills(
-    getSection(sections, "SKILLS", "TECHNICAL SKILLS", "SKILLS & TECHNOLOGIES", "CORE COMPETENCIES", "KEY SKILLS")
+    getSection(
+      sections,
+      "SKILLS", "TECHNICAL SKILLS", "SKILLS & TECHNOLOGIES", "CORE COMPETENCIES", "KEY SKILLS",
+      "COMPETENCIES", "PROFESSIONAL SKILLS", "TECHNICAL PROFICIENCIES", "AREAS OF EXPERTISE",
+      "COMPUTER SKILLS", "IT SKILLS",
+    )
   );
 
   const experience = parseExperience(
-    getSection(sections, "EXPERIENCE", "WORK EXPERIENCE", "PROFESSIONAL EXPERIENCE", "EMPLOYMENT HISTORY", "EMPLOYMENT")
+    getSection(
+      sections,
+      "EXPERIENCE", "WORK EXPERIENCE", "WORKING EXPERIENCE", "PROFESSIONAL EXPERIENCE", "EMPLOYMENT HISTORY", "EMPLOYMENT",
+      "WORK HISTORY", "TEACHING EXPERIENCE", "RESEARCH EXPERIENCE", "INDUSTRIAL EXPERIENCE",
+    )
   );
 
-  const education = parseEducation(getSection(sections, "EDUCATION", "ACADEMIC"));
+  const education = parseEducation(
+    getSection(
+      sections,
+      "EDUCATION", "ACADEMIC", "ACADEMIC BACKGROUND", "EDUCATIONAL BACKGROUND", "ACADEMIC INFORMATION",
+      "ACADEMIC QUALIFICATIONS", "EDUCATIONAL QUALIFICATION", "EDUCATIONAL QUALIFICATIONS", "QUALIFICATIONS",
+    )
+  );
 
   const projects = parseProjects(
     getSection(sections, "PROJECTS", "PERSONAL PROJECTS", "SIDE PROJECTS")
@@ -304,7 +367,85 @@ export function parseCVFallback(rawText: string, _options?: ParseCVOptions): Par
     projects, certifications, languages,
   };
 
-  return { parsed };
+  return { parsed, lowConfidence: isLowConfidence(cleanedText, parsed) };
+}
+
+const PLACEHOLDER_RE = /\b(forename|surname|job\s+title|company\s+name|professional\s+email\s+address|your\s+name|your\s+email|make\s+sure\s+your|please\s+use|lorem\s+ipsum|insert\s+your|add\s+your)\b/gi;
+
+/**
+ * Heuristic confidence gate. A real CV essentially always carries a working
+ * email or phone number; unfilled templates and scanned/flattened documents
+ * carry placeholder copy ("Forename SURNAME", "Job title", "Company name")
+ * and no contact details. When we detect that shape we tell the caller to
+ * ask the user to paste their text instead of importing garbage.
+ */
+function isLowConfidence(text: string, parsed: ParsedCV): boolean {
+  const hasEmail = EMAIL_RE.test(parsed.email);
+  const hasPhone = parsed.phone.replace(/\D/g, "").length >= 7;
+  const hasContact = hasEmail || hasPhone;
+  const hasStructure =
+    parsed.experience.some((e) => !!e.company) ||
+    parsed.education.length > 0 ||
+    parsed.skillGroups.length > 0;
+
+  const placeholderHits = (text.match(PLACEHOLDER_RE) ?? []).length;
+  const placeholderName = /\b(forename|surname)\b/i.test(parsed.name);
+  const placeholderRole = parsed.experience.some((e) =>
+    /\b(job\s+title|company\s+name|position\s+title)\b/i.test(`${e.position} ${e.company}`)
+  );
+
+  // Placeholder copy only matters when there is no usable contact info —
+  // real CVs sometimes contain the words "Job Title" as a column heading.
+  if ((placeholderName || placeholderRole || placeholderHits >= 3) && !hasContact) return true;
+  if (!hasContact && !hasStructure) return true;
+  return false;
+}
+
+/**
+ * Extract contact details written as explicit "Label: value" pairs in the
+ * document header (common in academic / regional CV formats):
+ *   Name: Khawaja Tariq Mahmood
+ *   Mobile: +92 333 5596829
+ *   Home Address: House # 512 ...
+ */
+function parseLabelledFields(text: string): {
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+} {
+  const out = { name: "", email: "", phone: "", location: "" };
+  const lines = text.split("\n").slice(0, 80);
+
+  const find = (labels: string[]): string => {
+    for (const line of lines) {
+      const m = line.match(/^\s*([A-Za-z][A-Za-z .&/-]{1,30}?)\s*:\s*(.+?)\s*$/);
+      if (!m) continue;
+      const label = m[1]!.toLowerCase().replace(/\s+/g, " ").trim();
+      if (labels.includes(label)) return m[2]!.trim();
+    }
+    return "";
+  };
+
+  const name = find(["name", "full name", "candidate name"]);
+  if (name && name.split(/\s+/).length <= 6) out.name = name;
+
+  const email = find(["email", "e-mail", "email address", "e-mail address"]);
+  if (email && EMAIL_RE.test(email)) out.email = email.match(EMAIL_RE)![0];
+
+  const phone = find([
+    "phone", "mobile", "cell", "telephone", "phone number", "mobile number",
+    "contact number", "contact", "tel",
+  ]);
+  if (phone && phone.replace(/\D/g, "").length >= 6) out.phone = phone;
+
+  const location = find([
+    "location", "address", "home address", "current address", "residence",
+    "city", "country", "mailing address",
+  ]);
+  if (location && location.length <= 100) out.location = location;
+
+  return out;
 }
 
 // ─── Section parsers ───────────────────────────────────────────────────────
@@ -344,7 +485,7 @@ function parseName(lines: string[]): string {
     if (!trimmed) continue;
 
     if (EMAIL_RE.test(trimmed) || PHONE_RE.test(trimmed) || URL_RE.test(trimmed)) break;
-    if (SECTION_RE.test(trimmed)) break;
+    if (SECTION_RE.test(trimmed) || matchSectionHeader(trimmed)) break;
     if (trimmed.length > 60) break;
     // Looks like contact line "key: value" or contains separators — most CVs
     // put contact info on the first or second line after the name.
@@ -488,12 +629,74 @@ function parseSkills(lines: string[]): ParsedSkillGroup[] {
     return true;
   };
 
+  // Full markers (●▪■) are used by some templates to denote CATEGORY
+  // headings, while hollow/small markers (○◦·•-) denote the skill items.
+  // Track that convention so wrapped item lines are joined correctly.
+  const FILLED_MARKER_RE = /^[●▪■►▸➤▶]/;
+  const isCategoryMarker = (line: string, stripped: string): boolean =>
+    FILLED_MARKER_RE.test(line) &&
+    !stripped.includes(":") &&
+    stripped.length <= 45 &&
+    stripped.split(/\s+/).filter(Boolean).length <= 5 &&
+    !/[.!?,]$/.test(stripped);
+
+  // Split on , ; | but never inside parentheses, so "Kubernetes (EKS, OKE)"
+  // stays a single skill.
+  const splitTopLevelItems = (text: string): string[] => {
+    const out: string[] = [];
+    let depth = 0;
+    let cur = "";
+    for (const ch of text) {
+      if (ch === "(" || ch === "[") depth++;
+      else if (ch === ")" || ch === "]") depth = Math.max(0, depth - 1);
+      if ((ch === "," || ch === ";" || ch === "|") && depth === 0) {
+        out.push(cur);
+        cur = "";
+      } else {
+        cur += ch;
+      }
+    }
+    out.push(cur);
+    return out
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0 && s.length < 80);
+  };
+
+  let sawCategoryMarker = false;
+  let itemBuffer = "";
+  const flushItemBuffer = () => {
+    if (itemBuffer.trim()) currentSkills.push(...splitTopLevelItems(itemBuffer));
+    itemBuffer = "";
+  };
+
   for (const line of lines) {
     const stripped = line.replace(BULLET_RE, "").trim();
     if (!stripped) continue;
 
+    if (FILLED_MARKER_RE.test(line)) {
+      flushItemBuffer();
+      if (isCategoryMarker(line, stripped)) {
+        pushCurrent();
+        sawCategoryMarker = true;
+        currentCategory = stripped.replace(/[:：]\s*$/, "").trim();
+        continue;
+      }
+    }
+
     // Embedded categories — one or more "Category: ..." chunks on the line.
     if (splitEmbeddedCategories(stripped)) continue;
+
+    // Category-marker layout: hollow bullets start a new item list; plain
+    // lines are wrapped continuations of the current item list.
+    if (sawCategoryMarker) {
+      if (BULLET_RE.test(line)) {
+        flushItemBuffer();
+        itemBuffer = stripped;
+      } else {
+        itemBuffer = itemBuffer ? `${itemBuffer} ${stripped}` : stripped;
+      }
+      continue;
+    }
 
     // Lone category label: "Languages:"
     const lone = isLoneCategoryLabel(stripped);
@@ -551,6 +754,7 @@ function parseSkills(lines: string[]): ParsedSkillGroup[] {
     currentSkills.push(...items);
   }
 
+  flushItemBuffer();
   if (currentSkills.length > 0) {
     groups.push({ category: currentCategory, skills: currentSkills });
   }
@@ -558,7 +762,11 @@ function parseSkills(lines: string[]): ParsedSkillGroup[] {
   return groups;
 }
 
-const DATE_RANGE_RE = /(\d{4}|\w+\s+\d{4}|\d{4}[-/]\d{2})\s*[-–—]\s*(\d{4}|\w+\s+\d{4}|\d{4}[-/]\d{2}|present|current)/i;
+const PRESENT_TOKEN = "present|current|to\\s+date|till\\s+date|ongoing|now";
+const DATE_RANGE_RE = new RegExp(
+  `(\\d{4}|\\w+\\s+\\d{4}|\\d{4}[-/]\\d{2})\\s*[-–—]\\s*(\\d{4}|\\w+\\s+\\d{4}|\\d{4}[-/]\\d{2}|${PRESENT_TOKEN})`,
+  "i",
+);
 
 // Company/location separator: comma, em/en dash, pipe, or newline (already split).
 const COMPANY_LOC_SEP_RE = /\s*[,\-|]\s*|\s+—\s+|\s+–\s+/;
@@ -571,14 +779,17 @@ const LOCATION_KEYWORDS_RE = /\b(USA|Canada|UK|US|U\.S\.A\.|U\.S\.|Remote|Hybrid
 function extractDateRange(line: string): { start: string; end: string; current: boolean; matchIndex: number } | null {
   // Match a date-range token anywhere; we want the rightmost one (typical
   // when the line is "Role — Company Jan 2020 - Present").
-  const re = /((?:\d{4}(?:[-/]\d{2})?)|(?:\w+\.?\s+\d{4}))\s*[-–—]\s*((?:\d{4}(?:[-/]\d{2})?)|(?:\w+\.?\s+\d{4})|present|current)/gi;
+  const re = new RegExp(
+    `((?:\\d{4}(?:[-/]\\d{2})?)|(?:\\w+\\.?\\s+\\d{4}))\\s*[-–—]\\s*((?:\\d{4}(?:[-/]\\d{2})?)|(?:\\w+\\.?\\s+\\d{4})|${PRESENT_TOKEN})`,
+    "gi",
+  );
   let m: RegExpExecArray | null;
   let lastMatch: { start: string; end: string; current: boolean; matchIndex: number } | null = null;
   while ((m = re.exec(line)) !== null) {
     lastMatch = {
       start: toYYYYMM(m[1]!),
-      end:   /present|current/i.test(m[2]!) ? "Present" : toYYYYMM(m[2]!),
-      current: /present|current/i.test(m[2]!),
+      end:   isPresentMarker(m[2]!) ? "Present" : toYYYYMM(m[2]!),
+      current: isPresentMarker(m[2]!),
       matchIndex: m.index,
     };
   }
@@ -589,7 +800,7 @@ function isLikelyPositionTitle(line: string): boolean {
   // A position title is short, capitalised, doesn't look like a date or
   // company line, and isn't a sentence (no terminal period, no commas).
   if (line.length < 3 || line.length > 50) return false;
-  if (/[.!?]$/.test(line)) return false;
+  if (/[.!?:;]$/.test(line)) return false;
   if (extractDateRange(line)) return false;
   // Real position titles are a single phrase with no commas.
   if (line.includes(",")) return false;
@@ -611,6 +822,7 @@ function parseExperience(lines: string[]): ParsedExperience[] {
     if (current && (current.position || current.company)) {
       entries.push(current);
     }
+    current = null;
   };
 
   const blank = (): ParsedExperience => ({
@@ -624,12 +836,74 @@ function parseExperience(lines: string[]): ParsedExperience[] {
     technologies: [],
   });
 
+  // Explicitly-labelled entries ("Company: …", "Designation: …", "Duration: …")
+  // are accumulated first and materialised when the prose/bullets begin.
+  const STRUCT_LABEL_RE = /^(company|employer|organisation|organization|institution|university|college|institute|position|designation|job title|title|role|duration|period|tenure|dates?|from|location|city|country)\s*:\s*(.*)$/i;
+  const COMPANY_LABELS = new Set(["company", "employer", "organisation", "organization", "institution", "university", "college", "institute"]);
+  const POSITION_LABELS = new Set(["position", "designation", "job title", "title", "role"]);
+  const DATE_LABELS = new Set(["duration", "period", "tenure", "dates", "date", "from"]);
+  const LOCATION_LABELS = new Set(["location", "city", "country"]);
+  let pending: ParsedExperience | null = null;
+
+  const materialisePending = () => {
+    if (!pending) return;
+    if (current) {
+      // A bare heading line (no company/dates/bullets) immediately before a
+      // labelled block is usually a category label, not a real entry.
+      const isBareHeading =
+        !current.company && !current.startDate && current.bullets.length === 0;
+      if (!isBareHeading || (!pending.company && !pending.startDate)) flush();
+    }
+    current = pending;
+    pending = null;
+  };
+
   for (let i = 0; i < lines.length; i++) {
     const line  = lines[i]!;
     const stripped = line.replace(BULLET_RE, "").trim();
     if (!stripped) continue;
 
     const isBullet = BULLET_RE.test(line);
+
+    if (!isBullet) {
+      const labelMatch = stripped.match(STRUCT_LABEL_RE);
+      if (labelMatch) {
+        const label = labelMatch[1]!.toLowerCase().replace(/\s+/g, " ").trim();
+        const value = labelMatch[2]!.trim();
+
+        // A second "Duration:" starts a new entry — commit the in-progress one.
+        if (DATE_LABELS.has(label) && pending && pending.startDate) {
+          materialisePending();
+          flush();
+        }
+        if (!pending) pending = blank();
+
+        if (COMPANY_LABELS.has(label)) {
+          if (pending.company) {
+            materialisePending();
+            flush();
+            pending = blank();
+          }
+          pending.company = value;
+        } else if (POSITION_LABELS.has(label)) {
+          pending.position = value;
+        } else if (DATE_LABELS.has(label)) {
+          const range = extractDateRange(value);
+          if (range) {
+            pending.startDate = range.start;
+            pending.endDate   = range.end;
+            pending.current   = range.current;
+          }
+        } else if (LOCATION_LABELS.has(label)) {
+          pending.location = value;
+        }
+        continue;
+      }
+
+      // Prose/bullets end a labelled block; make it current so the
+      // following bullets attach to the right entry.
+      if (pending) materialisePending();
+    }
 
     // Standalone date-range line: "Oct 2022 – June 2025", "2022-10 – Present".
     // Only treat as standalone if the line is essentially just a date range.
@@ -639,8 +913,8 @@ function parseExperience(lines: string[]): ParsedExperience[] {
     if (dateRangeIsOnlyContent && /\b(20|19)\d{2}\b/.test(stripped)) {
       if (current) {
         current.startDate = toYYYYMM(dm[1]!);
-        current.endDate   = /present|current/i.test(dm[2]!) ? "Present" : toYYYYMM(dm[2]!);
-        current.current   = /present|current/i.test(dm[2]!);
+        current.endDate   = isPresentMarker(dm[2]!) ? "Present" : toYYYYMM(dm[2]!);
+        current.current   = isPresentMarker(dm[2]!);
       }
       continue;
     }
@@ -725,18 +999,40 @@ function parseExperience(lines: string[]): ParsedExperience[] {
     //   - Length is sane
     //   - We haven't started collecting bullets yet (otherwise this line
     //     is most likely a new section or stray content).
-    if (
-      current &&
-      current.position &&
-      !current.company &&
-      current.bullets.length === 0 &&
-      stripped.length < 100 &&
-      (COMPANY_LOC_SEP_RE.test(stripped) || LOCATION_KEYWORDS_RE.test(stripped))
-    ) {
-      const parts = stripped.split(COMPANY_LOC_SEP_RE);
-      current.company  = parts[0]?.trim() ?? stripped;
-      current.location = parts.length > 1 ? parts.slice(1).join(", ").trim() : "";
-      continue;
+    if (current && current.position && !current.company && current.bullets.length === 0 && stripped.length < 100) {
+      // A line immediately before the first bullet, after we already know the
+      // role's dates, is almost always the employer (even without a comma).
+      const nextIsBullet = (() => {
+        for (let k = i + 1; k < lines.length; k++) {
+          const cand = lines[k]?.trim();
+          if (!cand) continue;
+          return BULLET_RE.test(lines[k]!);
+        }
+        return false;
+      })();
+      const looksLikeEmployer =
+        COMPANY_LOC_SEP_RE.test(stripped) ||
+        LOCATION_KEYWORDS_RE.test(stripped) ||
+        (!!current.startDate && nextIsBullet && stripped.split(/\s+/).length >= 2);
+
+      if (looksLikeEmployer) {
+        const parts = stripped.split(COMPANY_LOC_SEP_RE);
+        current.company  = parts[0]?.trim() ?? stripped;
+        current.location = parts.length > 1 ? parts.slice(1).join(", ").trim() : "";
+
+        // Roles listed under a single employer are often stacked ("Senior
+        // Architect" then "Architect" then one "Company, City" line). Back-fill
+        // the company onto immediately-preceding date-only entries.
+        for (let k = entries.length - 1; k >= 0; k--) {
+          const prev = entries[k]!;
+          if (!prev.company && prev.startDate && prev.position && prev.bullets.length === 0) {
+            prev.company = current.company;
+          } else {
+            break;
+          }
+        }
+        continue;
+      }
     }
 
     // Just after a combined-header with single-token company, the next
@@ -761,6 +1057,18 @@ function parseExperience(lines: string[]): ParsedExperience[] {
         current.location = stripped.trim();
         continue;
       }
+    }
+
+    // Once a role already has dates but no description yet, a non-bullet
+    // line ("Teaching", "Responsibilities", a category heading) is the
+    // description heading, not the next job. Real subsequent roles either
+    // carry a date range or an explicit "Company:/Designation:" label.
+    const looksLikeRoleLine = JOB_TITLE_KEYWORDS.some((kw) =>
+      stripped.toLowerCase().includes(kw.toLowerCase())
+    );
+    if (current && current.company && current.startDate && !looksLikeRoleLine) {
+      current.bullets.push(stripped);
+      continue;
     }
 
     // New job title line.
@@ -836,12 +1144,52 @@ function parseEducation(lines: string[]): ParsedEducation[] {
   // Generic date-range detector for education. Matches:
   //   "2013 - 2017", "2013 – 2017", "Aug 2018 – May 2022", "2013",
   //   "2020 - Present", "Sep 2019 - Current"
-  const EDU_DATE_RE = /((?:\d{4}(?:[-/]\d{2})?)|(?:\w+\.?\s+\d{4}))\s*[-–—]\s*((?:\d{4}(?:[-/]\d{2})?)|(?:\w+\.?\s+\d{4})|present|current|now)/i;
-  const EDU_YEAR_RE = /^\s*(?:(?:from\s+)?(\d{4})\s*[-–—]\s*(\d{4}|present|current)|(\d{4}))\s*$/i;
+  const EDU_DATE_RE = new RegExp(
+    `((?:\\d{4}(?:[-/]\\d{2})?)|(?:\\w+\\.?\\s+\\d{4}))\\s*[-–—]\\s*((?:\\d{4}(?:[-/]\\d{2})?)|(?:\\w+\\.?\\s+\\d{4})|${PRESENT_TOKEN})`,
+    "i",
+  );
+  const EDU_YEAR_RE = new RegExp(
+    `^\\s*(?:(?:from\\s+)?(\\d{4})\\s*[-–—]\\s*(\\d{4}|${PRESENT_TOKEN})|(\\d{4}))\\s*$`,
+    "i",
+  );
+
+  const EDU_LABEL_RE = /^(degree|qualification|program|course|institute|institution|university|college|school|board|duration|period|year|years|field|major|specialization|gpa|cgpa|grade|percentage|marks)\s*:\s*(.*)$/i;
 
   for (const line of lines) {
     const stripped = line.replace(BULLET_RE, "").trim();
     if (!stripped) continue;
+
+    // Labeled education fields ("Degree: …", "Institute: …", "Duration: …").
+    const eduLabel = stripped.match(EDU_LABEL_RE);
+    if (eduLabel) {
+      const label = eduLabel[1]!.toLowerCase();
+      const value = eduLabel[2]!.trim();
+      if (/^(degree|qualification|program|course)$/.test(label)) {
+        flush();
+        current = blankEdu();
+        current.degree = value;
+        const g = value.match(/\b(\d\.\d+)\s*(?:gpa|cgpa)\b/i) ?? value.match(/\b(?:gpa|cgpa)\s*:?\s*(\d\.\d+)/i);
+        if (g) current.gpa = g[1]!;
+        continue;
+      }
+      if (!current) current = blankEdu();
+      if (/^(institute|institution|university|college|school|board)$/.test(label)) {
+        if (!current.institution && value) current.institution = value;
+      } else if (/^(duration|period|year|years)$/.test(label)) {
+        const range = extractDateRange(value);
+        if (range) {
+          current.startDate = range.start;
+          current.endDate   = range.end;
+        } else if (/\b(19|20)\d{2}\b/.test(value)) {
+          current.endDate = toYYYYMM(value);
+        }
+      } else if (/^(field|major|specialization)$/.test(label)) {
+        current.field = value;
+      } else if (/^(gpa|cgpa|grade|percentage|marks)$/.test(label)) {
+        current.gpa = value;
+      }
+      continue;
+    }
 
     // GPA / honours line
     if (/gpa|grade/i.test(stripped)) {
@@ -866,7 +1214,7 @@ function parseEducation(lines: string[]): ParsedEducation[] {
       const m = stripped.match(EDU_DATE_RE);
       if (m && current) {
         current.startDate = toYYYYMM(m[1]!);
-        current.endDate   = /present|current/i.test(m[2]!) ? "Present" : toYYYYMM(m[2]!);
+        current.endDate   = isPresentMarker(m[2]!) ? "Present" : toYYYYMM(m[2]!);
         continue;
       }
     } else if (EDU_YEAR_RE.test(stripped)) {
@@ -874,7 +1222,7 @@ function parseEducation(lines: string[]): ParsedEducation[] {
       if (m && current) {
         if (m[1] && m[2]) {
           current.startDate = `${m[1]}-01`;
-          current.endDate   = /present|current/i.test(m[2]) ? "Present" : `${m[2]}-01`;
+          current.endDate   = isPresentMarker(m[2]) ? "Present" : `${m[2]}-01`;
         } else if (m[3]) {
           current.endDate = `${m[3]}-01`;
         }
@@ -888,7 +1236,10 @@ function parseEducation(lines: string[]): ParsedEducation[] {
 
       // Single-line combined header: "B.S. Computer Science - Carnegie Mellon University 2011 - 2015"
       // Split out trailing date range first.
-      const dateM = stripped.match(/((?:\d{4}(?:[-/]\d{2})?))\s*[-–—]\s*((?:\d{4}(?:[-/]\d{2})?)|present|current)/i);
+      const dateM = stripped.match(new RegExp(
+        `((?:\\d{4}(?:[-/]\\d{2})?))\\s*[-–—]\\s*((?:\\d{4}(?:[-/]\\d{2})?)|${PRESENT_TOKEN})`,
+        "i",
+      ));
       let headForParsing = stripped;
       let startStr = "";
       let endStr = "";
@@ -896,7 +1247,7 @@ function parseEducation(lines: string[]): ParsedEducation[] {
         const before = stripped.slice(0, dateM.index).trim().replace(/[,\s]+$/, "");
         headForParsing = before;
         startStr = toYYYYMM(dateM[1]!);
-        endStr = /present|current/i.test(dateM[2]!) ? "Present" : toYYYYMM(dateM[2]!);
+        endStr = isPresentMarker(dateM[2]!) ? "Present" : toYYYYMM(dateM[2]!);
       }
 
       const field = (() => {
@@ -992,24 +1343,55 @@ function parseProjects(lines: string[]): ParsedProject[] {
 }
 
 function parseCertifications(lines: string[]): ParsedCertification[] {
-  // A real cert entry is short, named, credential-like:
-  //   - doesn't start with any bullet marker
-  //   - is short (under 70 chars — long lines are sentence bullets that
-  //     leaked in from another section, not cert entries)
-  //   - doesn't end with a period (cert names don't terminate sentences)
-  //   - contains a year (most certs have one) OR is 5-50 chars long
-  return lines
-    .map((l) => l.replace(BULLET_RE, "").trim())
+  // Some templates group credentials under filled bullet markers:
+  //   ● Cloud & Kubernetes
+  //   ○ CKA - Kubernetes Administrator
+  //   ○ AWS Solutions Architect –
+  //   Associate                      ← wrapped continuation
+  // Join wrapped names and drop the category rows.
+  const FILLED_MARKER_RE = /^[●▪■►▸➤▶]/;
+  const isCategoryMarker = (raw: string, text: string): boolean =>
+    FILLED_MARKER_RE.test(raw) &&
+    !text.includes(":") &&
+    text.length <= 40 &&
+    text.split(/\s+/).filter(Boolean).length <= 5 &&
+    !/[.!?,]$/.test(text);
+
+  const items: string[] = [];
+  let buffer = "";
+  const flushBuffer = () => {
+    if (buffer.trim()) items.push(buffer.trim());
+    buffer = "";
+  };
+
+  for (const raw of lines) {
+    const text = raw.replace(BULLET_RE, "").trim();
+    if (!text) continue;
+    if (BULLET_RE.test(raw)) {
+      flushBuffer();
+      if (isCategoryMarker(raw, text)) continue;
+      buffer = text;
+      continue;
+    }
+    // Non-bullet line: wrapped remainder of the previous credential.
+    buffer = buffer ? `${buffer} ${text}` : text;
+  }
+  flushBuffer();
+
+  // A real cert entry is named and credential-like:
+  //   - doesn't end with sentence punctuation
+  //   - isn't a leaked experience/education row
+  //   - contains a year OR a known credential acronym
+  return items
     .filter((l) => {
       if (!l) return false;
-      if (l.length === 0 || l.length > 70) return false;
-      if (/^[○▪▫◦●•·►▸]\s*/.test(l)) return false;
-      if (/^[\s○▪▫◦●•·►▸]+$/.test(l)) return false;
+      if (l.length === 0 || l.length > 90) return false;
       if (/[.!?]$/.test(l)) return false;
       if (!/[A-Za-z]/.test(l)) return false;
-      // Either has a year (typical of cert entries with issue date) OR
-      // looks like a credential (short, mixed case, contains hyphens or
-      // known cert keywords).
+      // Reject experience/education rows that leaked into this section:
+      // a full date range or an explicit structural label is not a credential.
+      if (extractDateRange(l)) return false;
+      if (/^(company|designation|position|duration|period|institution|employer|organization|organisation)\s*:/i.test(l)) return false;
       if (/\b(20|19)\d{2}\b/.test(l)) return true;
       if (/[A-Z]{2,}/.test(l) && /\b(CKA|CKS|CCSK|PMP|AWS|GCP|OCI|RHCSA|MCSA|MCSE|MCTS|CCNA|JN0|BCVRE|VCA|CSAA|CCP|CISSP)\b/i.test(l)) return true;
       return false;

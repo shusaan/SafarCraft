@@ -48,10 +48,14 @@ drizzle/*.sql
 # docker
 docker/data/
 
-# personal/root-level PDFs (project ships CV PDFs only under tests/fixtures)
-# use 'git add -f <path>' to force-include a root-level PDF if ever needed.
+# Personal/real CV PDFs must NEVER be committed — they contain PII.
+# Root-level PDFs and all test fixtures are local-only. Drop your own
+# sample CVs into tests/fixtures/ to run the parser regression tests;
+# they are skipped automatically when absent.
 /*.pdf
 /*.PDF
+/tests/fixtures/*.pdf
+/tests/fixtures/*.PDF
 
 # planning/roadmap docs (local-only drafts)
 /PLAN.md
