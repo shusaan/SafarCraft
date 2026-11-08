@@ -28,6 +28,9 @@ const sections = [
 
 export type SectionId = (typeof sections)[number]["id"];
 
+/** Section metadata shared by the desktop sidebar and the mobile switcher. */
+export const SECTION_DEFS = sections;
+
 /** Returns true if the section has enough data to be considered "complete". */
 function useSectionCompletionMap(): Record<SectionId, boolean> {
   const data = useResumeStore((s) => s.data);

@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useResumeStore } from "@/stores/resume-store";
 import { renderTemplate } from "@/engines/templates/registry";
 import type { ResumeData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ZoomIn, ZoomOut, Maximize2, Eye, FileText } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 function PreviewSkeleton() {
   return (
@@ -29,6 +28,9 @@ function PreviewSkeleton() {
 
 const ZOOM_STEPS = [50, 75, 100, 125, 150] as const;
 type ZoomLevel = (typeof ZOOM_STEPS)[number];
+
+const PAGE_WIDTH = 816;
+const PAGE_HEIGHT = 1056;
 
 function generateRawText(data: ResumeData): string {
   const lines: string[] = [];
@@ -64,11 +66,45 @@ export function ResumePreview() {
   const [ready, setReady]   = useState(false);
   const [viewMode, setViewMode] = useState<"preview" | "raw">("preview");
 
+  // Fit-to-width: scale the fixed 816px page down to the available canvas
+  // width on narrow screens instead of forcing horizontal scrolling.
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const [fitScale, setFitScale] = useState(1);
+  const [pageHeight, setPageHeight] = useState(PAGE_HEIGHT);
+
+  useEffect(() => {
+    const el = canvasRef.current;
+    if (!el) return;
+    const update = () => {
+      const available = el.clientWidth - 32; // canvas p-4 padding
+      if (available > 0) setFitScale(Math.min(1, available / PAGE_WIDTH));
+    };
+    update();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const el = pageRef.current;
+    if (!el) return;
+    const measure = () => setPageHeight(Math.max(PAGE_HEIGHT, el.scrollHeight));
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [template, ready, viewMode]);
+
   useEffect(() => {
     setReady(false);
     const t = setTimeout(() => setReady(true), 300);
     return () => clearTimeout(t);
   }, [template]);
+
+  const effectiveScale = fitScale * (zoom / 100);
 
   const rawText = useMemo(() => generateRawText(data), [data]);
 
@@ -131,28 +167,31 @@ export function ResumePreview() {
       </div>
 
       {/* Canvas */}
-      <div className="flex-1 overflow-auto bg-muted/20 p-4">
+      <div ref={canvasRef} className="flex-1 overflow-auto bg-muted/20 p-4">
         {viewMode === "preview" ? (
           <div
-            className={cn(
-              "mx-auto origin-top bg-white shadow-lg dark:bg-neutral-950 transition-transform duration-300 rounded-sm",
-            )}
-            style={{
-              width: "816px",
-              minHeight: "1056px",
-              transform: `scale(${zoom / 100})`,
-              transformOrigin: "top center",
-              marginBottom: zoom < 100 ? `${-1056 * (1 - zoom / 100)}px` : undefined,
-            }}
-            aria-label="Resume document"
+            className="mx-auto"
+            style={{ width: PAGE_WIDTH * effectiveScale, height: pageHeight * effectiveScale }}
           >
-            {ready ? (
-              <div className="p-8 transition-opacity duration-300">
-                {renderTemplate(template, { data, layout })}
-              </div>
-            ) : (
-              <PreviewSkeleton />
-            )}
+            <div
+              ref={pageRef}
+              className="origin-top-left rounded-sm bg-white shadow-lg transition-transform duration-300 dark:bg-neutral-950"
+              style={{
+                width: PAGE_WIDTH,
+                minHeight: PAGE_HEIGHT,
+                transform: `scale(${effectiveScale})`,
+                transformOrigin: "top left",
+              }}
+              aria-label="Resume document"
+            >
+              {ready ? (
+                <div className="p-8 transition-opacity duration-300">
+                  {renderTemplate(template, { data, layout })}
+                </div>
+              ) : (
+                <PreviewSkeleton />
+              )}
+            </div>
           </div>
         ) : (
           <div className="mx-auto max-w-2xl space-y-2">

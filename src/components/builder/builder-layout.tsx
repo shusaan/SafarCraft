@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useResumeStore } from "@/stores/resume-store";
 import { useUIStore } from "@/stores/ui-store";
-import { SectionSidebar, type SectionId } from "./section-sidebar";
+import { SectionSidebar, SECTION_DEFS, type SectionId } from "./section-sidebar";
 import { SectionPanel } from "./section-panel";
 import { ResumePreview } from "./resume-preview";
 import { TemplateSelector } from "@/components/template-selector/template-selector";
@@ -272,17 +272,54 @@ export function BuilderLayout() {
     switch (activePanel) {
       case "editor":
         return (
-          <div className="flex flex-1 overflow-hidden">
-            <div className="w-52 shrink-0 border-r max-md:hidden relative">
-              <SectionSidebar
-                activeSection={activeSection}
-                onSectionChange={setActiveSection}
-                sectionOrder={sectionOrder}
-                onReorder={setSectionOrder}
-              />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {/* Mobile section switcher — the sidebar is hidden below md, so
+                this keeps every section (incl. skills/projects/languages)
+                reachable on small screens. */}
+            <div className="border-b md:hidden">
+              <div
+                className="flex gap-1 overflow-x-auto px-2 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                role="tablist"
+                aria-label="Resume sections"
+              >
+                {sectionOrder.map((id) => {
+                  const def = SECTION_DEFS.find((s) => s.id === id);
+                  if (!def) return null;
+                  const Icon = def.icon;
+                  const isActive = activeSection === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setActiveSection(id)}
+                      className={cn(
+                        "flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-accent hover:text-foreground",
+                      )}
+                    >
+                      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                      {def.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <SectionPanel section={activeSection} />
+            <div className="flex flex-1 overflow-hidden">
+              <div className="w-52 shrink-0 border-r max-md:hidden relative">
+                <SectionSidebar
+                  activeSection={activeSection}
+                  onSectionChange={setActiveSection}
+                  sectionOrder={sectionOrder}
+                  onReorder={setSectionOrder}
+                />
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <SectionPanel section={activeSection} />
+              </div>
             </div>
           </div>
         );
@@ -380,7 +417,7 @@ export function BuilderLayout() {
         </div>
 
         {/* Right — actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5 sm:gap-1">
           <AutosavePill isDirty={isDirty} />
 
           <Button
@@ -406,7 +443,7 @@ export function BuilderLayout() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="hidden h-8 w-8 sm:inline-flex"
             onClick={() => setShowVersionHistory(true)}
             title="Version History"
             aria-label="Version history"
@@ -416,7 +453,7 @@ export function BuilderLayout() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="hidden h-8 w-8 sm:inline-flex"
             onClick={() => setShowShareLink(true)}
             title="Share public link"
             aria-label="Share resume link"
@@ -426,7 +463,7 @@ export function BuilderLayout() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="hidden h-8 w-8 sm:inline-flex"
             onClick={() => setShowShortcuts(true)}
             title="Keyboard Shortcuts (?)"
             aria-label="Keyboard shortcuts"
@@ -434,7 +471,7 @@ export function BuilderLayout() {
             <HelpCircle className="h-3.5 w-3.5" />
           </Button>
 
-          <div className="mx-1 h-4 w-px bg-border" aria-hidden="true" />
+          <div className="mx-1 hidden h-4 w-px bg-border sm:block" aria-hidden="true" />
 
           <Button
             variant="ghost"
@@ -536,6 +573,44 @@ export function BuilderLayout() {
                 </div>
               </div>
             ))}
+
+            {/* Secondary actions hidden from the narrow header live here so
+                nothing becomes unreachable on phones. */}
+            <div className="mb-2">
+              <p className="mb-1.5 px-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Actions
+              </p>
+              <div className="space-y-0.5">
+                <button
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+                  onClick={() => { setShowVersionHistory(true); setMobileMenuOpen(false); }}
+                >
+                  <History className="h-4 w-4 shrink-0" />
+                  Version History
+                </button>
+                <button
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+                  onClick={() => { setShowShareLink(true); setMobileMenuOpen(false); }}
+                >
+                  <Link2 className="h-4 w-4 shrink-0" />
+                  Share Link
+                </button>
+                <button
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+                  onClick={() => { setShowShortcuts(true); setMobileMenuOpen(false); }}
+                >
+                  <HelpCircle className="h-4 w-4 shrink-0" />
+                  Keyboard Shortcuts
+                </button>
+                <button
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                >
+                  {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
+                  Switch Theme
+                </button>
+              </div>
+            </div>
           </nav>
         </div>
       )}
